@@ -107,8 +107,8 @@ def main():
                         add=pulp_nn_factory.PULPNNAdd(kernel=kernel_to_test, layer=None)
                         pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='add', comp=add, api=pulp_nn_init.PULPNNAPI)
                             
-        pulp_nn_factory.header(act_prec=a, ext=e, api=pulp_nn_init.PULPNNAPI)
-        pulp_nn_init.PULPNNAPI = ""
+            pulp_nn_factory.header(act_prec=a, ext=e, api=pulp_nn_init.PULPNNAPI)
+            pulp_nn_init.PULPNNAPI = ""
 
 
 if __name__ == '__main__':

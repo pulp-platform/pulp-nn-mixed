@@ -78,7 +78,7 @@ void pulp_nn_linear_u4_u4_i8(
 
 		for (int j=0; j<(dim_vec >> 3); j++)
 		{
-		  pA = pulp_nn_u4_to_u8(pA,vecA);
+		  pulp_nn_u4_to_u8(pA,vecA);
 		  vecB[0] = *((v4s*)pB);
 		  vecB2[0] = *((v4s*)pB2);
 		  pB+=4;

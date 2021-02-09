@@ -20,7 +20,7 @@
 #ifndef __PULPNN_KERNELS__
 #define __PULPNN_KERNELS__
 
-void pulp_nn_xconv_u8_u8_i8(
+void pulp_nn_conv_u8_u8_i8(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -42,14 +42,14 @@ void pulp_nn_xconv_u8_u8_i8(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xconv_u8_u8_i4(
+void pulp_nn_conv_u8_u8_i4(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -71,14 +71,14 @@ void pulp_nn_xconv_u8_u8_i4(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xconv_u8_u8_i2(
+void pulp_nn_conv_u8_u8_i2(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -100,14 +100,14 @@ void pulp_nn_xconv_u8_u8_i2(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xconv_u8_u4_i8(
+void pulp_nn_conv_u8_u4_i8(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -129,14 +129,14 @@ void pulp_nn_xconv_u8_u4_i8(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xconv_u8_u4_i4(
+void pulp_nn_conv_u8_u4_i4(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -158,14 +158,14 @@ void pulp_nn_xconv_u8_u4_i4(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xconv_u8_u4_i2(
+void pulp_nn_conv_u8_u4_i2(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -187,14 +187,14 @@ void pulp_nn_xconv_u8_u4_i2(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xconv_u8_u2_i8(
+void pulp_nn_conv_u8_u2_i8(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -216,14 +216,14 @@ void pulp_nn_xconv_u8_u2_i8(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xconv_u8_u2_i4(
+void pulp_nn_conv_u8_u2_i4(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -245,14 +245,14 @@ void pulp_nn_xconv_u8_u2_i4(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xconv_u8_u2_i2(
+void pulp_nn_conv_u8_u2_i2(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -274,14 +274,14 @@ void pulp_nn_xconv_u8_u2_i2(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xconv_u4_u8_i8(
+void pulp_nn_conv_u4_u8_i8(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -303,14 +303,14 @@ void pulp_nn_xconv_u4_u8_i8(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xconv_u4_u8_i4(
+void pulp_nn_conv_u4_u8_i4(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -332,14 +332,14 @@ void pulp_nn_xconv_u4_u8_i4(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xconv_u4_u8_i2(
+void pulp_nn_conv_u4_u8_i2(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -361,14 +361,14 @@ void pulp_nn_xconv_u4_u8_i2(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xconv_u4_u4_i8(
+void pulp_nn_conv_u4_u4_i8(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -390,14 +390,14 @@ void pulp_nn_xconv_u4_u4_i8(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xconv_u4_u4_i4(
+void pulp_nn_conv_u4_u4_i4(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -419,14 +419,14 @@ void pulp_nn_xconv_u4_u4_i4(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xconv_u4_u4_i2(
+void pulp_nn_conv_u4_u4_i2(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -448,14 +448,14 @@ void pulp_nn_xconv_u4_u4_i2(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xconv_u4_u2_i8(
+void pulp_nn_conv_u4_u2_i8(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -477,14 +477,14 @@ void pulp_nn_xconv_u4_u2_i8(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xconv_u4_u2_i4(
+void pulp_nn_conv_u4_u2_i4(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -506,14 +506,14 @@ void pulp_nn_xconv_u4_u2_i4(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xconv_u4_u2_i2(
+void pulp_nn_conv_u4_u2_i2(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -535,14 +535,14 @@ void pulp_nn_xconv_u4_u2_i2(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xconv_u2_u8_i8(
+void pulp_nn_conv_u2_u8_i8(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -564,14 +564,14 @@ void pulp_nn_xconv_u2_u8_i8(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xconv_u2_u8_i4(
+void pulp_nn_conv_u2_u8_i4(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -593,14 +593,14 @@ void pulp_nn_xconv_u2_u8_i4(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xconv_u2_u8_i2(
+void pulp_nn_conv_u2_u8_i2(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -622,14 +622,14 @@ void pulp_nn_xconv_u2_u8_i2(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xconv_u2_u4_i8(
+void pulp_nn_conv_u2_u4_i8(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -651,14 +651,14 @@ void pulp_nn_xconv_u2_u4_i8(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xconv_u2_u4_i4(
+void pulp_nn_conv_u2_u4_i4(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -680,14 +680,14 @@ void pulp_nn_xconv_u2_u4_i4(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xconv_u2_u4_i2(
+void pulp_nn_conv_u2_u4_i2(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -709,14 +709,14 @@ void pulp_nn_xconv_u2_u4_i2(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xconv_u2_u2_i8(
+void pulp_nn_conv_u2_u2_i8(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -738,14 +738,14 @@ void pulp_nn_xconv_u2_u2_i8(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xconv_u2_u2_i4(
+void pulp_nn_conv_u2_u2_i4(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -767,14 +767,14 @@ void pulp_nn_xconv_u2_u2_i4(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xconv_u2_u2_i2(
+void pulp_nn_conv_u2_u2_i2(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -796,14 +796,14 @@ void pulp_nn_xconv_u2_u2_i2(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xpointwise_u8_u8_i8(
+void pulp_nn_pointwise_u8_u8_i8(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -825,14 +825,14 @@ void pulp_nn_xpointwise_u8_u8_i8(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xpointwise_u8_u8_i4(
+void pulp_nn_pointwise_u8_u8_i4(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -854,14 +854,14 @@ void pulp_nn_xpointwise_u8_u8_i4(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xpointwise_u8_u8_i2(
+void pulp_nn_pointwise_u8_u8_i2(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -883,14 +883,14 @@ void pulp_nn_xpointwise_u8_u8_i2(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xpointwise_u8_u4_i8(
+void pulp_nn_pointwise_u8_u4_i8(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -912,14 +912,14 @@ void pulp_nn_xpointwise_u8_u4_i8(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xpointwise_u8_u4_i4(
+void pulp_nn_pointwise_u8_u4_i4(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -941,14 +941,14 @@ void pulp_nn_xpointwise_u8_u4_i4(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xpointwise_u8_u4_i2(
+void pulp_nn_pointwise_u8_u4_i2(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -970,14 +970,14 @@ void pulp_nn_xpointwise_u8_u4_i2(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xpointwise_u8_u2_i8(
+void pulp_nn_pointwise_u8_u2_i8(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -999,14 +999,14 @@ void pulp_nn_xpointwise_u8_u2_i8(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xpointwise_u8_u2_i4(
+void pulp_nn_pointwise_u8_u2_i4(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -1028,14 +1028,14 @@ void pulp_nn_xpointwise_u8_u2_i4(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xpointwise_u8_u2_i2(
+void pulp_nn_pointwise_u8_u2_i2(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -1057,14 +1057,14 @@ void pulp_nn_xpointwise_u8_u2_i2(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xpointwise_u4_u8_i8(
+void pulp_nn_pointwise_u4_u8_i8(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -1086,14 +1086,14 @@ void pulp_nn_xpointwise_u4_u8_i8(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xpointwise_u4_u8_i4(
+void pulp_nn_pointwise_u4_u8_i4(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -1115,14 +1115,14 @@ void pulp_nn_xpointwise_u4_u8_i4(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xpointwise_u4_u8_i2(
+void pulp_nn_pointwise_u4_u8_i2(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -1144,14 +1144,14 @@ void pulp_nn_xpointwise_u4_u8_i2(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xpointwise_u4_u4_i8(
+void pulp_nn_pointwise_u4_u4_i8(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -1173,14 +1173,14 @@ void pulp_nn_xpointwise_u4_u4_i8(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xpointwise_u4_u4_i4(
+void pulp_nn_pointwise_u4_u4_i4(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -1202,14 +1202,14 @@ void pulp_nn_xpointwise_u4_u4_i4(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xpointwise_u4_u4_i2(
+void pulp_nn_pointwise_u4_u4_i2(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -1231,14 +1231,14 @@ void pulp_nn_xpointwise_u4_u4_i2(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xpointwise_u4_u2_i8(
+void pulp_nn_pointwise_u4_u2_i8(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -1260,14 +1260,14 @@ void pulp_nn_xpointwise_u4_u2_i8(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xpointwise_u4_u2_i4(
+void pulp_nn_pointwise_u4_u2_i4(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -1289,14 +1289,14 @@ void pulp_nn_xpointwise_u4_u2_i4(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xpointwise_u4_u2_i2(
+void pulp_nn_pointwise_u4_u2_i2(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -1318,14 +1318,14 @@ void pulp_nn_xpointwise_u4_u2_i2(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xpointwise_u2_u8_i8(
+void pulp_nn_pointwise_u2_u8_i8(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -1347,14 +1347,14 @@ void pulp_nn_xpointwise_u2_u8_i8(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xpointwise_u2_u8_i4(
+void pulp_nn_pointwise_u2_u8_i4(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -1376,14 +1376,14 @@ void pulp_nn_xpointwise_u2_u8_i4(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xpointwise_u2_u8_i2(
+void pulp_nn_pointwise_u2_u8_i2(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -1405,14 +1405,14 @@ void pulp_nn_xpointwise_u2_u8_i2(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xpointwise_u2_u4_i8(
+void pulp_nn_pointwise_u2_u4_i8(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -1434,14 +1434,14 @@ void pulp_nn_xpointwise_u2_u4_i8(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xpointwise_u2_u4_i4(
+void pulp_nn_pointwise_u2_u4_i4(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -1463,14 +1463,14 @@ void pulp_nn_xpointwise_u2_u4_i4(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xpointwise_u2_u4_i2(
+void pulp_nn_pointwise_u2_u4_i2(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -1492,14 +1492,14 @@ void pulp_nn_xpointwise_u2_u4_i2(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xpointwise_u2_u2_i8(
+void pulp_nn_pointwise_u2_u2_i8(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -1521,14 +1521,14 @@ void pulp_nn_xpointwise_u2_u2_i8(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xpointwise_u2_u2_i4(
+void pulp_nn_pointwise_u2_u2_i4(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -1550,14 +1550,14 @@ void pulp_nn_xpointwise_u2_u2_i4(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-void pulp_nn_xpointwise_u2_u2_i2(
+void pulp_nn_pointwise_u2_u2_i2(
 	const uint8_t *pInBuffer,
 	const uint16_t dim_in_x,
 	const uint16_t dim_in_y,
@@ -1579,14 +1579,14 @@ void pulp_nn_xpointwise_u2_u2_i2(
 	uint8_t *pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pIm2ColBuffer,
 	int flag_relu,
 	int flag_batch_norm,
 	unsigned int * memory_chan);
 
-uint8_t *pulp_nn_xmatmul_u8_u8_i8(
+uint8_t *pulp_nn_matmul_u8_i8(
 	const int8_t * pWeight,
 	uint8_t * pInBuffer,
 	uint16_t ch_out,
@@ -1594,14 +1594,14 @@ uint8_t *pulp_nn_xmatmul_u8_u8_i8(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	const int8_t * bias,
 	uint8_t * pOut,
 	int flag_relu,
 	int flag_batch_norm);
 
-uint8_t *pulp_nn_xmatmul_u8_u8_i4(
+uint8_t *pulp_nn_matmul_u8_i4(
 	const int8_t * pWeight,
 	uint8_t * pInBuffer,
 	uint16_t ch_out,
@@ -1609,14 +1609,14 @@ uint8_t *pulp_nn_xmatmul_u8_u8_i4(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	const int8_t * bias,
 	uint8_t * pOut,
 	int flag_relu,
 	int flag_batch_norm);
 
-uint8_t *pulp_nn_xmatmul_u8_u8_i2(
+uint8_t *pulp_nn_matmul_u8_i2(
 	const int8_t * pWeight,
 	uint8_t * pInBuffer,
 	uint16_t ch_out,
@@ -1624,14 +1624,14 @@ uint8_t *pulp_nn_xmatmul_u8_u8_i2(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	const int8_t * bias,
 	uint8_t * pOut,
 	int flag_relu,
 	int flag_batch_norm);
 
-uint8_t *pulp_nn_xmatmul_u8_u4_i8(
+uint8_t *pulp_nn_matmul_u4_i8(
 	const int8_t * pWeight,
 	uint8_t * pInBuffer,
 	uint16_t ch_out,
@@ -1639,14 +1639,14 @@ uint8_t *pulp_nn_xmatmul_u8_u4_i8(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	const int8_t * bias,
 	uint8_t * pOut,
 	int flag_relu,
 	int flag_batch_norm);
 
-uint8_t *pulp_nn_xmatmul_u8_u4_i4(
+uint8_t *pulp_nn_matmul_u4_i4(
 	const int8_t * pWeight,
 	uint8_t * pInBuffer,
 	uint16_t ch_out,
@@ -1654,14 +1654,14 @@ uint8_t *pulp_nn_xmatmul_u8_u4_i4(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	const int8_t * bias,
 	uint8_t * pOut,
 	int flag_relu,
 	int flag_batch_norm);
 
-uint8_t *pulp_nn_xmatmul_u8_u4_i2(
+uint8_t *pulp_nn_matmul_u4_i2(
 	const int8_t * pWeight,
 	uint8_t * pInBuffer,
 	uint16_t ch_out,
@@ -1669,14 +1669,14 @@ uint8_t *pulp_nn_xmatmul_u8_u4_i2(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	const int8_t * bias,
 	uint8_t * pOut,
 	int flag_relu,
 	int flag_batch_norm);
 
-uint8_t *pulp_nn_xmatmul_u8_u2_i8(
+uint8_t *pulp_nn_matmul_u2_i8(
 	const int8_t * pWeight,
 	uint8_t * pInBuffer,
 	uint16_t ch_out,
@@ -1684,14 +1684,14 @@ uint8_t *pulp_nn_xmatmul_u8_u2_i8(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	const int8_t * bias,
 	uint8_t * pOut,
 	int flag_relu,
 	int flag_batch_norm);
 
-uint8_t *pulp_nn_xmatmul_u8_u2_i4(
+uint8_t *pulp_nn_matmul_u2_i4(
 	const int8_t * pWeight,
 	uint8_t * pInBuffer,
 	uint16_t ch_out,
@@ -1699,14 +1699,14 @@ uint8_t *pulp_nn_xmatmul_u8_u2_i4(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	const int8_t * bias,
 	uint8_t * pOut,
 	int flag_relu,
 	int flag_batch_norm);
 
-uint8_t *pulp_nn_xmatmul_u8_u2_i2(
+uint8_t *pulp_nn_matmul_u2_i2(
 	const int8_t * pWeight,
 	uint8_t * pInBuffer,
 	uint16_t ch_out,
@@ -1714,278 +1714,8 @@ uint8_t *pulp_nn_xmatmul_u8_u2_i2(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
-	const int8_t * bias,
-	uint8_t * pOut,
-	int flag_relu,
-	int flag_batch_norm);
-
-uint8_t *pulp_nn_xmatmul_u4_u8_i8(
-	const int8_t * pWeight,
-	uint8_t * pInBuffer,
-	uint16_t ch_out,
-	uint16_t num_col_im2col,
-	uint16_t bias_shift,
-	int8_t out_shift,
-	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
-	const int8_t * bias,
-	uint8_t * pOut,
-	int flag_relu,
-	int flag_batch_norm);
-
-uint8_t *pulp_nn_xmatmul_u4_u8_i4(
-	const int8_t * pWeight,
-	uint8_t * pInBuffer,
-	uint16_t ch_out,
-	uint16_t num_col_im2col,
-	uint16_t bias_shift,
-	int8_t out_shift,
-	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
-	const int8_t * bias,
-	uint8_t * pOut,
-	int flag_relu,
-	int flag_batch_norm);
-
-uint8_t *pulp_nn_xmatmul_u4_u8_i2(
-	const int8_t * pWeight,
-	uint8_t * pInBuffer,
-	uint16_t ch_out,
-	uint16_t num_col_im2col,
-	uint16_t bias_shift,
-	int8_t out_shift,
-	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
-	const int8_t * bias,
-	uint8_t * pOut,
-	int flag_relu,
-	int flag_batch_norm);
-
-uint8_t *pulp_nn_xmatmul_u4_u4_i8(
-	const int8_t * pWeight,
-	uint8_t * pInBuffer,
-	uint16_t ch_out,
-	uint16_t num_col_im2col,
-	uint16_t bias_shift,
-	int8_t out_shift,
-	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
-	const int8_t * bias,
-	uint8_t * pOut,
-	int flag_relu,
-	int flag_batch_norm);
-
-uint8_t *pulp_nn_xmatmul_u4_u4_i4(
-	const int8_t * pWeight,
-	uint8_t * pInBuffer,
-	uint16_t ch_out,
-	uint16_t num_col_im2col,
-	uint16_t bias_shift,
-	int8_t out_shift,
-	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
-	const int8_t * bias,
-	uint8_t * pOut,
-	int flag_relu,
-	int flag_batch_norm);
-
-uint8_t *pulp_nn_xmatmul_u4_u4_i2(
-	const int8_t * pWeight,
-	uint8_t * pInBuffer,
-	uint16_t ch_out,
-	uint16_t num_col_im2col,
-	uint16_t bias_shift,
-	int8_t out_shift,
-	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
-	const int8_t * bias,
-	uint8_t * pOut,
-	int flag_relu,
-	int flag_batch_norm);
-
-uint8_t *pulp_nn_xmatmul_u4_u2_i8(
-	const int8_t * pWeight,
-	uint8_t * pInBuffer,
-	uint16_t ch_out,
-	uint16_t num_col_im2col,
-	uint16_t bias_shift,
-	int8_t out_shift,
-	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
-	const int8_t * bias,
-	uint8_t * pOut,
-	int flag_relu,
-	int flag_batch_norm);
-
-uint8_t *pulp_nn_xmatmul_u4_u2_i4(
-	const int8_t * pWeight,
-	uint8_t * pInBuffer,
-	uint16_t ch_out,
-	uint16_t num_col_im2col,
-	uint16_t bias_shift,
-	int8_t out_shift,
-	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
-	const int8_t * bias,
-	uint8_t * pOut,
-	int flag_relu,
-	int flag_batch_norm);
-
-uint8_t *pulp_nn_xmatmul_u4_u2_i2(
-	const int8_t * pWeight,
-	uint8_t * pInBuffer,
-	uint16_t ch_out,
-	uint16_t num_col_im2col,
-	uint16_t bias_shift,
-	int8_t out_shift,
-	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
-	const int8_t * bias,
-	uint8_t * pOut,
-	int flag_relu,
-	int flag_batch_norm);
-
-uint8_t *pulp_nn_xmatmul_u2_u8_i8(
-	const int8_t * pWeight,
-	uint8_t * pInBuffer,
-	uint16_t ch_out,
-	uint16_t num_col_im2col,
-	uint16_t bias_shift,
-	int8_t out_shift,
-	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
-	const int8_t * bias,
-	uint8_t * pOut,
-	int flag_relu,
-	int flag_batch_norm);
-
-uint8_t *pulp_nn_xmatmul_u2_u8_i4(
-	const int8_t * pWeight,
-	uint8_t * pInBuffer,
-	uint16_t ch_out,
-	uint16_t num_col_im2col,
-	uint16_t bias_shift,
-	int8_t out_shift,
-	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
-	const int8_t * bias,
-	uint8_t * pOut,
-	int flag_relu,
-	int flag_batch_norm);
-
-uint8_t *pulp_nn_xmatmul_u2_u8_i2(
-	const int8_t * pWeight,
-	uint8_t * pInBuffer,
-	uint16_t ch_out,
-	uint16_t num_col_im2col,
-	uint16_t bias_shift,
-	int8_t out_shift,
-	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
-	const int8_t * bias,
-	uint8_t * pOut,
-	int flag_relu,
-	int flag_batch_norm);
-
-uint8_t *pulp_nn_xmatmul_u2_u4_i8(
-	const int8_t * pWeight,
-	uint8_t * pInBuffer,
-	uint16_t ch_out,
-	uint16_t num_col_im2col,
-	uint16_t bias_shift,
-	int8_t out_shift,
-	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
-	const int8_t * bias,
-	uint8_t * pOut,
-	int flag_relu,
-	int flag_batch_norm);
-
-uint8_t *pulp_nn_xmatmul_u2_u4_i4(
-	const int8_t * pWeight,
-	uint8_t * pInBuffer,
-	uint16_t ch_out,
-	uint16_t num_col_im2col,
-	uint16_t bias_shift,
-	int8_t out_shift,
-	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
-	const int8_t * bias,
-	uint8_t * pOut,
-	int flag_relu,
-	int flag_batch_norm);
-
-uint8_t *pulp_nn_xmatmul_u2_u4_i2(
-	const int8_t * pWeight,
-	uint8_t * pInBuffer,
-	uint16_t ch_out,
-	uint16_t num_col_im2col,
-	uint16_t bias_shift,
-	int8_t out_shift,
-	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
-	const int8_t * bias,
-	uint8_t * pOut,
-	int flag_relu,
-	int flag_batch_norm);
-
-uint8_t *pulp_nn_xmatmul_u2_u2_i8(
-	const int8_t * pWeight,
-	uint8_t * pInBuffer,
-	uint16_t ch_out,
-	uint16_t num_col_im2col,
-	uint16_t bias_shift,
-	int8_t out_shift,
-	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
-	const int8_t * bias,
-	uint8_t * pOut,
-	int flag_relu,
-	int flag_batch_norm);
-
-uint8_t *pulp_nn_xmatmul_u2_u2_i4(
-	const int8_t * pWeight,
-	uint8_t * pInBuffer,
-	uint16_t ch_out,
-	uint16_t num_col_im2col,
-	uint16_t bias_shift,
-	int8_t out_shift,
-	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
-	const int8_t * bias,
-	uint8_t * pOut,
-	int flag_relu,
-	int flag_batch_norm);
-
-uint8_t *pulp_nn_xmatmul_u2_u2_i2(
-	const int8_t * pWeight,
-	uint8_t * pInBuffer,
-	uint16_t ch_out,
-	uint16_t num_col_im2col,
-	uint16_t bias_shift,
-	int8_t out_shift,
-	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	const int8_t * bias,
 	uint8_t * pOut,
 	int flag_relu,
@@ -2013,8 +1743,8 @@ void pulp_nn_depthwise_u8_u8_i8(
 	uint8_t * pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t * pIm2ColBuffer,
 	int8_t * pWtBuffer,
 	int flag_relu,
@@ -2043,8 +1773,8 @@ void pulp_nn_depthwise_u8_u8_i4(
 	uint8_t * pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t * pIm2ColBuffer,
 	int8_t * pWtBuffer,
 	int flag_relu,
@@ -2073,8 +1803,8 @@ void pulp_nn_depthwise_u8_u8_i2(
 	uint8_t * pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t * pIm2ColBuffer,
 	int8_t * pWtBuffer,
 	int flag_relu,
@@ -2103,8 +1833,8 @@ void pulp_nn_depthwise_u8_u4_i8(
 	uint8_t * pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t * pIm2ColBuffer,
 	int8_t * pWtBuffer,
 	int flag_relu,
@@ -2133,8 +1863,8 @@ void pulp_nn_depthwise_u8_u4_i4(
 	uint8_t * pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t * pIm2ColBuffer,
 	int8_t * pWtBuffer,
 	int flag_relu,
@@ -2163,8 +1893,8 @@ void pulp_nn_depthwise_u8_u4_i2(
 	uint8_t * pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t * pIm2ColBuffer,
 	int8_t * pWtBuffer,
 	int flag_relu,
@@ -2193,8 +1923,8 @@ void pulp_nn_depthwise_u8_u2_i8(
 	uint8_t * pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t * pIm2ColBuffer,
 	int8_t * pWtBuffer,
 	int flag_relu,
@@ -2223,8 +1953,8 @@ void pulp_nn_depthwise_u8_u2_i4(
 	uint8_t * pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t * pIm2ColBuffer,
 	int8_t * pWtBuffer,
 	int flag_relu,
@@ -2253,8 +1983,8 @@ void pulp_nn_depthwise_u8_u2_i2(
 	uint8_t * pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t * pIm2ColBuffer,
 	int8_t * pWtBuffer,
 	int flag_relu,
@@ -2283,8 +2013,8 @@ void pulp_nn_depthwise_u4_u8_i8(
 	uint8_t * pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t * pIm2ColBuffer,
 	int8_t * pWtBuffer,
 	int flag_relu,
@@ -2313,8 +2043,8 @@ void pulp_nn_depthwise_u4_u8_i4(
 	uint8_t * pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t * pIm2ColBuffer,
 	int8_t * pWtBuffer,
 	int flag_relu,
@@ -2343,8 +2073,8 @@ void pulp_nn_depthwise_u4_u8_i2(
 	uint8_t * pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t * pIm2ColBuffer,
 	int8_t * pWtBuffer,
 	int flag_relu,
@@ -2373,8 +2103,8 @@ void pulp_nn_depthwise_u4_u4_i8(
 	uint8_t * pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t * pIm2ColBuffer,
 	int8_t * pWtBuffer,
 	int flag_relu,
@@ -2403,8 +2133,8 @@ void pulp_nn_depthwise_u4_u4_i4(
 	uint8_t * pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t * pIm2ColBuffer,
 	int8_t * pWtBuffer,
 	int flag_relu,
@@ -2433,8 +2163,8 @@ void pulp_nn_depthwise_u4_u4_i2(
 	uint8_t * pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t * pIm2ColBuffer,
 	int8_t * pWtBuffer,
 	int flag_relu,
@@ -2463,8 +2193,8 @@ void pulp_nn_depthwise_u4_u2_i8(
 	uint8_t * pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t * pIm2ColBuffer,
 	int8_t * pWtBuffer,
 	int flag_relu,
@@ -2493,8 +2223,8 @@ void pulp_nn_depthwise_u4_u2_i4(
 	uint8_t * pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t * pIm2ColBuffer,
 	int8_t * pWtBuffer,
 	int flag_relu,
@@ -2523,8 +2253,8 @@ void pulp_nn_depthwise_u4_u2_i2(
 	uint8_t * pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t * pIm2ColBuffer,
 	int8_t * pWtBuffer,
 	int flag_relu,
@@ -2553,8 +2283,8 @@ void pulp_nn_depthwise_u2_u8_i8(
 	uint8_t * pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t * pIm2ColBuffer,
 	int8_t * pWtBuffer,
 	int flag_relu,
@@ -2583,8 +2313,8 @@ void pulp_nn_depthwise_u2_u8_i4(
 	uint8_t * pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t * pIm2ColBuffer,
 	int8_t * pWtBuffer,
 	int flag_relu,
@@ -2613,8 +2343,8 @@ void pulp_nn_depthwise_u2_u8_i2(
 	uint8_t * pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t * pIm2ColBuffer,
 	int8_t * pWtBuffer,
 	int flag_relu,
@@ -2643,8 +2373,8 @@ void pulp_nn_depthwise_u2_u4_i8(
 	uint8_t * pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t * pIm2ColBuffer,
 	int8_t * pWtBuffer,
 	int flag_relu,
@@ -2673,8 +2403,8 @@ void pulp_nn_depthwise_u2_u4_i4(
 	uint8_t * pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t * pIm2ColBuffer,
 	int8_t * pWtBuffer,
 	int flag_relu,
@@ -2703,8 +2433,8 @@ void pulp_nn_depthwise_u2_u4_i2(
 	uint8_t * pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t * pIm2ColBuffer,
 	int8_t * pWtBuffer,
 	int flag_relu,
@@ -2733,8 +2463,8 @@ void pulp_nn_depthwise_u2_u2_i8(
 	uint8_t * pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t * pIm2ColBuffer,
 	int8_t * pWtBuffer,
 	int flag_relu,
@@ -2763,8 +2493,8 @@ void pulp_nn_depthwise_u2_u2_i4(
 	uint8_t * pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t * pIm2ColBuffer,
 	int8_t * pWtBuffer,
 	int flag_relu,
@@ -2793,8 +2523,8 @@ void pulp_nn_depthwise_u2_u2_i2(
 	uint8_t * pOutBuffer,
 	const uint16_t dim_out_x,
 	const uint16_t dim_out_y,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t * pIm2ColBuffer,
 	int8_t * pWtBuffer,
 	int flag_relu,
@@ -2810,8 +2540,8 @@ void pulp_nn_linear_u8_i32_i8(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -2826,8 +2556,8 @@ void pulp_nn_linear_u8_i32_i4(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -2842,8 +2572,8 @@ void pulp_nn_linear_u8_i32_i2(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -2858,8 +2588,8 @@ void pulp_nn_linear_u4_i32_i8(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -2874,8 +2604,8 @@ void pulp_nn_linear_u4_i32_i4(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -2890,8 +2620,8 @@ void pulp_nn_linear_u4_i32_i2(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -2906,8 +2636,8 @@ void pulp_nn_linear_u2_i32_i8(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -2922,8 +2652,8 @@ void pulp_nn_linear_u2_i32_i4(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -2938,8 +2668,8 @@ void pulp_nn_linear_u2_i32_i2(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -2954,8 +2684,8 @@ void pulp_nn_linear_u8_u8_i8(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -2970,8 +2700,8 @@ void pulp_nn_linear_u8_u8_i4(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -2986,8 +2716,8 @@ void pulp_nn_linear_u8_u8_i2(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -3002,8 +2732,8 @@ void pulp_nn_linear_u8_u4_i8(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -3018,8 +2748,8 @@ void pulp_nn_linear_u8_u4_i4(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -3034,8 +2764,8 @@ void pulp_nn_linear_u8_u4_i2(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -3050,8 +2780,8 @@ void pulp_nn_linear_u8_u2_i8(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -3066,8 +2796,8 @@ void pulp_nn_linear_u8_u2_i4(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -3082,8 +2812,8 @@ void pulp_nn_linear_u8_u2_i2(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -3098,8 +2828,8 @@ void pulp_nn_linear_u4_u8_i8(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -3114,8 +2844,8 @@ void pulp_nn_linear_u4_u8_i4(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -3130,8 +2860,8 @@ void pulp_nn_linear_u4_u8_i2(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -3146,8 +2876,8 @@ void pulp_nn_linear_u4_u4_i8(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -3162,8 +2892,8 @@ void pulp_nn_linear_u4_u4_i4(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -3178,8 +2908,8 @@ void pulp_nn_linear_u4_u4_i2(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -3194,8 +2924,8 @@ void pulp_nn_linear_u4_u2_i8(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -3210,8 +2940,8 @@ void pulp_nn_linear_u4_u2_i4(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -3226,8 +2956,8 @@ void pulp_nn_linear_u4_u2_i2(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -3242,8 +2972,8 @@ void pulp_nn_linear_u2_u8_i8(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -3258,8 +2988,8 @@ void pulp_nn_linear_u2_u8_i4(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -3274,8 +3004,8 @@ void pulp_nn_linear_u2_u8_i2(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -3290,8 +3020,8 @@ void pulp_nn_linear_u2_u4_i8(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -3306,8 +3036,8 @@ void pulp_nn_linear_u2_u4_i4(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -3322,8 +3052,8 @@ void pulp_nn_linear_u2_u4_i2(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -3338,8 +3068,8 @@ void pulp_nn_linear_u2_u2_i8(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -3354,8 +3084,8 @@ void pulp_nn_linear_u2_u2_i4(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,
@@ -3370,8 +3100,8 @@ void pulp_nn_linear_u2_u2_i2(
 	uint16_t bias_shift,
 	int8_t out_shift,
 	uint16_t out_mult,
-	int32_t *k,
-	int32_t *lambda,
+	int64_t *k,
+	int64_t *lambda,
 	uint8_t *pOutBuffer,
 	int flag_relu,
 	int flag_batch_norm,

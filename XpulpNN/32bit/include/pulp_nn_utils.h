@@ -20,6 +20,10 @@
 #ifndef __PULPNN_UTILS__
 #define __PULPNN_UTILS__
 
+#ifdef GAP_SDK
+#include "pulp.h"
+#endif
+
 uint8_t pulp_nn_bn_quant_u8 (int32_t phi, int32_t k, int32_t lambda, int8_t  d);
 uint8_t pulp_nn_bn_quant_u4 (int32_t phi, int32_t k, int32_t lambda, int8_t  d);
 uint8_t pulp_nn_bn_quant_u2 (int32_t phi, int32_t k, int32_t lambda, int8_t  d);
