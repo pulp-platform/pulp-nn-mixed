@@ -78,13 +78,13 @@ void pulp_nn_linear_u2_u4_i4(
 
 		for (int j=0; j<(dim_vec >> 4); j++)
 		{
-	      pA = pulp_nn_u2_to_u8(pA,vecA);
-		  pB = pulp_nn_i4_to_i8(pB,vecB);
-	      pB2 = pulp_nn_i4_to_i8(pB2,vecB2);
-	      //pB+=4;
-		  //pB2+=4;
-	      pB = pulp_nn_i4_to_i8(pB,vecB + 2);
-	      pB2 = pulp_nn_i4_to_i8(pB2,vecB2 + 2);
+	      pulp_nn_u2_to_u8(pA,vecA);
+		  pulp_nn_i4_to_i8(pB,vecB);
+	      pulp_nn_i4_to_i8(pB2,vecB2);
+	      pB+=4;
+		  pB2+=4;
+	      pulp_nn_i4_to_i8(pB,vecB + 2);
+	      pulp_nn_i4_to_i8(pB2,vecB2 + 2);
 		  sum = SumDotp(vecA[0], vecB[0], sum);
 	      sum = SumDotp(vecA[1], vecB[1], sum);
 	      sum = SumDotp(vecA[2], vecB[2], sum);
