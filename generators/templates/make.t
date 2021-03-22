@@ -2,16 +2,6 @@ APP = test
 
 APP_SRCS = test.c
 
-APP_SRCS += src/SupportFunctions/pulp_nn_utils.c
-
-${config.make}
-
-ifndef cores
-cores=1
-else
-cores = $(cores)
-endif
-
 %if config.kernel.type == 'maxpool' or config.kernel.type == 'avgpool':
 ifndef kernel
 kernel=8
@@ -26,6 +16,14 @@ else
 kernel = $(kernel)
 endif
 
+${config.make}
+
+ifndef cores
+cores=1
+else
+cores = $(cores)
+endif
+
 ifeq ($(perf), 1)
 APP_CFLAGS += -DVERBOSE_PERF
 endif
@@ -34,16 +32,10 @@ ifeq ($(check), 1)
 APP_CFLAGS += -DVERBOSE_CHECK
 endif
 
-APP_CFLAGS += -O3 -Iinclude -w #-flto
+APP_CFLAGS += -O3 -Iinclude -w -flto
 APP_CFLAGS += -DNUM_CORES=$(cores) -DKERNEL=$(kernel)
 
-APP_LDFLAGS += -lm #-flto
+APP_LDFLAGS += -lm -flto
 
-%if config.kernel.extentions == 'XpulpNN':
-PULP_ARCH_CFLAGS = -march=rv32imXpulpnn -D__riscv__
-PULP_ARCH_LDFLAGS =  -march=rv32imXpulpnn -D__riscv__
-
-disopt = --disassembler-options="march=rv32imcXpulpnn" -d
-%endif
 
 include $(RULES_DIR)/pmsis_rules.mk

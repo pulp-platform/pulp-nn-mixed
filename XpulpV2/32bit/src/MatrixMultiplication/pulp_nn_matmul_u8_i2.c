@@ -21,23 +21,18 @@
 #include "pulp_nn_utils.h"
 #include "pulp_nn_kernels.h"
 
-#define SumDotp(a, b, c) __builtin_pulp_sdotusp4(a, b, c)
-#define nn_round(out_shift) (0x1 << (out_shift -1))
-#define bitins(dst,not_mask_imm,src,mask_imm,off) __builtin_pulp_binsert(dst,not_mask_imm,src,mask_imm,off)
-#define bitext(x,size,off) __builtin_pulp_bextract(x,size,off)
-#define clip8(x) __builtin_pulp_clipu_r(x, 255)
 
 uint8_t *pulp_nn_matmul_u8_i2(
           const int8_t * pWeight,
           uint8_t * pInBuffer,
           uint16_t ch_out,
           uint16_t num_col_im2col,
-					uint16_t bias_shift,
+          uint16_t bias_shift,
           int8_t out_shift,
           uint16_t out_mult,
           int32_t *k,
           int32_t *lambda,
-					const int8_t * bias,
+          const int8_t * bias,
           uint8_t * pOut,
           int flag_relu,
           int flag_batch_norm
@@ -109,47 +104,47 @@ uint8_t *pulp_nn_matmul_u8_i2(
 
       pA = pulp_nn_i2_to_i8(pA,vecA);
 
-      sum = SumDotp(vecB, vecA[0], sum);
-      sum5 = SumDotp(vecB2, vecA[0], sum5);
-      sum = SumDotp(vecB3, vecA[1], sum);
-      sum5 = SumDotp(vecB4, vecA[1], sum5);
-      sum = SumDotp(vecB5, vecA[2], sum);
-      sum5 = SumDotp(vecB6, vecA[2], sum5);
-      sum = SumDotp(vecB7, vecA[3], sum);
-      sum5 = SumDotp(vecB8, vecA[3], sum5);
+      sum = SumDotp4(vecB, vecA[0], sum);
+      sum5 = SumDotp4(vecB2, vecA[0], sum5);
+      sum = SumDotp4(vecB3, vecA[1], sum);
+      sum5 = SumDotp4(vecB4, vecA[1], sum5);
+      sum = SumDotp4(vecB5, vecA[2], sum);
+      sum5 = SumDotp4(vecB6, vecA[2], sum5);
+      sum = SumDotp4(vecB7, vecA[3], sum);
+      sum5 = SumDotp4(vecB8, vecA[3], sum5);
 
       pA2 = pulp_nn_i2_to_i8(pA2,vecA2);
 
-      sum2 = SumDotp(vecB, vecA2[0], sum2);
-      sum6 = SumDotp(vecB2, vecA2[0], sum6);
-      sum2 = SumDotp(vecB3, vecA2[1], sum2);
-      sum6 = SumDotp(vecB4, vecA2[1], sum6);
-      sum2 = SumDotp(vecB5, vecA2[2], sum2);
-      sum6 = SumDotp(vecB6, vecA2[2], sum6);
-      sum2 = SumDotp(vecB7, vecA2[3], sum2);
-      sum6 = SumDotp(vecB8, vecA2[3], sum6);
+      sum2 = SumDotp4(vecB, vecA2[0], sum2);
+      sum6 = SumDotp4(vecB2, vecA2[0], sum6);
+      sum2 = SumDotp4(vecB3, vecA2[1], sum2);
+      sum6 = SumDotp4(vecB4, vecA2[1], sum6);
+      sum2 = SumDotp4(vecB5, vecA2[2], sum2);
+      sum6 = SumDotp4(vecB6, vecA2[2], sum6);
+      sum2 = SumDotp4(vecB7, vecA2[3], sum2);
+      sum6 = SumDotp4(vecB8, vecA2[3], sum6);
 
       pA3 = pulp_nn_i2_to_i8(pA3,vecA3);
 
-      sum3 = SumDotp(vecB, vecA3[0], sum3);
-      sum7 = SumDotp(vecB2, vecA3[0], sum7);
-      sum3 = SumDotp(vecB3, vecA3[1], sum3);
-      sum7 = SumDotp(vecB4, vecA3[1], sum7);
-      sum3 = SumDotp(vecB5, vecA3[2], sum3);
-      sum7 = SumDotp(vecB6, vecA3[2], sum7);
-      sum3 = SumDotp(vecB7, vecA3[3], sum3);
-      sum7 = SumDotp(vecB8, vecA3[3], sum7);
+      sum3 = SumDotp4(vecB, vecA3[0], sum3);
+      sum7 = SumDotp4(vecB2, vecA3[0], sum7);
+      sum3 = SumDotp4(vecB3, vecA3[1], sum3);
+      sum7 = SumDotp4(vecB4, vecA3[1], sum7);
+      sum3 = SumDotp4(vecB5, vecA3[2], sum3);
+      sum7 = SumDotp4(vecB6, vecA3[2], sum7);
+      sum3 = SumDotp4(vecB7, vecA3[3], sum3);
+      sum7 = SumDotp4(vecB8, vecA3[3], sum7);
 
       pA4 = pulp_nn_i2_to_i8(pA4,vecA4);
 
-      sum4 = SumDotp(vecB, vecA4[0], sum4);
-      sum8 = SumDotp(vecB2, vecA4[0], sum8);
-      sum4 = SumDotp(vecB3, vecA4[1], sum4);
-      sum8 = SumDotp(vecB4, vecA4[1], sum8);
-      sum4 = SumDotp(vecB5, vecA4[2], sum4);
-      sum8 = SumDotp(vecB6, vecA4[2], sum8);
-      sum4 = SumDotp(vecB7, vecA4[3], sum4);
-      sum8 = SumDotp(vecB8, vecA4[3], sum8);
+      sum4 = SumDotp4(vecB, vecA4[0], sum4);
+      sum8 = SumDotp4(vecB2, vecA4[0], sum8);
+      sum4 = SumDotp4(vecB3, vecA4[1], sum4);
+      sum8 = SumDotp4(vecB4, vecA4[1], sum8);
+      sum4 = SumDotp4(vecB5, vecA4[2], sum4);
+      sum8 = SumDotp4(vecB6, vecA4[2], sum8);
+      sum4 = SumDotp4(vecB7, vecA4[3], sum4);
+      sum8 = SumDotp4(vecB8, vecA4[3], sum8);
 
       // pA+=4;
       // pA2+=4;
@@ -319,14 +314,14 @@ uint8_t *pulp_nn_matmul_u8_i2(
 
       pA = pulp_nn_i2_to_i8(pA,vecA);
 
-      sum = SumDotp(vecB, vecA[0], sum);
-      sum2 = SumDotp(vecB2, vecA[0], sum2);
-      sum = SumDotp(vecB3, vecA[1], sum);
-      sum2 = SumDotp(vecB4, vecA[1], sum2);
-      sum = SumDotp(vecB5, vecA[2], sum);
-      sum2 = SumDotp(vecB6, vecA[2], sum2);
-      sum = SumDotp(vecB7, vecA[3], sum);
-      sum2 = SumDotp(vecB8, vecA[3], sum2);
+      sum = SumDotp4(vecB, vecA[0], sum);
+      sum2 = SumDotp4(vecB2, vecA[0], sum2);
+      sum = SumDotp4(vecB3, vecA[1], sum);
+      sum2 = SumDotp4(vecB4, vecA[1], sum2);
+      sum = SumDotp4(vecB5, vecA[2], sum);
+      sum2 = SumDotp4(vecB6, vecA[2], sum2);
+      sum = SumDotp4(vecB7, vecA[3], sum);
+      sum2 = SumDotp4(vecB8, vecA[3], sum2);
 
       //pA+=4;
       pB+=16;

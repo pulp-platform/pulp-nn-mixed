@@ -21,11 +21,6 @@
 #include "pulp_nn_utils.h"
 #include "pulp_nn_kernels.h"
 
-#define log2(x) __builtin_pulp_fl1(x)
-#define min(a,b) ((a)<(b)?(a):(b))
-#define SumDotp(a, b, c) __builtin_pulp_sdotusp4(a, b, c)
-#define bitins(dst,not_mask_imm,src,mask_imm,off) __builtin_pulp_binsert(dst,not_mask_imm,src,mask_imm,off)
-#define bitext(x,size,off) __builtin_pulp_bextract(x,size,off)
 
 void pulp_nn_linear_u2_i32_i4(
                   uint8_t *pInBuffer,
@@ -44,55 +39,55 @@ void pulp_nn_linear_u2_i32_i4(
                   unsigned int * memory_chan
 )
 {
-	uint16_t dim_vec_in = dim_vec >> 2;
-	uint16_t dim_vec_wt = dim_vec >> 1;
+    uint16_t dim_vec_in = dim_vec >> 2;
+    uint16_t dim_vec_wt = dim_vec >> 1;
 
-	int core_id = pi_core_id();
-	int Log2Core = log2(NUM_CORES);
-	int chunk = (num_o_neurons >> Log2Core) + ((num_o_neurons & (NUM_CORES-1))!=0);
-	int start = min(chunk * core_id, num_o_neurons);
-	int stop = min(start + chunk, num_o_neurons);
+    int core_id = pi_core_id();
+    int Log2Core = log2(NUM_CORES);
+    int chunk = (num_o_neurons >> Log2Core) + ((num_o_neurons & (NUM_CORES-1))!=0);
+    int start = min(chunk * core_id, num_o_neurons);
+    int stop = min(start + chunk, num_o_neurons);
 
-	v4u vecA[4];
-	v4s vecB[4];
-	v4s vecB2[4];
+    v4u vecA[4];
+    v4s vecB[4];
+    v4s vecB2[4];
 
-	int32_t *pOut = (int32_t *) pOutBuffer + start;
+    int32_t *pOut = (int32_t *) pOutBuffer + start;
 
       int lft_neurons = chunk & 0x01;
-	int stop_even = stop - lft_neurons;
-	int i;
+    int stop_even = stop - lft_neurons;
+    int i;
 
-	for(i=start; i<stop_even; i+=2)
-	{
-		int sum = 0;
-		int sum2 = 0;
+    for(i=start; i<stop_even; i+=2)
+    {
+        int sum = 0;
+        int sum2 = 0;
 
-		uint8_t *pA = pInBuffer;
-		int8_t *pB = pWeights + (i * dim_vec_wt);
-		int8_t *pB2 = pB + dim_vec_wt;
+        uint8_t *pA = pInBuffer;
+        int8_t *pB = pWeights + (i * dim_vec_wt);
+        int8_t *pB2 = pB + dim_vec_wt;
 
-		for (int j=0; j<(dim_vec >> 4); j++)
-		{
+        for (int j=0; j<(dim_vec >> 4); j++)
+        {
                   pulp_nn_u2_to_u8(pA,vecA);
-	  	      pulp_nn_i4_to_i8(pB,vecB);
+              pulp_nn_i4_to_i8(pB,vecB);
                   pulp_nn_i4_to_i8(pB2,vecB2);
                   pB+=4;
-            	pB2+=4;
+                pB2+=4;
                   pulp_nn_i4_to_i8(pB,vecB + 2);
                   pulp_nn_i4_to_i8(pB2,vecB2 + 2);
-            	sum = SumDotp(vecA[0], vecB[0], sum);
-                  sum = SumDotp(vecA[1], vecB[1], sum);
-                  sum = SumDotp(vecA[2], vecB[2], sum);
-                  sum = SumDotp(vecA[3], vecB[3], sum);
-                  sum2 = SumDotp(vecA[0], vecB2[0], sum2);
-                  sum2 = SumDotp(vecA[1], vecB2[1], sum2);
-                  sum2 = SumDotp(vecA[2], vecB2[2], sum2);
-                  sum2 = SumDotp(vecA[3], vecB2[3], sum2);
+                sum = SumDotp4(vecA[0], vecB[0], sum);
+                  sum = SumDotp4(vecA[1], vecB[1], sum);
+                  sum = SumDotp4(vecA[2], vecB[2], sum);
+                  sum = SumDotp4(vecA[3], vecB[3], sum);
+                  sum2 = SumDotp4(vecA[0], vecB2[0], sum2);
+                  sum2 = SumDotp4(vecA[1], vecB2[1], sum2);
+                  sum2 = SumDotp4(vecA[2], vecB2[2], sum2);
+                  sum2 = SumDotp4(vecA[3], vecB2[3], sum2);
                   pA+=4;
                   pB+=4;
                   pB2+=4;
-		}
+        }
             uint16_t col_cnt = dim_vec & 0xf;
             while (col_cnt)
             {
@@ -113,41 +108,41 @@ void pulp_nn_linear_u2_i32_i4(
                   int8_t inB7 = (int8_t) bitext((int) *pB2, 4, 0);
                   int8_t inB8 = (int8_t) bitext((int) *pB2, 4, 4);
                   pB2++;
-       	  	sum += inA * inB;
-       	  	sum += inA2 * inB2;
-       	  	sum += inA3 * inB3;
-       	  	sum += inA4 * inB4;
-       	  	sum2 += inA * inB5;
-       	  	sum2 += inA2 * inB6;
-       	  	sum2 += inA3 * inB7;
-       	  	sum2 += inA4 * inB8;
+            sum += inA * inB;
+            sum += inA2 * inB2;
+            sum += inA3 * inB3;
+            sum += inA4 * inB4;
+            sum2 += inA * inB5;
+            sum2 += inA2 * inB6;
+            sum2 += inA3 * inB7;
+            sum2 += inA4 * inB8;
                   col_cnt--;
             }
-		*pOut = sum;
-		pOut++;
-		*pOut = sum2;
-		pOut++;
-	}
-	if (lft_neurons && (stop - start) > 0)
-	{
-		int sum = 0;
+        *pOut = sum;
+        pOut++;
+        *pOut = sum2;
+        pOut++;
+    }
+    if (lft_neurons && (stop - start) > 0)
+    {
+        int sum = 0;
 
-		uint8_t *pA = pInBuffer;
-		int8_t *pB = pWeights + (i * dim_vec_wt);
+        uint8_t *pA = pInBuffer;
+        int8_t *pB = pWeights + (i * dim_vec_wt);
 
-		for (int j=0; j<(dim_vec >> 4); j++)
-		{
-	          pulp_nn_u2_to_u8(pA,vecA);
-      	   pulp_nn_i4_to_i8(pB,vecB);
-      	   pB+=4;
+        for (int j=0; j<(dim_vec >> 4); j++)
+        {
+              pulp_nn_u2_to_u8(pA,vecA);
+           pulp_nn_i4_to_i8(pB,vecB);
+           pB+=4;
                pulp_nn_i4_to_i8(pB,vecB + 2);
-		   sum = SumDotp(vecA[0], vecB[0], sum);
-	         sum = SumDotp(vecA[1], vecB[1], sum);
-	         sum = SumDotp(vecA[2], vecB[2], sum);
-	         sum = SumDotp(vecA[3], vecB[3], sum);
-      	   pA+=4;
-      	   pB+=4;
-		}
+           sum = SumDotp4(vecA[0], vecB[0], sum);
+             sum = SumDotp4(vecA[1], vecB[1], sum);
+             sum = SumDotp4(vecA[2], vecB[2], sum);
+             sum = SumDotp4(vecA[3], vecB[3], sum);
+           pA+=4;
+           pB+=4;
+        }
             uint16_t col_cnt = dim_vec & 0xf;
             while (col_cnt)
             {
@@ -162,14 +157,14 @@ void pulp_nn_linear_u2_i32_i4(
                   int8_t inB3 = (int8_t) bitext((int) *pB, 4, 0);
                   int8_t inB4 = (int8_t) bitext((int) *pB, 4, 4);
                   pB++;
-       	  	sum += inA * inB;
-       	  	sum += inA2 * inB2;
-       	  	sum += inA3 * inB3;
-       	  	sum += inA4 * inB4;
+            sum += inA * inB;
+            sum += inA2 * inB2;
+            sum += inA3 * inB3;
+            sum += inA4 * inB4;
                   col_cnt--;
             }
-		*pOut = sum;
-		pOut++;
-	}
-	pi_cl_team_barrier(0);
+        *pOut = sum;
+        pOut++;
+    }
+    pi_cl_team_barrier(0);
 }

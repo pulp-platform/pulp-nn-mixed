@@ -21,23 +21,18 @@
 #include "pulp_nn_utils.h"
 #include "pulp_nn_kernels.h"
 
-#define SumDotp(a, b, c) __builtin_pulp_sdotusp4(a, b, c)
-#define nn_round(out_shift) (0x1 << (out_shift -1))
-#define bitins(dst,not_mask_imm,src,mask_imm,off) __builtin_pulp_binsert(dst,not_mask_imm,src,mask_imm,off)
-#define bitext(x,size,off) __builtin_pulp_bextract(x,size,off)
-#define clip8(x) __builtin_pulp_clipu_r(x, 15)
 
 uint8_t *pulp_nn_matmul_u4_i8(
           const int8_t * pWeight,
           uint8_t * pInBuffer,
           uint16_t ch_out,
           uint16_t num_col_im2col,
-					uint16_t bias_shift,
+          uint16_t bias_shift,
           int8_t out_shift,
           uint16_t out_mult,
           int64_t *k,
           int64_t *lambda,
-					const int8_t * bias,
+          const int8_t * bias,
           uint8_t * pOut,
           int flag_relu,
           int flag_batch_norm
@@ -100,15 +95,15 @@ uint8_t *pulp_nn_matmul_u4_i8(
       vecB = *((v4u*)pB);
       vecB2 = *((v4u*)pB2);
 
-      sum = SumDotp(vecB, vecA, sum );
-      sum2 = SumDotp(vecB, vecA2, sum2);
-      sum3 = SumDotp (vecB, vecA3, sum3);
-      sum4 = SumDotp(vecB, vecA4, sum4);
+      sum = SumDotp4(vecB, vecA, sum );
+      sum2 = SumDotp4(vecB, vecA2, sum2);
+      sum3 = SumDotp4(vecB, vecA3, sum3);
+      sum4 = SumDotp4(vecB, vecA4, sum4);
 
-      sum5 = SumDotp(vecB2, vecA, sum5);
-      sum6 = SumDotp(vecB2, vecA2, sum6);
-      sum7 = SumDotp(vecB2, vecA3, sum7);
-      sum8 = SumDotp(vecB2, vecA4, sum8);
+      sum5 = SumDotp4(vecB2, vecA, sum5);
+      sum6 = SumDotp4(vecB2, vecA2, sum6);
+      sum7 = SumDotp4(vecB2, vecA3, sum7);
+      sum8 = SumDotp4(vecB2, vecA4, sum8);
 
       pA+=4;
       pA2+=4;
@@ -190,21 +185,21 @@ uint8_t *pulp_nn_matmul_u4_i8(
       }
       else
       {
-        sum = (uint8_t) clip8(sum >> out_shift);
-        sum2 = (uint8_t) clip8(sum2 >> out_shift);
+        sum = (uint8_t) clip4(sum >> out_shift);
+        sum2 = (uint8_t) clip4(sum2 >> out_shift);
         *pOut = bitins(sum, n_mask, sum2, mask, off);
         pOut++;
-        sum3 = (uint8_t) clip8(sum3 >> out_shift);
-        sum4 = (uint8_t) clip8(sum4 >> out_shift);
+        sum3 = (uint8_t) clip4(sum3 >> out_shift);
+        sum4 = (uint8_t) clip4(sum4 >> out_shift);
         *pOut = bitins(sum3, n_mask, sum4, mask, off);
         pOut++;
 
-        sum5 = (uint8_t) clip8(sum5 >> out_shift);
-        sum6 = (uint8_t) clip8(sum6 >> out_shift);
+        sum5 = (uint8_t) clip4(sum5 >> out_shift);
+        sum6 = (uint8_t) clip4(sum6 >> out_shift);
         *pOut2 = bitins(sum5, n_mask, sum6, mask, off);
         pOut2++;
-        sum7 = (uint8_t) clip8(sum7 >> out_shift);
-        sum8 = (uint8_t) clip8(sum8 >> out_shift);
+        sum7 = (uint8_t) clip4(sum7 >> out_shift);
+        sum8 = (uint8_t) clip4(sum8 >> out_shift);
         *pOut2 = bitins(sum7, n_mask, sum8, mask, off);
         pOut2++;
       }
@@ -229,8 +224,8 @@ uint8_t *pulp_nn_matmul_u4_i8(
       vecB = *((v4u*) pB);
       vecB2 = *((v4u*) pB2);
 
-      sum = SumDotp(vecB, vecA, sum);
-      sum2 = SumDotp(vecB2, vecA, sum2);
+      sum = SumDotp4(vecB, vecA, sum);
+      sum2 = SumDotp4(vecB2, vecA, sum2);
 
       pA+=4;
       pB+=4;
@@ -281,8 +276,8 @@ uint8_t *pulp_nn_matmul_u4_i8(
       else
       {
         uint8_t i_o = i & 0x01;
-        out[i_o] = (uint8_t) clip8(sum >> out_shift);
-        out2[i_o] = (uint8_t) clip8(sum2 >> out_shift);
+        out[i_o] = (uint8_t) clip4(sum >> out_shift);
+        out2[i_o] = (uint8_t) clip4(sum2 >> out_shift);
         if(i_o == 0x01)
         {
           *pOut = bitins(out[0], n_mask, out[1], mask, off);

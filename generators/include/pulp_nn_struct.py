@@ -54,7 +54,6 @@ PULPNNSrcDirsSW32bit = {'src':                      PULPNNInstallPathSW32bit + "
                         'depthwise':                PULPNNInstallPathSW32bit + "src/Depthwise/",
                         'linear_nq':                PULPNNInstallPathSW32bit + "src/LinearNoQuant/",
                         'linear_q':                 PULPNNInstallPathSW32bit + "src/LinearQuant/",
-                        'support_function':         PULPNNInstallPathSW32bit + "src/SupportFunctions/",
                         'pooling':                  PULPNNInstallPathSW32bit + "src/Pooling/",
                         'maxpool':                  PULPNNInstallPathSW32bit + "src/Pooling/MaxPool/",
                         'avgpool':                  PULPNNInstallPathSW32bit + "src/Pooling/AvgPool/",
@@ -70,7 +69,6 @@ PULPNNSrcDirsSW32bit = {'src':                      PULPNNInstallPathSW32bit + "
                         'pulp_nn_maxpool':          PULPNNTestFolderSW32bit + "src/Pooling/MaxPool/",
                         'pulp_nn_avgpool':          PULPNNTestFolderSW32bit + "src/Pooling/AvgPool/",
                         'pulp_nn_add':              PULPNNTestFolderSW32bit + "src/Add/",
-                        'pulp_nn_support_function': PULPNNTestFolderSW32bit + "src/SupportFunctions/",
                         'data_allocation_matm':     PULPNNTestFolderSW32bit + "include/DataAllocationMatMul/",
                         'data_allocation_conv':     PULPNNTestFolderSW32bit + "include/DataAllocationConvolution/",
                         'data_allocation_pw':       PULPNNTestFolderSW32bit + "include/DataAllocationPointwise/",
@@ -99,7 +97,6 @@ PULPNNSrcDirsSW64bit = {'src':                      PULPNNInstallPathSW64bit + "
                         'depthwise':                PULPNNInstallPathSW64bit + "src/Depthwise/",
                         'linear_nq':                PULPNNInstallPathSW64bit + "src/LinearNoQuant/",
                         'linear_q':                 PULPNNInstallPathSW64bit + "src/LinearQuant/",
-                        'support_function':         PULPNNInstallPathSW64bit + "src/SupportFunctions/",
                         'pooling':                  PULPNNInstallPathSW64bit + "src/Pooling/",
                         'maxpool':                  PULPNNInstallPathSW64bit + "src/Pooling/MaxPool/",
                         'avgpool':                  PULPNNInstallPathSW64bit + "src/Pooling/AvgPool/",
@@ -115,7 +112,6 @@ PULPNNSrcDirsSW64bit = {'src':                      PULPNNInstallPathSW64bit + "
                         'pulp_nn_maxpool':          PULPNNTestFolderSW64bit + "src/Pooling/MaxPool/",
                         'pulp_nn_avgpool':          PULPNNTestFolderSW64bit + "src/Pooling/AvgPool/",
                         'pulp_nn_add':              PULPNNTestFolderSW64bit + "src/Add/",
-                        'pulp_nn_support_function': PULPNNTestFolderSW64bit + "src/SupportFunctions/",
                         'data_allocation_matm':     PULPNNTestFolderSW64bit + "include/DataAllocationMatMul/",
                         'data_allocation_conv':     PULPNNTestFolderSW64bit + "include/DataAllocationConvolution/",
                         'data_allocation_pw':       PULPNNTestFolderSW64bit + "include/DataAllocationPointwise/",
@@ -145,7 +141,6 @@ PULPNNSrcDirsHW32bit = {'src':                      PULPNNInstallPathHW32bit + "
                         'depthwise':                PULPNNInstallPathHW32bit + "src/Depthwise/",
                         'linear_nq':                PULPNNInstallPathHW32bit + "src/LinearNoQuant/",
                         'linear_q':                 PULPNNInstallPathHW32bit + "src/LinearQuant/",
-                        'support_function':         PULPNNInstallPathHW32bit + "src/SupportFunctions/",
                         'pooling':                  PULPNNInstallPathHW32bit + "src/Pooling/",
                         'maxpool':                  PULPNNInstallPathHW32bit + "src/Pooling/MaxPool/",
                         'avgpool':                  PULPNNInstallPathHW32bit + "src/Pooling/AvgPool/",
@@ -161,7 +156,6 @@ PULPNNSrcDirsHW32bit = {'src':                      PULPNNInstallPathHW32bit + "
                         'pulp_nn_maxpool':          PULPNNTestFolderHW32bit + "src/Pooling/MaxPool/",
                         'pulp_nn_avgpool':          PULPNNTestFolderHW32bit + "src/Pooling/AvgPool/",
                         'pulp_nn_add':              PULPNNTestFolderHW32bit + "src/Add/",
-                        'pulp_nn_support_function': PULPNNTestFolderHW32bit + "src/SupportFunctions/",
                         'data_allocation_matm':     PULPNNTestFolderHW32bit + "include/DataAllocationMatMul/",
                         'data_allocation_conv':     PULPNNTestFolderHW32bit + "include/DataAllocationConvolution/",
                         'data_allocation_pw':       PULPNNTestFolderHW32bit + "include/DataAllocationPointwise/",
@@ -190,7 +184,6 @@ PULPNNSrcDirsHW64bit = {'src':                      PULPNNInstallPathHW64bit + "
                         'depthwise':                PULPNNInstallPathHW64bit + "src/Depthwise/",
                         'linear_nq':                PULPNNInstallPathHW64bit + "src/LinearNoQuant/",
                         'linear_q':                 PULPNNInstallPathHW64bit + "src/LinearQuant/",
-                        'support_function':         PULPNNInstallPathHW64bit + "src/SupportFunctions/",
                         'pooling':                  PULPNNInstallPathHW64bit + "src/Pooling/",
                         'maxpool':                  PULPNNInstallPathHW64bit + "src/Pooling/MaxPool/",
                         'avgpool':                  PULPNNInstallPathHW64bit + "src/Pooling/AvgPool/",
@@ -206,7 +199,6 @@ PULPNNSrcDirsHW64bit = {'src':                      PULPNNInstallPathHW64bit + "
                         'pulp_nn_maxpool':          PULPNNTestFolderHW64bit + "src/Pooling/MaxPool/",
                         'pulp_nn_avgpool':          PULPNNTestFolderHW64bit + "src/Pooling/AvgPool/",
                         'pulp_nn_add':              PULPNNTestFolderHW64bit + "src/Add/",
-                        'pulp_nn_support_function': PULPNNTestFolderHW64bit + "src/SupportFunctions/",
                         'data_allocation_matm':     PULPNNTestFolderHW64bit + "include/DataAllocationMatMul/",
                         'data_allocation_conv':     PULPNNTestFolderHW64bit + "include/DataAllocationConvolution/",
                         'data_allocation_pw':       PULPNNTestFolderHW64bit + "include/DataAllocationPointwise/",
@@ -250,7 +242,6 @@ def mkdir_src(act_prec, ext):
                 mkdir_p(PULPNNSrcDirsSW32bit['depthwise'])
                 mkdir_p(PULPNNSrcDirsSW32bit['linear_nq'])
                 mkdir_p(PULPNNSrcDirsSW32bit['linear_q'])
-                mkdir_p(PULPNNSrcDirsSW32bit['support_function'])
                 mkdir_p(PULPNNSrcDirsSW32bit['pooling'])
                 mkdir_p(PULPNNSrcDirsSW32bit['maxpool'])
                 mkdir_p(PULPNNSrcDirsSW32bit['avgpool'])
@@ -264,7 +255,6 @@ def mkdir_src(act_prec, ext):
                 mkdir_p(PULPNNSrcDirsSW64bit['depthwise'])
                 mkdir_p(PULPNNSrcDirsSW64bit['linear_nq'])
                 mkdir_p(PULPNNSrcDirsSW64bit['linear_q'])
-                mkdir_p(PULPNNSrcDirsSW64bit['support_function'])
                 mkdir_p(PULPNNSrcDirsSW64bit['pooling'])
                 mkdir_p(PULPNNSrcDirsSW64bit['maxpool'])
                 mkdir_p(PULPNNSrcDirsSW64bit['avgpool'])
@@ -280,7 +270,6 @@ def mkdir_src(act_prec, ext):
                 mkdir_p(PULPNNSrcDirsHW32bit['depthwise'])
                 mkdir_p(PULPNNSrcDirsHW32bit['linear_nq'])
                 mkdir_p(PULPNNSrcDirsHW32bit['linear_q'])
-                mkdir_p(PULPNNSrcDirsHW32bit['support_function'])
                 mkdir_p(PULPNNSrcDirsHW32bit['pooling'])
                 mkdir_p(PULPNNSrcDirsHW32bit['maxpool'])
                 mkdir_p(PULPNNSrcDirsHW32bit['avgpool'])
@@ -294,7 +283,6 @@ def mkdir_src(act_prec, ext):
                 mkdir_p(PULPNNSrcDirsHW64bit['depthwise'])
                 mkdir_p(PULPNNSrcDirsHW64bit['linear_nq'])
                 mkdir_p(PULPNNSrcDirsHW64bit['linear_q'])
-                mkdir_p(PULPNNSrcDirsHW64bit['support_function'])
                 mkdir_p(PULPNNSrcDirsHW64bit['pooling'])
                 mkdir_p(PULPNNSrcDirsHW64bit['maxpool'])
                 mkdir_p(PULPNNSrcDirsHW64bit['avgpool'])
@@ -311,7 +299,6 @@ def mkdir_test(kernel, act_prec, ext):
                     pass
             mkdir_p(PULPNNTestFolderHW32bit)
             mkdir_p(PULPNNSrcDirsHW32bit['pulp_nn_src'])
-            mkdir_p(PULPNNSrcDirsHW32bit['pulp_nn_support_function'])
             mkdir_p(PULPNNSrcDirsHW32bit['pulp_nn_include'])
             if kernel=='matmul':
                 mkdir_p(PULPNNSrcDirsHW32bit['pulp_nn_matmul'])
@@ -360,7 +347,6 @@ def mkdir_test(kernel, act_prec, ext):
                     pass
             mkdir_p(PULPNNTestFolderHW64bit)
             mkdir_p(PULPNNSrcDirsHW64bit['pulp_nn_src'])
-            mkdir_p(PULPNNSrcDirsHW64bit['pulp_nn_support_function'])
             mkdir_p(PULPNNSrcDirsHW64bit['pulp_nn_include'])
             if kernel=='matmul':
                 mkdir_p(PULPNNSrcDirsHW64bit['pulp_nn_matmul'])
@@ -410,7 +396,6 @@ def mkdir_test(kernel, act_prec, ext):
                     pass
             mkdir_p(PULPNNTestFolderSW32bit)
             mkdir_p(PULPNNSrcDirsSW32bit['pulp_nn_src'])
-            mkdir_p(PULPNNSrcDirsSW32bit['pulp_nn_support_function'])
             mkdir_p(PULPNNSrcDirsSW32bit['pulp_nn_include'])
             if kernel=='matmul':
                 mkdir_p(PULPNNSrcDirsSW32bit['pulp_nn_matmul'])
@@ -459,7 +444,6 @@ def mkdir_test(kernel, act_prec, ext):
                     pass
             mkdir_p(PULPNNTestFolderSW64bit)
             mkdir_p(PULPNNSrcDirsSW64bit['pulp_nn_src'])
-            mkdir_p(PULPNNSrcDirsSW64bit['pulp_nn_support_function'])
             mkdir_p(PULPNNSrcDirsSW64bit['pulp_nn_include'])
             if kernel=='matmul':
                 mkdir_p(PULPNNSrcDirsSW64bit['pulp_nn_matmul'])

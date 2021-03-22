@@ -21,11 +21,6 @@
 #include "pulp_nn_utils.h"
 #include "pulp_nn_kernels.h"
 
-#define log2(x) __builtin_pulp_fl1(x)
-#define min(a,b) ((a)<(b)?(a):(b))
-#define SumDotp(a, b, c) __builtin_pulp_sdotusp4(a, b, c)
-#define nn_round(out_shift) (0x1 << (out_shift -1))
-#define clip8(x) __builtin_pulp_clipu(x, 0, 255)
 
 void pulp_nn_depthwise_u8_u8_i8(
         const uint8_t * pInBuffer,
@@ -166,7 +161,7 @@ void pulp_nn_depthwise_u8_u8_i8(
           {
             v4s w = *(v4s *) pWt;
             v4u x = *(v4u *) pIm2Col;
-            sum = SumDotp(x, w, sum);
+            sum = SumDotp4(x, w, sum);
             pWt += 4;
             pIm2Col += 4;
             j++;
@@ -254,7 +249,7 @@ void pulp_nn_depthwise_u8_u8_i8(
         {
           v4s w = *(v4s *) pWt;
           v4u x = *(v4u *) pIm2Col;
-          sum = SumDotp(x, w, sum);
+          sum = SumDotp4(x, w, sum);
           pWt += 4;
           pIm2Col += 4;
           j++;
@@ -351,7 +346,7 @@ void pulp_nn_depthwise_u8_u8_i8(
         {
           v4s w = *(v4s *) pWt;
           v4u x = *(v4u *) pIm2Col;
-          sum = SumDotp(x, w, sum);
+          sum = SumDotp4(x, w, sum);
           pWt += 4;
           pIm2Col += 4;
           j++;

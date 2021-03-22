@@ -21,40 +21,25 @@
 #include "pulp_nn_utils.h"
 #include "pulp_nn_kernels.h"
 
-#define log2(x) __builtin_pulp_fl1(x)
-#define min(a,b) ((a)<(b)?(a):(b))
-#define SumDotp(a, b, c) __builtin_pulp_sdotusp4(a, b, c)
-#define nn_round(out_shift) (0x1 << (out_shift -1))
-%if config.kernel.out_data_t != 8 or config.kernel.wt_data_t != 8:
-#define bitins(dst,not_mask_imm,src,mask_imm,off) __builtin_pulp_binsert(dst,not_mask_imm,src,mask_imm,off)
-#define bitext(x,size,off) __builtin_pulp_bextract(x,size,off)
-%endif
-%if config.kernel.out_data_t == 4 and config.kernel.quantization == 'shift_clip':
-#define clip8(x) __builtin_pulp_clipu_r(x, 15)
-%elif config.kernel.out_data_t == 2 and config.kernel.quantization == 'shift_clip':
-#define clip8(x) __builtin_pulp_clipu_r(x, 3)
-%elif config.kernel.out_data_t == 8 and config.kernel.quantization == 'shift_clip':
-#define clip8(x) __builtin_pulp_clipu_r(x, 255)
-%endif
 
 void ${config.fn_name}(
           const uint8_t *pInBuffer,
-					const uint16_t dim_in_x,
-					const uint16_t dim_in_y,
-					const uint16_t ch_in,
-					const int8_t *pWeight,
-					const uint16_t ch_out,
-					const uint16_t dim_kernel_x,
-					const uint16_t dim_kernel_y,
-					const uint16_t padding_y_top,
-					const uint16_t padding_y_bottom,
-					const uint16_t padding_x_left,
-					const uint16_t padding_x_right,
-					const uint16_t stride_x,
-					const uint16_t stride_y,
-					const int8_t *bias,
-					const uint16_t bias_shift,
-					const int8_t out_shift,
+          const uint16_t dim_in_x,
+          const uint16_t dim_in_y,
+          const uint16_t ch_in,
+          const int8_t *pWeight,
+          const uint16_t ch_out,
+          const uint16_t dim_kernel_x,
+          const uint16_t dim_kernel_y,
+          const uint16_t padding_y_top,
+          const uint16_t padding_y_bottom,
+          const uint16_t padding_x_left,
+          const uint16_t padding_x_right,
+          const uint16_t stride_x,
+          const uint16_t stride_y,
+          const int8_t *bias,
+          const uint16_t bias_shift,
+          const int8_t out_shift,
           const uint16_t out_mult,
           uint8_t *pOutBuffer,
           const uint16_t dim_out_x,
@@ -69,62 +54,62 @@ void ${config.fn_name}(
 %if config.kernel.quantization == 'thresholds':
           int16_t *pThr,
 %endif
-					uint8_t *pIm2ColBuffer,
+          uint8_t *pIm2ColBuffer,
           int flag_relu,
           int flag_batch_norm,
           unsigned int * memory_chan
 ) {
 %if config.kernel.in_data_t == 8:
-	uint16_t ch_in_r = ch_in;
+  uint16_t ch_in_r = ch_in;
 %elif config.kernel.in_data_t == 4:
-	uint16_t ch_in_r = ch_in >> 1;
+  uint16_t ch_in_r = ch_in >> 1;
 %else:
-	uint16_t ch_in_r = ch_in >> 2;
+  uint16_t ch_in_r = ch_in >> 2;
 %endif
 %if config.kernel.out_data_t == 8:
-	uint16_t ch_out_r = ch_out;
+  uint16_t ch_out_r = ch_out;
 %elif config.kernel.out_data_t == 4:
-	uint16_t ch_out_r = ch_out >> 1;
+  uint16_t ch_out_r = ch_out >> 1;
 %else:
-	uint16_t ch_out_r = ch_out >> 2;
+  uint16_t ch_out_r = ch_out >> 2;
 %endif
 
-	int core_id = pi_core_id();
-	int i_out_y, i_out_x, i_ker_y, i_ker_x;
-	int Log2Core;
+  int core_id = pi_core_id();
+  int i_out_y, i_out_x, i_ker_y, i_ker_x;
+  int Log2Core;
 
-	uint8_t extra_chunk = ((dim_out_y & (NUM_CORES-1)) != 0);
-	uint8_t extra_chunk_r;
-	uint16_t dim_out_x_r;
-	uint8_t section;
-	int core_id_r;
+  uint8_t extra_chunk = ((dim_out_y & (NUM_CORES-1)) != 0);
+  uint8_t extra_chunk_r;
+  uint16_t dim_out_x_r;
+  uint8_t section;
+  int core_id_r;
 
-	if(extra_chunk && dim_out_x > 1)
-	{
-		Log2Core = log2(NUM_CORES >> 1);
-		core_id_r = (core_id >> 1);
-		dim_out_x_r = (dim_out_x >> 1);
-		section = (core_id & 0x1);
-		extra_chunk_r = ((dim_out_y & ((NUM_CORES >> 1) - 1)) != 0);
-	}
-	else
-	{
-		Log2Core = log2(NUM_CORES);
-		core_id_r = core_id;
-		dim_out_x_r = dim_out_x;
-		section = 0;
-		extra_chunk_r = extra_chunk;
-		extra_chunk = 0;
-	}
+  if(extra_chunk && dim_out_x > 1)
+  {
+    Log2Core = log2(NUM_CORES >> 1);
+    core_id_r = (core_id >> 1);
+    dim_out_x_r = (dim_out_x >> 1);
+    section = (core_id & 0x1);
+    extra_chunk_r = ((dim_out_y & ((NUM_CORES >> 1) - 1)) != 0);
+  }
+  else
+  {
+    Log2Core = log2(NUM_CORES);
+    core_id_r = core_id;
+    dim_out_x_r = dim_out_x;
+    section = 0;
+    extra_chunk_r = extra_chunk;
+    extra_chunk = 0;
+  }
 
   uint8_t flag_dim_out_x_odd = dim_out_x & 0x01;
 
-	int chunk = (dim_out_y >> Log2Core) + extra_chunk_r;
+  int chunk = (dim_out_y >> Log2Core) + extra_chunk_r;
 
-	int start_pixel = min((chunk * core_id_r), dim_out_y);
-	int stop_pixel = min(start_pixel + chunk, dim_out_y);
+  int start_pixel = min((chunk * core_id_r), dim_out_y);
+  int stop_pixel = min(start_pixel + chunk, dim_out_y);
 
-	uint8_t *pOut = pOutBuffer + (start_pixel * ch_out_r * dim_out_x) + (section * ch_out_r * dim_out_x_r);
+  uint8_t *pOut = pOutBuffer + (start_pixel * ch_out_r * dim_out_x) + (section * ch_out_r * dim_out_x_r);
 %if config.kernel.in_data_t < 8:  
   uint8_t *pIm2Col = pIm2ColBuffer + (2 * core_id * ch_in);
 %endif
@@ -223,25 +208,25 @@ void ${config.fn_name}(
 
           pA = ${config.unpack_fn}(pA,inA);
 
-          sum = SumDotp(inB, inA[0], sum);
+          sum = SumDotp4(inB, inA[0], sum);
 
           inB = *((v4u*) pB);
 
           pB+=4;
 
-          sum = SumDotp(inB, inA[1], sum);
+          sum = SumDotp4(inB, inA[1], sum);
 
           inB = *((v4u*) pB);
 
           pB+=4;
 
-          sum = SumDotp(inB, inA[2], sum);
+          sum = SumDotp4(inB, inA[2], sum);
 
           inB = *((v4u*) pB);
 
           pB+=4;
 
-          sum = SumDotp(inB, inA[3], sum);
+          sum = SumDotp4(inB, inA[3], sum);
 
           //pA+=4;
   %elif config.kernel.wt_data_t == 4:
@@ -251,11 +236,11 @@ void ${config.fn_name}(
 
           pA = ${config.unpack_fn}(pA,inA);
 
-          sum = SumDotp(inB, inA[0], sum);
+          sum = SumDotp4(inB, inA[0], sum);
 
           inB = *((v4u*) pB);
 
-          sum = SumDotp(inB, inA[1], sum);
+          sum = SumDotp4(inB, inA[1], sum);
 
           pB+=4;
           //pA+=4;
@@ -263,7 +248,7 @@ void ${config.fn_name}(
           v4s inA = *((v4s*) pA);
           v4u inB = *((v4u*) pB);
 
-          sum = SumDotp(inB, inA, sum);
+          sum = SumDotp4(inB, inA, sum);
           pA+=4;
           pB+=4;
   %endif
@@ -378,7 +363,7 @@ void ${config.fn_name}(
             pOut++;
   %elif config.kernel.out_data_t == 4:
             uint8_t i_o = i & 0x01;
-            out[i_o] = (uint8_t) clip8(sum >> out_shift);
+            out[i_o] = (uint8_t) clip4(sum >> out_shift);
             if(i_o == 0x01)
             {
               *pOut = bitins(out[0], n_mask, out[1], mask, off);
@@ -386,7 +371,7 @@ void ${config.fn_name}(
             }
   %elif config.kernel.out_data_t == 2:
             uint8_t i_o = i & 0x03;
-            out[i_o] = (uint8_t) clip8(sum >> out_shift);
+            out[i_o] = (uint8_t) clip2(sum >> out_shift);
             if(i_o == 0x03)
             {
               out[0] = bitins(out[0], n_mask2, out[1], mask2, off2);

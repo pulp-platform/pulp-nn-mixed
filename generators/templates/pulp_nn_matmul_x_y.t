@@ -21,26 +21,13 @@
 #include "pulp_nn_utils.h"
 #include "pulp_nn_kernels.h"
 
-#define SumDotp(a, b, c) __builtin_pulp_sdotusp4(a, b, c)
-#define nn_round(out_shift) (0x1 << (out_shift -1))
-%if config.kernel.out_data_t != 8 or config.kernel.wt_data_t != 8:
-#define bitins(dst,not_mask_imm,src,mask_imm,off) __builtin_pulp_binsert(dst,not_mask_imm,src,mask_imm,off)
-#define bitext(x,size,off) __builtin_pulp_bextract(x,size,off)
-%endif
-%if config.kernel.out_data_t == 4 and config.kernel.quantization == 'shift_clip':
-#define clip8(x) __builtin_pulp_clipu_r(x, 15)
-%elif config.kernel.out_data_t == 2 and config.kernel.quantization == 'shift_clip':
-#define clip8(x) __builtin_pulp_clipu_r(x, 3)
-%elif config.kernel.out_data_t == 8:
-#define clip8(x) __builtin_pulp_clipu_r(x, 255)
-%endif
 
 uint8_t *${config.fn_name}(
           const int8_t * pWeight,
           uint8_t * pInBuffer,
           uint16_t ch_out,
           uint16_t num_col_im2col,
-					uint16_t bias_shift,
+          uint16_t bias_shift,
           int8_t out_shift,
           uint16_t out_mult,
 %if config.kernel.quantization == 'shift_clip' and config.kernel.act_prec == '32bit':
@@ -52,7 +39,7 @@ uint8_t *${config.fn_name}(
 %else:
           int16_t *pThr,
 %endif
-					const int8_t * bias,
+          const int8_t * bias,
           uint8_t * pOut,
           int flag_relu,
           int flag_batch_norm
@@ -166,47 +153,47 @@ uint8_t *${config.fn_name}(
 
       pA = ${config.unpack_fn}(pA,vecA);
 
-      sum = SumDotp(vecB, vecA[0], sum);
-      sum5 = SumDotp(vecB2, vecA[0], sum5);
-      sum = SumDotp(vecB3, vecA[1], sum);
-      sum5 = SumDotp(vecB4, vecA[1], sum5);
-      sum = SumDotp(vecB5, vecA[2], sum);
-      sum5 = SumDotp(vecB6, vecA[2], sum5);
-      sum = SumDotp(vecB7, vecA[3], sum);
-      sum5 = SumDotp(vecB8, vecA[3], sum5);
+      sum = SumDotp4(vecB, vecA[0], sum);
+      sum5 = SumDotp4(vecB2, vecA[0], sum5);
+      sum = SumDotp4(vecB3, vecA[1], sum);
+      sum5 = SumDotp4(vecB4, vecA[1], sum5);
+      sum = SumDotp4(vecB5, vecA[2], sum);
+      sum5 = SumDotp4(vecB6, vecA[2], sum5);
+      sum = SumDotp4(vecB7, vecA[3], sum);
+      sum5 = SumDotp4(vecB8, vecA[3], sum5);
 
       pA2 = ${config.unpack_fn}(pA2,vecA2);
 
-      sum2 = SumDotp(vecB, vecA2[0], sum2);
-      sum6 = SumDotp(vecB2, vecA2[0], sum6);
-      sum2 = SumDotp(vecB3, vecA2[1], sum2);
-      sum6 = SumDotp(vecB4, vecA2[1], sum6);
-      sum2 = SumDotp(vecB5, vecA2[2], sum2);
-      sum6 = SumDotp(vecB6, vecA2[2], sum6);
-      sum2 = SumDotp(vecB7, vecA2[3], sum2);
-      sum6 = SumDotp(vecB8, vecA2[3], sum6);
+      sum2 = SumDotp4(vecB, vecA2[0], sum2);
+      sum6 = SumDotp4(vecB2, vecA2[0], sum6);
+      sum2 = SumDotp4(vecB3, vecA2[1], sum2);
+      sum6 = SumDotp4(vecB4, vecA2[1], sum6);
+      sum2 = SumDotp4(vecB5, vecA2[2], sum2);
+      sum6 = SumDotp4(vecB6, vecA2[2], sum6);
+      sum2 = SumDotp4(vecB7, vecA2[3], sum2);
+      sum6 = SumDotp4(vecB8, vecA2[3], sum6);
 
       pA3 = ${config.unpack_fn}(pA3,vecA3);
 
-      sum3 = SumDotp(vecB, vecA3[0], sum3);
-      sum7 = SumDotp(vecB2, vecA3[0], sum7);
-      sum3 = SumDotp(vecB3, vecA3[1], sum3);
-      sum7 = SumDotp(vecB4, vecA3[1], sum7);
-      sum3 = SumDotp(vecB5, vecA3[2], sum3);
-      sum7 = SumDotp(vecB6, vecA3[2], sum7);
-      sum3 = SumDotp(vecB7, vecA3[3], sum3);
-      sum7 = SumDotp(vecB8, vecA3[3], sum7);
+      sum3 = SumDotp4(vecB, vecA3[0], sum3);
+      sum7 = SumDotp4(vecB2, vecA3[0], sum7);
+      sum3 = SumDotp4(vecB3, vecA3[1], sum3);
+      sum7 = SumDotp4(vecB4, vecA3[1], sum7);
+      sum3 = SumDotp4(vecB5, vecA3[2], sum3);
+      sum7 = SumDotp4(vecB6, vecA3[2], sum7);
+      sum3 = SumDotp4(vecB7, vecA3[3], sum3);
+      sum7 = SumDotp4(vecB8, vecA3[3], sum7);
 
       pA4 = ${config.unpack_fn}(pA4,vecA4);
 
-      sum4 = SumDotp(vecB, vecA4[0], sum4);
-      sum8 = SumDotp(vecB2, vecA4[0], sum8);
-      sum4 = SumDotp(vecB3, vecA4[1], sum4);
-      sum8 = SumDotp(vecB4, vecA4[1], sum8);
-      sum4 = SumDotp(vecB5, vecA4[2], sum4);
-      sum8 = SumDotp(vecB6, vecA4[2], sum8);
-      sum4 = SumDotp(vecB7, vecA4[3], sum4);
-      sum8 = SumDotp(vecB8, vecA4[3], sum8);
+      sum4 = SumDotp4(vecB, vecA4[0], sum4);
+      sum8 = SumDotp4(vecB2, vecA4[0], sum8);
+      sum4 = SumDotp4(vecB3, vecA4[1], sum4);
+      sum8 = SumDotp4(vecB4, vecA4[1], sum8);
+      sum4 = SumDotp4(vecB5, vecA4[2], sum4);
+      sum8 = SumDotp4(vecB6, vecA4[2], sum8);
+      sum4 = SumDotp4(vecB7, vecA4[3], sum4);
+      sum8 = SumDotp4(vecB8, vecA4[3], sum8);
 
       // pA+=4;
       // pA2+=4;
@@ -223,35 +210,35 @@ uint8_t *${config.fn_name}(
 
       pA = ${config.unpack_fn}(pA,vecA);
 
-      sum = SumDotp(vecB, vecA[0], sum);
-      sum5 = SumDotp(vecB2, vecA[0], sum5);
+      sum = SumDotp4(vecB, vecA[0], sum);
+      sum5 = SumDotp4(vecB2, vecA[0], sum5);
 
-      sum = SumDotp(vecB3, vecA[1], sum);
-      sum5 = SumDotp(vecB4, vecA[1], sum5);
+      sum = SumDotp4(vecB3, vecA[1], sum);
+      sum5 = SumDotp4(vecB4, vecA[1], sum5);
 
-			pA2 = ${config.unpack_fn}(pA2,vecA2);
+      pA2 = ${config.unpack_fn}(pA2,vecA2);
 
-      sum2 = SumDotp(vecB, vecA2[0], sum2);
-      sum6 = SumDotp(vecB2, vecA2[0], sum6);
+      sum2 = SumDotp4(vecB, vecA2[0], sum2);
+      sum6 = SumDotp4(vecB2, vecA2[0], sum6);
 
-      sum2 = SumDotp(vecB3, vecA2[1], sum2);
-      sum6 = SumDotp(vecB4, vecA2[1], sum6);
+      sum2 = SumDotp4(vecB3, vecA2[1], sum2);
+      sum6 = SumDotp4(vecB4, vecA2[1], sum6);
 
       pA3 = ${config.unpack_fn}(pA3,vecA3);
 
-      sum3 = SumDotp(vecB, vecA3[0], sum3);
-      sum7 = SumDotp(vecB2, vecA3[0], sum7);
+      sum3 = SumDotp4(vecB, vecA3[0], sum3);
+      sum7 = SumDotp4(vecB2, vecA3[0], sum7);
 
-      sum3 = SumDotp(vecB3, vecA3[1], sum3);
-      sum7 = SumDotp(vecB4, vecA3[1], sum7);
+      sum3 = SumDotp4(vecB3, vecA3[1], sum3);
+      sum7 = SumDotp4(vecB4, vecA3[1], sum7);
 
       pA4 = ${config.unpack_fn}(pA4,vecA4);
 
-      sum4 = SumDotp(vecB, vecA4[0], sum4);
-      sum8 = SumDotp(vecB2, vecA4[0], sum8);
+      sum4 = SumDotp4(vecB, vecA4[0], sum4);
+      sum8 = SumDotp4(vecB2, vecA4[0], sum8);
 
-      sum4 = SumDotp(vecB3, vecA4[1], sum4);
-      sum8 = SumDotp(vecB4, vecA4[1], sum8);
+      sum4 = SumDotp4(vecB3, vecA4[1], sum4);
+      sum8 = SumDotp4(vecB4, vecA4[1], sum8);
 
       // pA+=4;
       // pA2+=4;
@@ -266,15 +253,15 @@ uint8_t *${config.fn_name}(
       vecB = *((v4u*)pB);
       vecB2 = *((v4u*)pB2);
 
-      sum = SumDotp(vecB, vecA, sum );
-      sum2 = SumDotp(vecB, vecA2, sum2);
-      sum3 = SumDotp (vecB, vecA3, sum3);
-      sum4 = SumDotp(vecB, vecA4, sum4);
+      sum = SumDotp4(vecB, vecA, sum );
+      sum2 = SumDotp4(vecB, vecA2, sum2);
+      sum3 = SumDotp4(vecB, vecA3, sum3);
+      sum4 = SumDotp4(vecB, vecA4, sum4);
 
-      sum5 = SumDotp(vecB2, vecA, sum5);
-      sum6 = SumDotp(vecB2, vecA2, sum6);
-      sum7 = SumDotp(vecB2, vecA3, sum7);
-      sum8 = SumDotp(vecB2, vecA4, sum8);
+      sum5 = SumDotp4(vecB2, vecA, sum5);
+      sum6 = SumDotp4(vecB2, vecA2, sum6);
+      sum7 = SumDotp4(vecB2, vecA3, sum7);
+      sum8 = SumDotp4(vecB2, vecA4, sum8);
 
       pA+=4;
       pA2+=4;
@@ -575,37 +562,37 @@ uint8_t *${config.fn_name}(
         *pOut2 = (uint8_t) clip8(sum8 >> out_shift);
         pOut2++;
 %elif config.kernel.out_data_t == 4:
-        sum = (uint8_t) clip8(sum >> out_shift);
-        sum2 = (uint8_t) clip8(sum2 >> out_shift);
+        sum = (uint8_t) clip4(sum >> out_shift);
+        sum2 = (uint8_t) clip4(sum2 >> out_shift);
         *pOut = bitins(sum, n_mask, sum2, mask, off);
         pOut++;
-        sum3 = (uint8_t) clip8(sum3 >> out_shift);
-        sum4 = (uint8_t) clip8(sum4 >> out_shift);
+        sum3 = (uint8_t) clip4(sum3 >> out_shift);
+        sum4 = (uint8_t) clip4(sum4 >> out_shift);
         *pOut = bitins(sum3, n_mask, sum4, mask, off);
         pOut++;
 
-        sum5 = (uint8_t) clip8(sum5 >> out_shift);
-        sum6 = (uint8_t) clip8(sum6 >> out_shift);
+        sum5 = (uint8_t) clip4(sum5 >> out_shift);
+        sum6 = (uint8_t) clip4(sum6 >> out_shift);
         *pOut2 = bitins(sum5, n_mask, sum6, mask, off);
         pOut2++;
-        sum7 = (uint8_t) clip8(sum7 >> out_shift);
-        sum8 = (uint8_t) clip8(sum8 >> out_shift);
+        sum7 = (uint8_t) clip4(sum7 >> out_shift);
+        sum8 = (uint8_t) clip4(sum8 >> out_shift);
         *pOut2 = bitins(sum7, n_mask, sum8, mask, off);
         pOut2++;
 %elif config.kernel.out_data_t == 2:
-        sum = (uint8_t) clip8(sum >> out_shift);
-        sum2 = (uint8_t) clip8(sum2 >> out_shift);
-        sum3 = (uint8_t) clip8(sum3 >> out_shift);
-        sum4 = (uint8_t) clip8(sum4 >> out_shift);
+        sum = (uint8_t) clip2(sum >> out_shift);
+        sum2 = (uint8_t) clip2(sum2 >> out_shift);
+        sum3 = (uint8_t) clip2(sum3 >> out_shift);
+        sum4 = (uint8_t) clip2(sum4 >> out_shift);
         sum = bitins(sum, n_mask2, sum2, mask2, off2);
         sum = bitins(sum, n_mask4, sum3, mask4, off4);
         *pOut = bitins(sum, n_mask6, sum4, mask6, off6);
         pOut++;
 
-        sum5 = (uint8_t) clip8(sum5 >> out_shift);
-        sum6 = (uint8_t) clip8(sum6 >> out_shift);
-        sum7 = (uint8_t) clip8(sum7 >> out_shift);
-        sum8 = (uint8_t) clip8(sum8 >> out_shift);
+        sum5 = (uint8_t) clip2(sum5 >> out_shift);
+        sum6 = (uint8_t) clip2(sum6 >> out_shift);
+        sum7 = (uint8_t) clip2(sum7 >> out_shift);
+        sum8 = (uint8_t) clip2(sum8 >> out_shift);
         sum5 = bitins(sum5, n_mask2, sum6, mask2, off2);
         sum5 = bitins(sum5, n_mask4, sum7, mask4, off4);
         *pOut2 = bitins(sum5, n_mask6, sum8, mask6, off6);
@@ -718,14 +705,14 @@ uint8_t *${config.fn_name}(
 
       pA = ${config.unpack_fn}(pA,vecA);
 
-      sum = SumDotp(vecB, vecA[0], sum);
-      sum2 = SumDotp(vecB2, vecA[0], sum2);
-      sum = SumDotp(vecB3, vecA[1], sum);
-      sum2 = SumDotp(vecB4, vecA[1], sum2);
-      sum = SumDotp(vecB5, vecA[2], sum);
-      sum2 = SumDotp(vecB6, vecA[2], sum2);
-      sum = SumDotp(vecB7, vecA[3], sum);
-      sum2 = SumDotp(vecB8, vecA[3], sum2);
+      sum = SumDotp4(vecB, vecA[0], sum);
+      sum2 = SumDotp4(vecB2, vecA[0], sum2);
+      sum = SumDotp4(vecB3, vecA[1], sum);
+      sum2 = SumDotp4(vecB4, vecA[1], sum2);
+      sum = SumDotp4(vecB5, vecA[2], sum);
+      sum2 = SumDotp4(vecB6, vecA[2], sum2);
+      sum = SumDotp4(vecB7, vecA[3], sum);
+      sum2 = SumDotp4(vecB8, vecA[3], sum2);
 
       //pA+=4;
       pB+=16;
@@ -738,11 +725,11 @@ uint8_t *${config.fn_name}(
 
       pA = ${config.unpack_fn}(pA,vecA);
 
-      sum = SumDotp(vecB, vecA[0], sum);
-      sum2 = SumDotp(vecB2, vecA[0], sum2);
+      sum = SumDotp4(vecB, vecA[0], sum);
+      sum2 = SumDotp4(vecB2, vecA[0], sum2);
 
-      sum = SumDotp(vecB3, vecA[1], sum);
-      sum2 = SumDotp(vecB4, vecA[1], sum2);
+      sum = SumDotp4(vecB3, vecA[1], sum);
+      sum2 = SumDotp4(vecB4, vecA[1], sum2);
 
       //pA+=4;
       pB+=8;
@@ -752,8 +739,8 @@ uint8_t *${config.fn_name}(
       vecB = *((v4u*) pB);
       vecB2 = *((v4u*) pB2);
 
-      sum = SumDotp(vecB, vecA, sum);
-      sum2 = SumDotp(vecB2, vecA, sum2);
+      sum = SumDotp4(vecB, vecA, sum);
+      sum2 = SumDotp4(vecB2, vecA, sum2);
 
       pA+=4;
       pB+=4;
@@ -874,8 +861,8 @@ uint8_t *${config.fn_name}(
         pOut2++;
 %elif config.kernel.out_data_t == 4:
         uint8_t i_o = i & 0x01;
-        out[i_o] = (uint8_t) clip8(sum >> out_shift);
-        out2[i_o] = (uint8_t) clip8(sum2 >> out_shift);
+        out[i_o] = (uint8_t) clip4(sum >> out_shift);
+        out2[i_o] = (uint8_t) clip4(sum2 >> out_shift);
         if(i_o == 0x01)
         {
           *pOut = bitins(out[0], n_mask, out[1], mask, off);

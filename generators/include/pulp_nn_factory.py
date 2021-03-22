@@ -172,12 +172,13 @@ class PULPNNConvolve(PULPNNFactory):
             self.unpack_fn = "pulp_nn_i{0}_to_i{1}".format(str(self.kernel.wt_data_t), '8')
         elif self.kernel.extentions == 'XpulpNN':
             self.max_precision = max([self.kernel.in_data_t, self.kernel.wt_data_t])
-            self.fn_name = "pulp_nn_xconv_u{0}_u{1}_i{2}{3}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
+            self.fn_name = "xpulp_nn_conv_u{0}_u{1}_i{2}{3}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
                 str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""))
-            self.im2col_fn = "pulp_nn_xim2col_u{0}_to_u{1}".format(str(self.kernel.in_data_t), str(self.max_precision))
-            self.mat_mul_fn = "pulp_nn_xmatmul_u{0}_u{1}_i{2}{3}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
+            self.zeromem_fn = "xpulp_nn_zero_mem_u{0}".format(str(self.max_precision))            
+            self.im2col_fn = "xpulp_nn_im2col_u{0}_to_u{1}".format(str(self.kernel.in_data_t), str(self.max_precision))
+            self.mat_mul_fn = "xpulp_nn_matmul_u{0}_u{1}_i{2}{3}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
                 str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""))
-            self.unpack_in_fn = "pulp_nn_i{0}_to_i{1}".format(str(self.kernel.in_data_t), str(self.max_precision))
+            self.unpack_in_fn = "pulp_nn_u{0}_to_u{1}".format(str(self.kernel.in_data_t), str(self.max_precision))
             self.unpack_wt_fn = "pulp_nn_i{0}_to_i{1}".format(str(self.kernel.wt_data_t), str(self.max_precision))
 
         self.filename = self.fn_name + ".c"
@@ -190,7 +191,7 @@ class PULPNNConvolve(PULPNNFactory):
         if self.kernel.extentions == 'XpulpV2':
             return Template(filename="templates/pulp_nn_conv_x_y_z.t").render(config=self)
         elif self.kernel.extentions == 'XpulpNN':
-            return Template(filename="templates/XpulpNN/pulp_nn_xconv_x_y_z.t").render(config=self)
+            return Template(filename="templates/XpulpNN/xpulp_nn_conv_x_y_z.t").render(config=self)
 
 class PULPNNConvolvePointwise(PULPNNFactory):
     def __init__(self, kernel, layer):
@@ -205,10 +206,10 @@ class PULPNNConvolvePointwise(PULPNNFactory):
             self.unpack_fn = "pulp_nn_i{0}_to_i{1}".format(str(self.kernel.wt_data_t), '8')
         elif self.kernel.extentions == 'XpulpNN':
             self.max_precision = max([self.kernel.in_data_t, self.kernel.wt_data_t])
-            self.fn_name = "pulp_nn_xpointwise_u{0}_u{1}_i{2}{3}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
+            self.fn_name = "xpulp_nn_pointwise_u{0}_u{1}_i{2}{3}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
                 str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""))
-            self.im2col_fn = "pulp_nn_xim2col_u{0}_to_u{1}".format(str(self.kernel.in_data_t), str(self.max_precision))
-            self.mat_mul_fn = "pulp_nn_xmatmul_u{0}_u{1}_i{2}{3}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
+            self.im2col_fn = "xpulp_nn_im2col_u{0}_to_u{1}".format(str(self.kernel.in_data_t), str(self.max_precision))
+            self.mat_mul_fn = "xpulp_nn_matmul_u{0}_u{1}_i{2}{3}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
                 str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""))
             self.unpack_in_fn = "pulp_nn_i{0}_to_i{1}".format(str(self.kernel.in_data_t), str(self.max_precision))
             self.unpack_wt_fn = "pulp_nn_i{0}_to_i{1}".format(str(self.kernel.wt_data_t), str(self.max_precision))        
@@ -223,12 +224,18 @@ class PULPNNConvolvePointwise(PULPNNFactory):
         if self.kernel.extentions == 'XpulpV2':
             return Template(filename="templates/pulp_nn_pointwise_x_y_z.t").render(config=self)
         elif self.kernel.extentions == 'XpulpNN':
-            return Template(filename="templates/XpulpNN/pulp_nn_xpointwise_x_y_z.t").render(config=self)
+            return Template(filename="templates/XpulpNN/xpulp_nn_pointwise_x_y_z.t").render(config=self)
 
 class PULPNNConvolveDepthwise(PULPNNFactory):
     def __init__(self, kernel, layer):
         super().__init__(kernel, layer)
-        self.fn_name = "pulp_nn_depthwise_u{0}_u{1}_i{2}{3}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
+
+        if self.kernel.extentions == 'XpulpV2':
+            self.fn_name = "pulp_nn_depthwise_u{0}_u{1}_i{2}{3}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
+                        str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""))
+        elif self.kernel.extentions == 'XpulpNN':
+            self.max_precision = max([self.kernel.in_data_t, self.kernel.wt_data_t])
+            self.fn_name = "xpulp_nn_depthwise_u{0}_u{1}_i{2}{3}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
                         str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""))
         self.filename = self.fn_name + ".c"
         self.api = self.__class__.__name__
@@ -238,7 +245,10 @@ class PULPNNConvolveDepthwise(PULPNNFactory):
         self.less_precision = min([self.kernel.in_data_t, self.kernel.wt_data_t, self.kernel.out_data_t])
 
     def generate_code(self):
-        return Template(filename="templates/pulp_nn_dw_x_y_z.t").render(config=self)
+        if self.kernel.extentions == 'XpulpV2':
+            return Template(filename="templates/pulp_nn_dw_x_y_z.t").render(config=self)
+        elif self.kernel.extentions == 'XpulpNN':
+            return Template(filename="templates/XpulpNN/xpulp_nn_dw_x_y_z.t").render(config=self)
 
 class PULPNNMatMul(PULPNNFactory):
     def __init__(self, kernel, layer):
@@ -250,9 +260,9 @@ class PULPNNMatMul(PULPNNFactory):
             self.unpack_fn = "pulp_nn_i{0}_to_i{1}".format(str(self.kernel.wt_data_t), '8')
         elif self.kernel.extentions == 'XpulpNN':
             self.max_precision = max([self.kernel.in_data_t, self.kernel.wt_data_t])            
-            self.fn_name = "pulp_nn_xmatmul_u{0}_u{1}_i{2}{3}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
+            self.fn_name = "xpulp_nn_matmul_u{0}_u{1}_i{2}{3}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
                 str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""))
-            self.unpack_in_fn = "pulp_nn_i{0}_to_i{1}".format(str(self.kernel.in_data_t), str(self.max_precision))
+            self.unpack_in_fn = "pulp_nn_u{0}_to_u{1}".format(str(self.kernel.in_data_t), str(self.max_precision))
             self.unpack_wt_fn = "pulp_nn_i{0}_to_i{1}".format(str(self.kernel.wt_data_t), str(self.max_precision))
 
         self.filename = self.fn_name + ".c"
@@ -265,7 +275,7 @@ class PULPNNMatMul(PULPNNFactory):
         if self.kernel.extentions == 'XpulpV2':
             return Template(filename="templates/pulp_nn_matmul_x_y.t").render(config=self)
         elif self.kernel.extentions == 'XpulpNN':
-            return Template(filename="templates/XpulpNN/pulp_nn_xmatmul_x_y_z.t").render(config=self)
+            return Template(filename="templates/XpulpNN/xpulp_nn_matmul_x_y_z.t").render(config=self)
 
 class PULPNNLinearNoQuant(PULPNNFactory):
     def __init__(self, kernel, layer):
@@ -302,7 +312,10 @@ class PULPNNMaxPool(PULPNNFactory):
         self.fn_name = "pulp_nn_maxpool_u{0}".format(str(self.kernel.in_data_t))
         self.filename = self.fn_name + ".c"
         self.api = self.__class__.__name__
-        self.comp_and_replace_fn = "pulp_nn_compare_and_replace_if_larger_u{0}".format(str(self.kernel.in_data_t))
+        if self.kernel.extentions == 'XpulpV2':
+            self.comp_and_replace_fn = "pulp_nn_compare_and_replace_if_larger_u{0}".format(str(self.kernel.in_data_t))
+        elif self.kernel.extentions == 'XpulpNN':
+            self.comp_and_replace_fn = "xpulp_nn_compare_and_replace_if_larger_u{0}".format(str(self.kernel.in_data_t))
 
     def generate_code(self):
         return Template(filename="templates/pulp_nn_maxpool_x.t").render(config=self)
@@ -313,7 +326,10 @@ class PULPNNAvgPool(PULPNNFactory):
         self.fn_name = "pulp_nn_avgpool_u{0}".format(str(self.kernel.in_data_t))
         self.filename = self.fn_name + ".c"
         self.api = self.__class__.__name__
-        self.comp_and_avg_fn = "pulp_nn_avg_and_replace_u{0}".format(str(self.kernel.in_data_t))
+        if self.kernel.extentions == 'XpulpV2':
+            self.comp_and_avg_fn = "pulp_nn_avg_and_replace_u{0}".format(str(self.kernel.in_data_t))
+        elif self.kernel.extentions == 'XpulpNN':
+            self.comp_and_avg_fn = "xpulp_nn_avg_and_replace_u{0}".format(str(self.kernel.in_data_t))
 
     def generate_code(self):
         return Template(filename="templates/pulp_nn_avgpool_x.t").render(config=self)
@@ -406,20 +422,16 @@ def headers(act_prec='32bit', ext='XpulpV2'):
         if act_prec == '32bit':
             shutil.copyfile(PULPNNSrcDirsSW32bit['inc'] + "pulp_nn_kernels.h", PULPNNSrcDirsSW32bit['pulp_nn_include'] + "pulp_nn_kernels.h")
             shutil.copyfile(PULPNNSrcDirsSW32bit['inc'] + "pulp_nn_utils.h", PULPNNSrcDirsSW32bit['pulp_nn_include'] + "pulp_nn_utils.h")
-            shutil.copyfile(PULPNNSrcDirsSW32bit['support_function'] + "pulp_nn_utils.c", PULPNNSrcDirsSW32bit['pulp_nn_support_function'] + "pulp_nn_utils.c")
         elif act_prec == '64bit':
             shutil.copyfile(PULPNNSrcDirsSW64bit['inc'] + "pulp_nn_kernels.h", PULPNNSrcDirsSW64bit['pulp_nn_include'] + "pulp_nn_kernels.h")
             shutil.copyfile(PULPNNSrcDirsSW64bit['inc'] + "pulp_nn_utils.h", PULPNNSrcDirsSW64bit['pulp_nn_include'] + "pulp_nn_utils.h")
-            shutil.copyfile(PULPNNSrcDirsSW64bit['support_function'] + "pulp_nn_utils.c", PULPNNSrcDirsSW64bit['pulp_nn_support_function'] + "pulp_nn_utils.c")
     elif ext == 'XpulpNN':
         if act_prec == '32bit':
             shutil.copyfile(PULPNNSrcDirsHW32bit['inc'] + "pulp_nn_kernels.h", PULPNNSrcDirsHW32bit['pulp_nn_include'] + "pulp_nn_kernels.h")
             shutil.copyfile(PULPNNSrcDirsHW32bit['inc'] + "pulp_nn_utils.h", PULPNNSrcDirsHW32bit['pulp_nn_include'] + "pulp_nn_utils.h")
-            shutil.copyfile(PULPNNSrcDirsHW32bit['support_function'] + "pulp_nn_utils.c", PULPNNSrcDirsHW32bit['pulp_nn_support_function'] + "pulp_nn_utils.c")
         elif act_prec == '64bit':
             shutil.copyfile(PULPNNSrcDirsHW64bit['inc'] + "pulp_nn_kernels.h", PULPNNSrcDirsHW64bit['pulp_nn_include'] + "pulp_nn_kernels.h")
             shutil.copyfile(PULPNNSrcDirsHW64bit['inc'] + "pulp_nn_utils.h", PULPNNSrcDirsHW64bit['pulp_nn_include'] + "pulp_nn_utils.h")
-            shutil.copyfile(PULPNNSrcDirsHW64bit['support_function'] + "pulp_nn_utils.c", PULPNNSrcDirsHW64bit['pulp_nn_support_function'] + "pulp_nn_utils.c")
 
 def copy_file(src_tag, key, dest_tag):
     if key.kernel.extentions == 'XpulpV2':
@@ -444,27 +456,21 @@ def header(act_prec, ext, api):
             new_file = open(PULPNNSrcDirsHW32bit['inc'] + "/pulp_nn_kernels.h", 'w')
         elif act_prec == '64bit':
             new_file = open(PULPNNSrcDirsHW64bit['inc'] + "/pulp_nn_kernels.h", 'w')
-    new_file.write(Template(filename="templates/pulp_nn_kernels.t").render(PULPNNAPI=api))
+    new_file.write(Template(filename="templates/pulp_nn_kernels.t").render(PULPNNAPI=api, PULPNNEXT=ext))
     new_file.close()
 
 def utils(act_prec, ext):
     comp = PULPNNUtils()
     if ext == 'XpulpV2':
         if act_prec == '32bit':
-            new_file_c = open(PULPNNSrcDirsSW32bit['support_function'] + comp.filename_c, 'w')
             new_file_h = open(PULPNNSrcDirsSW32bit['inc'] + comp.filename_h, 'w')
         elif act_prec == '64bit':
-            new_file_c = open(PULPNNSrcDirsSW64bit['support_function'] + comp.filename_c, 'w')
             new_file_h = open(PULPNNSrcDirsSW64bit['inc'] + comp.filename_h, 'w')
     elif ext == 'XpulpNN':
         if act_prec == '32bit':
-            new_file_c = open(PULPNNSrcDirsHW32bit['support_function'] + comp.filename_c, 'w')
             new_file_h = open(PULPNNSrcDirsHW32bit['inc'] + comp.filename_h, 'w')
         elif act_prec == '64bit':
-            new_file_c = open(PULPNNSrcDirsHW64bit['support_function'] + comp.filename_c, 'w')
             new_file_h = open(PULPNNSrcDirsHW64bit['inc'] + comp.filename_h, 'w')
-    new_file_c.write(comp.generate_code(act_prec))
-    new_file_c.close()
     new_file_h.write(comp.generate_header(act_prec))
     new_file_h.close()
 

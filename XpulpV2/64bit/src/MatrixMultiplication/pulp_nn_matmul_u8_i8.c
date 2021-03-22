@@ -21,21 +21,18 @@
 #include "pulp_nn_utils.h"
 #include "pulp_nn_kernels.h"
 
-#define SumDotp(a, b, c) __builtin_pulp_sdotusp4(a, b, c)
-#define nn_round(out_shift) (0x1 << (out_shift -1))
-#define clip8(x) __builtin_pulp_clipu_r(x, 255)
 
 uint8_t *pulp_nn_matmul_u8_i8(
           const int8_t * pWeight,
           uint8_t * pInBuffer,
           uint16_t ch_out,
           uint16_t num_col_im2col,
-					uint16_t bias_shift,
+          uint16_t bias_shift,
           int8_t out_shift,
           uint16_t out_mult,
           int64_t *k,
           int64_t *lambda,
-					const int8_t * bias,
+          const int8_t * bias,
           uint8_t * pOut,
           int flag_relu,
           int flag_batch_norm
@@ -95,15 +92,15 @@ uint8_t *pulp_nn_matmul_u8_i8(
       vecB = *((v4u*)pB);
       vecB2 = *((v4u*)pB2);
 
-      sum = SumDotp(vecB, vecA, sum );
-      sum2 = SumDotp(vecB, vecA2, sum2);
-      sum3 = SumDotp (vecB, vecA3, sum3);
-      sum4 = SumDotp(vecB, vecA4, sum4);
+      sum = SumDotp4(vecB, vecA, sum );
+      sum2 = SumDotp4(vecB, vecA2, sum2);
+      sum3 = SumDotp4(vecB, vecA3, sum3);
+      sum4 = SumDotp4(vecB, vecA4, sum4);
 
-      sum5 = SumDotp(vecB2, vecA, sum5);
-      sum6 = SumDotp(vecB2, vecA2, sum6);
-      sum7 = SumDotp(vecB2, vecA3, sum7);
-      sum8 = SumDotp(vecB2, vecA4, sum8);
+      sum5 = SumDotp4(vecB2, vecA, sum5);
+      sum6 = SumDotp4(vecB2, vecA2, sum6);
+      sum7 = SumDotp4(vecB2, vecA3, sum7);
+      sum8 = SumDotp4(vecB2, vecA4, sum8);
 
       pA+=4;
       pA2+=4;
@@ -224,8 +221,8 @@ uint8_t *pulp_nn_matmul_u8_i8(
       vecB = *((v4u*) pB);
       vecB2 = *((v4u*) pB2);
 
-      sum = SumDotp(vecB, vecA, sum);
-      sum2 = SumDotp(vecB2, vecA, sum2);
+      sum = SumDotp4(vecB, vecA, sum);
+      sum2 = SumDotp4(vecB2, vecA, sum2);
 
       pA+=4;
       pB+=4;

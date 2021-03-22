@@ -22,8 +22,6 @@
 #include "pulp_nn_utils.h"
 #include "pulp_nn_kernels.h"
 
-#define log2(x) __builtin_pulp_fl1(x)
-#define min(a,b) ((a)<(b)?(a):(b))
 
 void __attribute__ ((noinline))  pulp_nn_avgpool_u2(
   uint8_t * Im_in,
@@ -81,7 +79,7 @@ void __attribute__ ((noinline))  pulp_nn_avgpool_u2(
       win_start += ch_im_in_r;
       for (; win_start < win_stop; win_start += ch_im_in_r)
       {
-        pulp_nn_avg_and_replace_u2(target, win_start, ch_im_in_r);
+        xpulp_nn_avg_and_replace_u2(target, win_start, ch_im_in_r);
       }
     }
   }
@@ -131,7 +129,7 @@ void __attribute__ ((noinline))  pulp_nn_avgpool_u2(
 
     for (; row_start < row_end; row_start += dim_im_in * ch_im_in_r)
     {
-      pulp_nn_avg_and_replace_u2(target, row_start, dim_im_out * ch_im_in_r);
+      xpulp_nn_avg_and_replace_u2(target, row_start, dim_im_out * ch_im_in_r);
     }
   }
 

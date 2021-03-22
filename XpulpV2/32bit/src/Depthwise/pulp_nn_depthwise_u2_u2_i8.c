@@ -21,14 +21,6 @@
 #include "pulp_nn_utils.h"
 #include "pulp_nn_kernels.h"
 
-#define log2(x) __builtin_pulp_fl1(x)
-#define min(a,b) ((a)<(b)?(a):(b))
-#define SumDotp(a, b, c) __builtin_pulp_sdotusp4(a, b, c)
-#define nn_round(out_shift) (0x1 << (out_shift -1))
-#define bitins(dst,not_mask_imm,src,mask_imm,off) __builtin_pulp_binsert(dst,not_mask_imm,src,mask_imm,off)
-#define bitext(x,size,off) __builtin_pulp_bextract(x,size,off)
-#define bitextu(x,size,off) __builtin_pulp_bextractu(x,size,off)
-#define clip8(x) __builtin_pulp_clipu(x, 0, 3)
 
 void pulp_nn_depthwise_u2_u2_i8(
         const uint8_t * pInBuffer,
@@ -251,22 +243,22 @@ void pulp_nn_depthwise_u2_u2_i8(
           {
             v4s w = *(v4s *) pWt;
             v4u x = *(v4u *) pIm2Col;
-            sum = SumDotp(x, w, sum);
+            sum = SumDotp4(x, w, sum);
             pWt += 4;
             pIm2Col += 4;
             v4s w2 = *(v4s *) pWt2;
             v4u x2 = *(v4u *) pIm2Col2;
-            sum2 = SumDotp(x2, w2, sum2);
+            sum2 = SumDotp4(x2, w2, sum2);
             pWt2 += 4;
             pIm2Col2 += 4;
             v4s w3 = *(v4s *) pWt3;
             v4u x3 = *(v4u *) pIm2Col3;
-            sum3 = SumDotp(x3, w3, sum3);
+            sum3 = SumDotp4(x3, w3, sum3);
             pWt3 += 4;
             pIm2Col3 += 4;
             v4s w4 = *(v4s *) pWt4;
             v4u x4 = *(v4u *) pIm2Col4;
-            sum4 = SumDotp(x4, w4, sum4);
+            sum4 = SumDotp4(x4, w4, sum4);
             pWt4 += 4;
             pIm2Col4 += 4;
             j++;
@@ -310,10 +302,10 @@ void pulp_nn_depthwise_u2_u2_i8(
             }
             else
             {
-              sum = (uint8_t) clip8(sum >> out_shift);
-              sum2 = (uint8_t) clip8(sum2 >> out_shift);
-              sum3 = (uint8_t) clip8(sum3 >> out_shift);
-              sum4 = (uint8_t) clip8(sum4 >> out_shift);
+              sum = (uint8_t) clip2(sum >> out_shift);
+              sum2 = (uint8_t) clip2(sum2 >> out_shift);
+              sum3 = (uint8_t) clip2(sum3 >> out_shift);
+              sum4 = (uint8_t) clip2(sum4 >> out_shift);
               sum = bitins(sum, n_mask2, sum2, mask2, off2);
               sum = bitins(sum, n_mask4, sum3, mask4, off4);
               *pOut = bitins(sum, n_mask6, sum4, mask6, off6);
@@ -445,22 +437,22 @@ void pulp_nn_depthwise_u2_u2_i8(
         {
           v4s w = *(v4s *) pWt;
           v4u x = *(v4u *) pIm2Col;
-          sum = SumDotp(x, w, sum);
+          sum = SumDotp4(x, w, sum);
           pWt += 4;
           pIm2Col += 4;
           v4s w2 = *(v4s *) pWt2;
           v4u x2 = *(v4u *) pIm2Col2;
-          sum2 = SumDotp(x2, w2, sum2);
+          sum2 = SumDotp4(x2, w2, sum2);
           pWt2 += 4;
           pIm2Col2 += 4;
           v4s w3 = *(v4s *) pWt3;
           v4u x3 = *(v4u *) pIm2Col3;
-          sum3 = SumDotp(x3, w3, sum3);
+          sum3 = SumDotp4(x3, w3, sum3);
           pWt3 += 4;
           pIm2Col3 += 4;
           v4s w4 = *(v4s *) pWt4;
           v4u x4 = *(v4u *) pIm2Col4;
-          sum4 = SumDotp(x4, w4, sum4);
+          sum4 = SumDotp4(x4, w4, sum4);
           pWt4 += 4;
           pIm2Col4 += 4;
           j++;
@@ -504,10 +496,10 @@ void pulp_nn_depthwise_u2_u2_i8(
           }
           else
           {
-            sum = (uint8_t) clip8(sum >> out_shift);
-            sum2 = (uint8_t) clip8(sum2 >> out_shift);
-            sum3 = (uint8_t) clip8(sum3 >> out_shift);
-            sum4 = (uint8_t) clip8(sum4 >> out_shift);
+            sum = (uint8_t) clip2(sum >> out_shift);
+            sum2 = (uint8_t) clip2(sum2 >> out_shift);
+            sum3 = (uint8_t) clip2(sum3 >> out_shift);
+            sum4 = (uint8_t) clip2(sum4 >> out_shift);
             sum = bitins(sum, n_mask2, sum2, mask2, off2);
             sum = bitins(sum, n_mask4, sum3, mask4, off4);
             *pOut = bitins(sum, n_mask6, sum4, mask6, off6);
@@ -654,22 +646,22 @@ void pulp_nn_depthwise_u2_u2_i8(
         {
           v4s w = *(v4s *) pWt;
           v4u x = *(v4u *) pIm2Col;
-          sum = SumDotp(x, w, sum);
+          sum = SumDotp4(x, w, sum);
           pWt += 4;
           pIm2Col += 4;
           v4s w2 = *(v4s *) pWt2;
           v4u x2 = *(v4u *) pIm2Col2;
-          sum2 = SumDotp(x2, w2, sum2);
+          sum2 = SumDotp4(x2, w2, sum2);
           pWt2 += 4;
           pIm2Col2 += 4;
           v4s w3 = *(v4s *) pWt3;
           v4u x3 = *(v4u *) pIm2Col3;
-          sum3 = SumDotp(x3, w3, sum3);
+          sum3 = SumDotp4(x3, w3, sum3);
           pWt3 += 4;
           pIm2Col3 += 4;
           v4s w4 = *(v4s *) pWt4;
           v4u x4 = *(v4u *) pIm2Col4;
-          sum4 = SumDotp(x4, w4, sum4);
+          sum4 = SumDotp4(x4, w4, sum4);
           pWt4 += 4;
           pIm2Col4 += 4;
           j++;
@@ -713,10 +705,10 @@ void pulp_nn_depthwise_u2_u2_i8(
           }
           else
           {
-            sum = (uint8_t) clip8(sum >> out_shift);
-            sum2 = (uint8_t) clip8(sum2 >> out_shift);
-            sum3 = (uint8_t) clip8(sum3 >> out_shift);
-            sum4 = (uint8_t) clip8(sum4 >> out_shift);
+            sum = (uint8_t) clip2(sum >> out_shift);
+            sum2 = (uint8_t) clip2(sum2 >> out_shift);
+            sum3 = (uint8_t) clip2(sum3 >> out_shift);
+            sum4 = (uint8_t) clip2(sum4 >> out_shift);
             sum = bitins(sum, n_mask2, sum2, mask2, off2);
             sum = bitins(sum, n_mask4, sum3, mask4, off4);
             *pOut = bitins(sum, n_mask6, sum4, mask6, off6);
