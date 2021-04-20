@@ -19,13 +19,13 @@
 
 # If is 1 only the selected-below kernel is created (SINGLE KERNEL SOLUTION). Otherwise, all kernels are created (ALL KERNELS SOLUTION)
 
-SINGLE_KERNEL		= 1
+SINGLE_KERNEL		= 0
 
 # Select from the supported ones:
 
 # -> XpulpV2, XpulpNN
 
-ISA 				= 'XpulpV2'
+ISA 				= 'XpulpNN'
 
 # Select from the supported ones:
 
@@ -64,22 +64,22 @@ quantization_type 	= 'shift_clip'
 #       - all values for dim_y
 
 # if depthwise CH_IM_IN must be equal to CH_IM_OUT
-DIM_IM_IN_X 		= 17
-DIM_IM_IN_Y 		= 97
-CH_IM_IN 			= 3
+DIM_IM_IN_X 		= 1
+DIM_IM_IN_Y 		= 8
+CH_IM_IN 			= 8
 # if pooling, output dimensions must be relative to kernel and stride sizes
-DIM_IM_OUT_X 		= 8
-DIM_IM_OUT_Y 		= 48
-CH_IM_OUT 			= 32
+DIM_IM_OUT_X 		= 1
+DIM_IM_OUT_Y 		= 8
+CH_IM_OUT 			= 8
 # if is not linear
 DIM_KERNEL_X 		= 3 # 1 if is pointwise, free otherwise
 DIM_KERNEL_Y 		= 3 # 1 if is pointwise, free otherwise
 PADDING_Y_TOP 		= 1 # 0 if is pointwise, free otherwise
-PADDING_Y_BOTTOM 	= 0 # 0 if is pointwise, free otherwise
-PADDING_X_LEFT 		= 0 # 0 if is pointwise, free otherwise
-PADDING_X_RIGHT 	= 0 # 0 if is pointwise, free otherwise
-STRIDE_X 			= 2
-STRIDE_Y 			= 2
+PADDING_Y_BOTTOM 	= 1 # 0 if is pointwise, free otherwise
+PADDING_X_LEFT 		= 1 # 0 if is pointwise, free otherwise
+PADDING_X_RIGHT 	= 1 # 0 if is pointwise, free otherwise
+STRIDE_X 			= 1
+STRIDE_Y 			= 1
 # Other parameters
 BIAS 				= False
 BN 					= True

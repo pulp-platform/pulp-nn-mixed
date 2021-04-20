@@ -22,7 +22,7 @@
 #include "pulp_nn_kernels.h"
 
 
-void xpulp_nn_pointwise_u4_u8_i8(
+void __attribute__((noinline)) xpulp_nn_pointwise_u4_u8_i8(
           const uint8_t *pInBuffer,
           const uint16_t dim_in_x,
           const uint16_t dim_in_y,
@@ -51,8 +51,8 @@ void xpulp_nn_pointwise_u4_u8_i8(
           int flag_batch_norm,
           unsigned int * memory_chan
 ) {
-  uint16_t ch_in_r = ch_in >> 1;
-  uint16_t ch_out_r = ch_out;
+  uint16_t ch_in_r = PACK_INT4_SIZE(ch_in);
+  uint16_t ch_out_r = PACK_INT8_SIZE(ch_out);
 
   int core_id = pi_core_id();
   int i_out_y, i_out_x, i_ker_y, i_ker_x;
@@ -90,7 +90,7 @@ void xpulp_nn_pointwise_u4_u8_i8(
   int stop_pixel = min(start_pixel + chunk, dim_out_y);
 
   uint8_t *pOut = pOutBuffer + (start_pixel * ch_out_r * dim_out_x) + (section * ch_out_r * dim_out_x_r);
-  uint8_t *pIm2Col = pIm2ColBuffer + (2 * core_id * ch_in);
+  uint8_t *pIm2Col = pIm2ColBuffer + (2 * core_id * PACK_INT8_SIZE(ch_in));
 
   for (i_out_y = start_pixel; i_out_y < stop_pixel; i_out_y++)
   {
@@ -100,8 +100,8 @@ void xpulp_nn_pointwise_u4_u8_i8(
     {
       if((n & 0x0001) != 0)
       {
-          xpulp_nn_im2col_u4_to_u8(pInBuffer + (i_out_x * ch_in_r) + (i_out_y * dim_in_x * ch_in_r), pIm2Col, ch_in<<1);
-          pOut = xpulp_nn_matmul_u4_u8_i8(
+        xpulp_nn_im2col_u4_to_u8(pInBuffer + (i_out_x * ch_in_r) + (i_out_y * dim_in_x * ch_in_r), pIm2Col, ch_in<<1);
+        pOut = xpulp_nn_matmul_u4_u8_i8(
               pWeight,
               pIm2Col,
               ch_out,
@@ -116,7 +116,7 @@ void xpulp_nn_pointwise_u4_u8_i8(
               flag_relu,
               flag_batch_norm
               );
-          i_out_x+=2;
+        i_out_x+=2;
       }
     }
 
@@ -126,30 +126,43 @@ void xpulp_nn_pointwise_u4_u8_i8(
       int i;
       int32_t * k1 = k;
       int32_t * lambda1 = lambda;
+      v4s inA;
+      v4u inB[2];
       for(i = 0; i < ch_out; i++)
       {
-        int sum = 0;//((int)(bias[i]) << bias_shift);// + nn_round(out_shift);
+        int sum = 0;
 
         uint8_t *pB = (pInBuffer + (i_out_x * ch_in) + (i_out_y * dim_in_x * ch_in));
-        uint16_t col_cnt_im2col = ch_in * dim_kernel_x * dim_kernel_y >> 2;
-        for(int j=0; j < col_cnt_im2col; j++)
-        {
-          v4s inA = *((v4s*) pA);
-          v4u inB = *((v4u*) pB);
 
-          sum = SumDotp4(inB, inA, sum);
+        uint16_t col_cnt_im2col = ch_in * dim_kernel_x * dim_kernel_y;
+
+        for(int j=0; j < (col_cnt_im2col >> 2); j++)
+        {
+          inA = *((v4s*) pA);
+
           pA+=4;
-          pB+=4;
+
+          pB = pulp_nn_i4_to_i8(pB,inB);
+
+          sum = SumDotp4(inB[0], inA, sum);
+
+          inA = *((v4s*) pA);
+
+          pA+=4;
+
+          sum = SumDotp4(inB[1], inA, sum);
         }
         col_cnt_im2col = (ch_in * dim_kernel_y * dim_kernel_x) & 0x3;
         while (col_cnt_im2col)
         {
           int8_t inA1 = *pA++;
-          uint8_t inB1 = *pB++;
-          asm volatile("": : :"memory");
+          uint8_t inB1 = (uint8_t) bitextu((unsigned int) *pB, 4, 0);
           sum += inA1 * inB1;
-
-          col_cnt_im2col--;
+          inA1 = *pA++;
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 4, 4);
+          sum += inA1 * inB1;
+          pB++;
+          col_cnt_im2col-=2;
         }
         if (flag_batch_norm && flag_relu)
         {

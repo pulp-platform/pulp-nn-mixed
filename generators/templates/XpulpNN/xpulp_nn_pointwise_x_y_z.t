@@ -22,7 +22,7 @@
 #include "pulp_nn_kernels.h"
 
 
-void ${config.fn_name}(
+void __attribute__((noinline)) ${config.fn_name}(
           const uint8_t *pInBuffer,
           const uint16_t dim_in_x,
           const uint16_t dim_in_y,
@@ -59,20 +59,8 @@ void ${config.fn_name}(
           int flag_batch_norm,
           unsigned int * memory_chan
 ) {
-%if config.kernel.in_data_t == 8:
-  uint16_t ch_in_r = ch_in;
-%elif config.kernel.in_data_t == 4:
-  uint16_t ch_in_r = ch_in >> 1;
-%else:
-  uint16_t ch_in_r = ch_in >> 2;
-%endif
-%if config.kernel.out_data_t == 8:
-  uint16_t ch_out_r = ch_out;
-%elif config.kernel.out_data_t == 4:
-  uint16_t ch_out_r = ch_out >> 1;
-%else:
-  uint16_t ch_out_r = ch_out >> 2;
-%endif
+  uint16_t ch_in_r = PACK_INT${config.kernel.in_data_t}_SIZE(ch_in);
+  uint16_t ch_out_r = PACK_INT${config.kernel.out_data_t}_SIZE(ch_out);
 
   int core_id = pi_core_id();
   int i_out_y, i_out_x, i_ker_y, i_ker_x;
@@ -110,8 +98,8 @@ void ${config.fn_name}(
   int stop_pixel = min(start_pixel + chunk, dim_out_y);
 
   uint8_t *pOut = pOutBuffer + (start_pixel * ch_out_r * dim_out_x) + (section * ch_out_r * dim_out_x_r);
-%if config.kernel.in_data_t < 8:  
-  uint8_t *pIm2Col = pIm2ColBuffer + (2 * core_id * ch_in);
+%if config.kernel.in_data_t < config.kernel.wt_data_t:  
+  uint8_t *pIm2Col = pIm2ColBuffer + (2 * core_id * PACK_INT${config.kernel.wt_data_t}_SIZE(ch_in));
 %endif
 
   for (i_out_y = start_pixel; i_out_y < stop_pixel; i_out_y++)
@@ -122,12 +110,12 @@ void ${config.fn_name}(
     {
       if((n & 0x0001) != 0)
       {
-%if config.kernel.in_data_t < 8:
-          ${config.im2col_fn}(pInBuffer + (i_out_x * ch_in_r) + (i_out_y * dim_in_x * ch_in_r), pIm2Col, ch_in<<1);
+%if config.kernel.in_data_t < config.kernel.wt_data_t:
+        ${config.im2col_fn}(pInBuffer + (i_out_x * ch_in_r) + (i_out_y * dim_in_x * ch_in_r), pIm2Col, ch_in<<1);
 %else:
-          uint8_t *pIm2Col = (pInBuffer + (i_out_x * ch_in) + (i_out_y * dim_in_x * ch_in));
+        uint8_t *pIm2Col = (pInBuffer + (i_out_x * ch_in_r) + (i_out_y * dim_in_x * ch_in_r));
 %endif
-          pOut = ${config.mat_mul_fn}(
+        pOut = ${config.mat_mul_fn}(
               pWeight,
               pIm2Col,
               ch_out,
@@ -145,7 +133,7 @@ void ${config.fn_name}(
               flag_relu,
               flag_batch_norm
               );
-          i_out_x+=2;
+        i_out_x+=2;
       }
     }
 
@@ -175,13 +163,20 @@ void ${config.fn_name}(
       int64_t * k1 = k;
       int64_t * lambda1 = lambda;
 %endif
-  %if config.kernel.wt_data_t == 2:
+%if config.kernel.wt_data_t == 2:
       v4s inA[4];
-      v4u inB;
-  %elif config.kernel.wt_data_t == 4:
+%elif config.kernel.wt_data_t == 4:
       v4s inA[2];
+%else:
+      v4s inA;
+%endif
+%if config.kernel.in_data_t == 2:
+      v4u inB[4];
+%elif config.kernel.in_data_t == 4:
+      v4u inB[2];
+%else:
       v4u inB;
-  %endif
+%endif
   %if config.kernel.out_data_t == 4:
       uint8_t out[2];
   %elif config.kernel.out_data_t == 2:
@@ -189,19 +184,16 @@ void ${config.fn_name}(
   %endif
       for(i = 0; i < ch_out; i++)
       {
-        int sum = 0;//((int)(bias[i]) << bias_shift);// + nn_round(out_shift);
+        int sum = 0;
 
         uint8_t *pB = (pInBuffer + (i_out_x * ch_in) + (i_out_y * dim_in_x * ch_in));
-  %if config.kernel.wt_data_t == 8:
-        uint16_t col_cnt_im2col = ch_in * dim_kernel_x * dim_kernel_y >> 2;
-  %elif config.kernel.wt_data_t == 4:
-        uint16_t col_cnt_im2col = ch_in * dim_kernel_x * dim_kernel_y >> 3;
-  %elif config.kernel.wt_data_t == 2:
-        uint16_t col_cnt_im2col = ch_in * dim_kernel_x * dim_kernel_y >> 4;
-  %endif
-        for(int j=0; j < col_cnt_im2col; j++)
+
+        uint16_t col_cnt_im2col = ch_in * dim_kernel_x * dim_kernel_y;
+<%! import math %>
+        for(int j=0; j < (col_cnt_im2col >> ${int(math.log2(int(32/config.kernel.wt_data_t)))}); j++)
         {
-  %if config.kernel.wt_data_t == 2:
+%if config.kernel.wt_data_t == 2:
+%if config.kernel.in_data_t == 8:
           inB = *((v4u*) pB);
 
           pB+=4;
@@ -227,9 +219,35 @@ void ${config.fn_name}(
           pB+=4;
 
           sum = SumDotp4(inB, inA[3], sum);
+%elif config.kernel.in_data_t == 4:
+          pB = ${config.unpack_in_fn}(pB,inB);
 
-          //pA+=4;
-  %elif config.kernel.wt_data_t == 4:
+          pA = ${config.unpack_wt_fn}(pA,inA);
+
+          sum = SumDotp4(inB[0], inA[0], sum);
+
+          sum = SumDotp4(inB[1], inA[1], sum);
+
+          pB = ${config.unpack_in_fn}(pB,inB);
+
+          sum = SumDotp4(inB[0], inA[2], sum);
+
+          sum = SumDotp4(inB[1], inA[3], sum);
+%elif config.kernel.in_data_t == 2:
+          pB = ${config.unpack_in_fn}(pB,inB);
+
+          pA = ${config.unpack_wt_fn}(pA,inA);
+
+          sum = SumDotp4(inB[0], inA[0], sum);
+
+          sum = SumDotp4(inB[1], inA[1], sum);
+
+          sum = SumDotp4(inB[2], inA[2], sum);
+
+          sum = SumDotp4(inB[3], inA[3], sum);
+%endif
+%elif config.kernel.wt_data_t == 4:
+%if config.kernel.in_data_t == 8:
           inB = *((v4u*) pB);
 
           pB+=4;
@@ -243,15 +261,79 @@ void ${config.fn_name}(
           sum = SumDotp4(inB, inA[1], sum);
 
           pB+=4;
-          //pA+=4;
-  %else:
+%elif config.kernel.in_data_t == 4:
+          pB = ${config.unpack_in_fn}(pB,inB);
+
+          pA = ${config.unpack_wt_fn}(pA,inA);
+
+          sum = SumDotp4(inB[0], inA[0], sum);
+
+          sum = SumDotp4(inB[1], inA[1], sum);
+%elif config.kernel.in_data_t == 2:
+          pB = ${config.unpack_in_fn}(pB,inB);
+
+          pA = ${config.unpack_wt_fn}(pA,inA);
+
+          sum = SumDotp4(inB[0], inA[0], sum);
+
+          sum = SumDotp4(inB[1], inA[1], sum);
+
+          pA = ${config.unpack_wt_fn}(pA,inA);
+
+          sum = SumDotp4(inB[0], inA[0], sum);
+
+          sum = SumDotp4(inB[1], inA[1], sum);
+%endif
+%else:
+%if config.kernel.in_data_t == 8:
           v4s inA = *((v4s*) pA);
           v4u inB = *((v4u*) pB);
 
           sum = SumDotp4(inB, inA, sum);
           pA+=4;
           pB+=4;
-  %endif
+%elif config.kernel.in_data_t == 4:
+          inA = *((v4s*) pA);
+
+          pA+=4;
+
+          pB = ${config.unpack_in_fn}(pB,inB);
+
+          sum = SumDotp4(inB[0], inA, sum);
+
+          inA = *((v4s*) pA);
+
+          pA+=4;
+
+          sum = SumDotp4(inB[1], inA, sum);
+%elif config.kernel.in_data_t == 2:
+          inA = *((v4s*) pA);
+
+          pA+=4;
+
+          pB = ${config.unpack_in_fn}(pB,inB);
+
+          sum = SumDotp4(inB[0], inA, sum);
+
+          inA = *((v4s*) pA);
+
+          pA+=4;
+
+          sum = SumDotp4(inB[1], inA, sum);
+
+          inA = *((v4s*) pA);
+
+          pA+=4;
+
+          sum = SumDotp4(inB[2], inA, sum);
+
+          inA = *((v4s*) pA);
+
+          pA+=4;
+
+          sum = SumDotp4(inB[3], inA, sum);
+%endif
+%endif
         }
   %if config.kernel.wt_data_t == 2:
         col_cnt_im2col = (ch_in * dim_kernel_y * dim_kernel_x) & 0xf;
@@ -262,7 +344,8 @@ void ${config.fn_name}(
   %endif
         while (col_cnt_im2col)
         {
-  %if config.kernel.wt_data_t == 2:
+%if config.kernel.wt_data_t == 2:
+%if config.kernel.in_data_t == 8:
           int8_t inA1 = (int8_t) bitext((int) *pA, 2, 0);
           uint8_t inB1 = *pB++;
           sum += inA1 * inB1;
@@ -278,24 +361,117 @@ void ${config.fn_name}(
 
           pA++;
           col_cnt_im2col-=4;
-  %elif config.kernel.wt_data_t == 4:
+%elif config.kernel.in_data_t == 4:
+          int8_t inA1 = (int8_t) bitext((int) *pA, 2, 0);
+          uint8_t inB1 = (uint8_t) bitextu((unsigned int) *pB, 4, 0);
+          sum += inA1 * inB1;
+          inA1 = (int8_t) bitext((int) *pA, 2, 2);
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 4, 4);
+          sum += inA1 * inB1;
+          pB++;
+          inA1 = (int8_t) bitext((int) *pA, 2, 4);
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 4, 0);
+          sum += inA1 * inB1;
+          inA1 = (int8_t) bitext((int) *pA, 2, 6);
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 4, 4);
+          sum += inA1 * inB1;
+
+          pA++;
+          pB++;
+          col_cnt_im2col-=4;
+%elif config.kernel.in_data_t == 2:
+          int8_t inA1 = (int8_t) bitext((int) *pA, 2, 0);
+          uint8_t inB1 = (uint8_t) bitextu((unsigned int) *pB, 2, 0);
+          sum += inA1 * inB1;
+          inA1 = (int8_t) bitext((int) *pA, 2, 2);
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 2, 2);
+          sum += inA1 * inB1;
+          inA1 = (int8_t) bitext((int) *pA, 2, 4);
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 2, 4);
+          sum += inA1 * inB1;
+          inA1 = (int8_t) bitext((int) *pA, 2, 6);
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 2, 6);
+          sum += inA1 * inB1;
+
+          pA++;
+          pB++;
+          col_cnt_im2col-=4;
+%endif
+%elif config.kernel.wt_data_t == 4:
+%if config.kernel.in_data_t == 8:
           int8_t inA1 = (int8_t) bitext((int) *pA, 4, 0);
           uint8_t inB1 = *pB++;
           sum += inA1 * inB1;
-          inA1 = (int8_t) bitext((int) *pA, 4, 4);
+          inA1 = (int8_t) bitextu((int) *pA, 4, 4);
           inB1 = *pB++;
           sum += inA1 * inB1;
 
           pA++;
           col_cnt_im2col-=2;
-  %else:
+%elif config.kernel.in_data_t == 4:
+          int8_t inA1 = (int8_t) bitext((int) *pA, 4, 0);
+          uint8_t inB1 = (uint8_t) bitextu((unsigned int) *pB, 4, 0);
+          sum += inA1 * inB1;
+          inA1 = (int8_t) bitext((int) *pA, 4, 4);
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 4, 4);
+          sum += inA1 * inB1;
+
+          pA++;
+          pB++;
+          col_cnt_im2col-=2;
+%elif config.kernel.in_data_t == 2:
+          int8_t inA1 = (int8_t) bitext((int) *pA, 4, 0);
+          uint8_t inB1 = (uint8_t) bitextu((unsigned int) *pB, 2, 0);
+          sum += inA1 * inB1;
+          inA1 = (int8_t) bitext((int) *pA, 4, 4);
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 2, 2);
+          sum += inA1 * inB1;
+          pA++;
+          inA1 = (int8_t) bitext((int) *pA, 4, 0);
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 2, 4);
+          sum += inA1 * inB1;
+          inA1 = (int8_t) bitext((int) *pA, 4, 4);
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 2, 6);
+          sum += inA1 * inB1;
+
+          pA++;
+          pB++;
+          col_cnt_im2col-=4;
+%endif
+%else:
+%if config.kernel.in_data_t == 8:
           int8_t inA1 = *pA++;
           uint8_t inB1 = *pB++;
           asm volatile("": : :"memory");
           sum += inA1 * inB1;
 
           col_cnt_im2col--;
-  %endif
+%elif config.kernel.in_data_t == 4:
+          int8_t inA1 = *pA++;
+          uint8_t inB1 = (uint8_t) bitextu((unsigned int) *pB, 4, 0);
+          sum += inA1 * inB1;
+          inA1 = *pA++;
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 4, 4);
+          sum += inA1 * inB1;
+          pB++;
+          col_cnt_im2col-=2;
+%elif config.kernel.in_data_t == 2:
+          int8_t inA1 = *pA++;
+          uint8_t inB1 = (uint8_t) bitextu((unsigned int) *pB, 2, 0);
+          sum += inA1 * inB1;
+          inA1 = *pA++;
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 2, 2);
+          sum += inA1 * inB1;
+          inA1 = *pA++;
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 2, 4);
+          sum += inA1 * inB1;
+          inA1 = *pA++;
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 2, 6);
+          sum += inA1 * inB1;
+          pB++;
+          col_cnt_im2col-=4;
+%endif
+%endif
         }
   %if config.kernel.out_data_t == 8 or config.kernel.quantization == 'shift_clip':
         if (flag_batch_norm && flag_relu)

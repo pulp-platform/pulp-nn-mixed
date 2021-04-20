@@ -211,8 +211,8 @@ class PULPNNConvolvePointwise(PULPNNFactory):
             self.im2col_fn = "xpulp_nn_im2col_u{0}_to_u{1}".format(str(self.kernel.in_data_t), str(self.max_precision))
             self.mat_mul_fn = "xpulp_nn_matmul_u{0}_u{1}_i{2}{3}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
                 str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""))
-            self.unpack_in_fn = "pulp_nn_i{0}_to_i{1}".format(str(self.kernel.in_data_t), str(self.max_precision))
-            self.unpack_wt_fn = "pulp_nn_i{0}_to_i{1}".format(str(self.kernel.wt_data_t), str(self.max_precision))        
+            self.unpack_in_fn = "pulp_nn_i{0}_to_i{1}".format(str(self.kernel.in_data_t), '8')
+            self.unpack_wt_fn = "pulp_nn_i{0}_to_i{1}".format(str(self.kernel.wt_data_t), '8')        
 
         self.filename = self.fn_name + ".c"
         self.api = self.__class__.__name__

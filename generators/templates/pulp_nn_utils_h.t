@@ -48,16 +48,18 @@
 #define MacLoadInit(a_update, b_update, a_reg, b_reg, ptr)   __builtin_pulp_mlinitspr_v3(a_update, b_update, a_reg, b_reg, ptr)
 #define MacLoadUpdate(ptr)                                   __builtin_pulp_mlupdatespr_v3(ptr)
 #define MacLoadAssign(ptr)                                   __builtin_pulp_mlassignspr_v3(ptr)
-#define MacLoad4(a_update, b_update, a_reg, b_reg, ptr, sum) __builtin_pulp_mlsdotusp4_v3(a_update, b_update, a_reg, b_reg, ptr, sum)
-#define MacLoad8(a_update, b_update, a_reg, b_reg, ptr, sum) __builtin_pulp_mlsdotusp8_v3(a_update, b_update, a_reg, b_reg, ptr, sum)
-#define MacLoad16(a_update, b_update, a_reg, b_reg, ptr, sum)__builtin_pulp_mlsdotusp16_v3(a_update, b_update, a_reg, b_reg, ptr, sum)
+#define MacLoad4(a_update, b_update, a_reg, b_reg, ptr, sum) __builtin_pulp_mlsdotsup4_v3(a_update, b_update, a_reg, b_reg, ptr, sum)
+#define MacLoad8(a_update, b_update, a_reg, b_reg, ptr, sum) __builtin_pulp_mlsdotsup8_v3(a_update, b_update, a_reg, b_reg, ptr, sum)
+#define MacLoad16(a_update, b_update, a_reg, b_reg, ptr, sum)__builtin_pulp_mlsdotsup16_v3(a_update, b_update, a_reg, b_reg, ptr, sum)
 
-#define PACK_INT8_SIZE(x)                                  (x)
-#define PACK_INT4_SIZE(x)                                  ((x) >> 1)
-#define PACK_INT2_SIZE(x)                                  ((x) >> 2)
+#define PACK_INT8_SIZE(x)                                    (x)
+#define PACK_INT4_SIZE(x)                                    ((x) >> 1)
+#define PACK_INT2_SIZE(x)                                    ((x) >> 2)
+
+#define MemoryFence()                                        asm volatile("":::"memory")
 
 
-static inline uint8_t pulp_nn_bn_quant_u8 (
+static uint8_t __attribute__((noinline)) pulp_nn_bn_quant_u8 (
   int32_t phi,
 %if config.act_prec == '32bit':
   int32_t k,
@@ -79,7 +81,7 @@ static inline uint8_t pulp_nn_bn_quant_u8 (
   return res;
 }
 
-static inline uint8_t pulp_nn_quant_u8(
+static uint8_t __attribute__((noinline)) pulp_nn_quant_u8(
   int32_t phi,
   int16_t m,
   int8_t  d
@@ -89,7 +91,7 @@ static inline uint8_t pulp_nn_quant_u8(
   return res;
 }
 
-static inline uint8_t pulp_nn_add_quant_u8 (
+static uint8_t __attribute__((noinline)) pulp_nn_add_quant_u8 (
   uint8_t pix1,
   uint8_t pix2,
   int16_t m1,
@@ -104,7 +106,7 @@ static inline uint8_t pulp_nn_add_quant_u8 (
   return res;
 }
 
-static inline uint8_t pulp_nn_bn_quant_u4 (
+static uint8_t __attribute__((noinline)) pulp_nn_bn_quant_u4 (
   int32_t phi,
 %if config.act_prec == '32bit':
   int32_t k,
@@ -126,7 +128,7 @@ static inline uint8_t pulp_nn_bn_quant_u4 (
   return res;
 }
 
-static inline uint8_t pulp_nn_quant_u4(
+static uint8_t __attribute__((noinline)) pulp_nn_quant_u4(
   int32_t phi,
   int16_t m,
   int8_t  d
@@ -136,7 +138,7 @@ static inline uint8_t pulp_nn_quant_u4(
   return res;
 }
 
-static inline uint8_t pulp_nn_add_quant_u4 (
+static uint8_t __attribute__((noinline)) pulp_nn_add_quant_u4 (
   uint8_t pix1,
   uint8_t pix2,
   int16_t m1,
@@ -151,7 +153,7 @@ static inline uint8_t pulp_nn_add_quant_u4 (
   return res;
 }
 
-static inline uint8_t pulp_nn_bn_quant_u2 (
+static uint8_t __attribute__((noinline)) pulp_nn_bn_quant_u2 (
   int32_t phi,
 %if config.act_prec == '32bit':
   int32_t k,
@@ -173,7 +175,7 @@ static inline uint8_t pulp_nn_bn_quant_u2 (
   return res;
 }
 
-static inline uint8_t pulp_nn_quant_u2(
+static uint8_t __attribute__((noinline)) pulp_nn_quant_u2(
   int32_t phi,
   int16_t m,
   int8_t  d
@@ -183,7 +185,7 @@ static inline uint8_t pulp_nn_quant_u2(
   return res;
 }
 
-static inline uint8_t pulp_nn_add_quant_u2 (
+static uint8_t __attribute__((noinline)) pulp_nn_add_quant_u2 (
   uint8_t pix1,
   uint8_t pix2,
   int16_t m1,
@@ -198,7 +200,7 @@ static inline uint8_t pulp_nn_add_quant_u2 (
   return res;
 }
 
-static inline uint8_t pulp_nn_u4_quant(int input, int16_t * pThr)
+static uint8_t __attribute__((noinline)) pulp_nn_u4_quant(int input, int16_t * pThr)
 {
   if(input <= pThr[7] )
   {
@@ -276,7 +278,7 @@ static inline uint8_t pulp_nn_u4_quant(int input, int16_t * pThr)
   }
 }
 
-static inline uint8_t pulp_nn_u2_quant(int input, int16_t * pThr)
+static uint8_t __attribute__((noinline)) pulp_nn_u2_quant(int input, int16_t * pThr)
 {
   if( input <= pThr[1])
   {
@@ -303,10 +305,10 @@ static inline uint8_t pulp_nn_u2_quant(int input, int16_t * pThr)
 }
 
 /*
-/* Common
-*/
+ * Common
+ */
 
-static inline v4s pulp_nn_i4_to_i8_r( int8_t *pSrc)
+static v4s __attribute__((noinline)) pulp_nn_i4_to_i8_r( int8_t *pSrc)
 {
   v4s Src = *((v4s*) pSrc);
   int8_t bext1, bext2, bext3, bext4;
@@ -320,7 +322,7 @@ static inline v4s pulp_nn_i4_to_i8_r( int8_t *pSrc)
   return res;
 }
 
-static inline v4u pulp_nn_u4_to_u8_r(uint8_t *pSrc)
+static v4u __attribute__((noinline)) pulp_nn_u4_to_u8_r(uint8_t *pSrc)
 {
   v4u Src = *((v4u*) pSrc);
   uint8_t bext1, bext2, bext3, bext4;
@@ -334,7 +336,7 @@ static inline v4u pulp_nn_u4_to_u8_r(uint8_t *pSrc)
   return res;
 }
 
-static inline v4s pulp_nn_i2_to_i8_r( int8_t *pSrc)
+static v4s __attribute__((noinline)) pulp_nn_i2_to_i8_r( int8_t *pSrc)
 {
   v4s Src = *((v4s*) pSrc);
   int8_t bext1, bext2, bext3, bext4;
@@ -348,7 +350,7 @@ static inline v4s pulp_nn_i2_to_i8_r( int8_t *pSrc)
   return res;
 }
 
-static inline v4u pulp_nn_u2_to_u8_r(uint8_t *pSrc)
+static v4u __attribute__((noinline)) pulp_nn_u2_to_u8_r(uint8_t *pSrc)
 {
   v4u Src = *((v4u*) pSrc);
   uint8_t bext1, bext2, bext3, bext4;
@@ -362,7 +364,7 @@ static inline v4u pulp_nn_u2_to_u8_r(uint8_t *pSrc)
   return res;
 }
 
-static inline v4s pulp_nn_i2_to_i4_r(int8_t *pSrc)
+static v4s __attribute__((noinline)) pulp_nn_i2_to_i4_r(int8_t *pSrc)
 {
   int8_t mask = 0xf0;
   int8_t n_mask = ~ mask;
@@ -383,7 +385,7 @@ static inline v4s pulp_nn_i2_to_i4_r(int8_t *pSrc)
   bext1 = (int8_t) bitextu((int) Src, 2, 8);
   bext2 = (int8_t) bitextu((int) Src, 2, 10);
   bext3 = (int8_t) bitextu((int) Src, 2, 12);
-  bext4 = (int8_t) bitextu((int) Src, 2, 16);
+  bext4 = (int8_t) bitextu((int) Src, 2, 14);
 
   out3 = bitins(bext1, n_mask, bext2, mask, off);
   out4 = bitins(bext3, n_mask, bext4, mask, off);
@@ -393,7 +395,7 @@ static inline v4s pulp_nn_i2_to_i4_r(int8_t *pSrc)
   return res;
 }
 
-static inline v4u pulp_nn_u2_to_u4_r(uint8_t *pSrc)
+static v4u __attribute__((noinline)) pulp_nn_u2_to_u4_r(uint8_t *pSrc)
 {
   int8_t mask = 0xf0;
   int8_t n_mask = ~ mask;
@@ -414,7 +416,7 @@ static inline v4u pulp_nn_u2_to_u4_r(uint8_t *pSrc)
   bext1 = (uint8_t) bitextu((unsigned int) Src, 2, 8);
   bext2 = (uint8_t) bitextu((unsigned int) Src, 2, 10);
   bext3 = (uint8_t) bitextu((unsigned int) Src, 2, 12);
-  bext4 = (uint8_t) bitextu((unsigned int) Src, 2, 16);
+  bext4 = (uint8_t) bitextu((unsigned int) Src, 2, 14);
 
   out3 = bitins(bext1, n_mask, bext2, mask, off);
   out4 = bitins(bext3, n_mask, bext4, mask, off);
@@ -424,7 +426,7 @@ static inline v4u pulp_nn_u2_to_u4_r(uint8_t *pSrc)
   return res;
 }
 
-static inline int8_t *pulp_nn_i4_to_i8( int8_t *pSrc, int8_t *pDst)
+static int8_t *__attribute__((noinline)) pulp_nn_i4_to_i8( int8_t *pSrc, int8_t *pDst)
 {
   v4s Src = *((v4s*) pSrc);
   int8_t bext1, bext2, bext3, bext4;
@@ -447,7 +449,7 @@ static inline int8_t *pulp_nn_i4_to_i8( int8_t *pSrc, int8_t *pDst)
   return pSrc;
 }
 
-static inline uint8_t *pulp_nn_u4_to_u8(uint8_t *pSrc, uint8_t *pDst)
+static uint8_t *__attribute__((noinline)) pulp_nn_u4_to_u8(uint8_t *pSrc, uint8_t *pDst)
 {
   v4u Src = *((v4u*) pSrc);
   uint8_t bext1, bext2, bext3, bext4;
@@ -470,7 +472,7 @@ static inline uint8_t *pulp_nn_u4_to_u8(uint8_t *pSrc, uint8_t *pDst)
   return pSrc;
 }
 
-static inline int8_t *pulp_nn_i2_to_i8( int8_t * pSrc, int8_t * pDst)
+static int8_t *__attribute__((always_inline)) pulp_nn_i2_to_i8( int8_t * pSrc, int8_t * pDst)
 {
   v4s Src = *((v4s*) pSrc);
   int8_t bext1, bext2, bext3, bext4;
@@ -507,7 +509,7 @@ static inline int8_t *pulp_nn_i2_to_i8( int8_t * pSrc, int8_t * pDst)
   return pSrc;
 }
 
-static inline uint8_t *pulp_nn_u2_to_u8(uint8_t * pSrc, uint8_t * pDst)
+static uint8_t *__attribute__((noinline)) pulp_nn_u2_to_u8(uint8_t * pSrc, uint8_t * pDst)
 {
   v4u Src = *((v4u*) pSrc);
   uint8_t bext1, bext2, bext3, bext4;
@@ -544,7 +546,7 @@ static inline uint8_t *pulp_nn_u2_to_u8(uint8_t * pSrc, uint8_t * pDst)
   return pSrc;
 }
 
-static inline int8_t *pulp_nn_i2_to_i4( int8_t * pSrc, int8_t * pDst)
+static int8_t *__attribute__((noinline)) pulp_nn_i2_to_i4( int8_t * pSrc, int8_t * pDst)
 {
   int8_t mask = 0xf0;
   int8_t n_mask = ~ mask;
@@ -599,7 +601,7 @@ static inline int8_t *pulp_nn_i2_to_i4( int8_t * pSrc, int8_t * pDst)
   return pSrc;
 }
 
-static inline uint8_t *pulp_nn_u2_to_u4( uint8_t * pSrc, uint8_t * pDst)
+static uint8_t *__attribute__((noinline)) pulp_nn_u2_to_u4( uint8_t * pSrc, uint8_t * pDst)
 {
   int8_t mask = 0xf0;
   int8_t n_mask = ~ mask;
@@ -655,10 +657,10 @@ static inline uint8_t *pulp_nn_u2_to_u4( uint8_t * pSrc, uint8_t * pDst)
 }
 
 /*
-/* XpulpV2
-*/
+ * XpulpV2
+ */
 
-static inline void pulp_zero_mem(uint8_t * pBuffer, unsigned int size)
+static void __attribute__((noinline)) pulp_zero_mem(uint8_t * pBuffer, unsigned int size)
 {
   int lfover = size &0x3;
   for (int i=0; i<(size>>2); i++)
@@ -674,7 +676,7 @@ static inline void pulp_zero_mem(uint8_t * pBuffer, unsigned int size)
   }
 }
 
-static inline void pulp_nn_im2col_u8_to_u8(uint8_t * pInput, uint8_t * pOutput, unsigned int blockSize)
+static void __attribute__((noinline)) pulp_nn_im2col_u8_to_u8(uint8_t * pInput, uint8_t * pOutput, unsigned int blockSize)
 {
   unsigned int blkCnt = blockSize >> 2u;
   int lfover = blockSize & 0x3;
@@ -694,7 +696,7 @@ static inline void pulp_nn_im2col_u8_to_u8(uint8_t * pInput, uint8_t * pOutput, 
   }
 }
 
-static inline void pulp_nn_im2col_u4_to_u8(uint8_t * pInput, uint8_t * pOutput, unsigned int blockSize)
+static void __attribute__((noinline)) pulp_nn_im2col_u4_to_u8(uint8_t * pInput, uint8_t * pOutput, unsigned int blockSize)
 {
   unsigned int blkCnt = blockSize >> 3u;
   int lfover = blockSize & 0x7;
@@ -716,7 +718,7 @@ static inline void pulp_nn_im2col_u4_to_u8(uint8_t * pInput, uint8_t * pOutput, 
   }
 }
 
-static inline void pulp_nn_im2col_u2_to_u8(uint8_t * pInput, uint8_t * pOutput, unsigned int blockSize)
+static void __attribute__((noinline)) pulp_nn_im2col_u2_to_u8(uint8_t * pInput, uint8_t * pOutput, unsigned int blockSize)
 {
   unsigned int blkCnt = blockSize >> 4u;
   int lfover = blockSize & 0xf;
@@ -735,7 +737,7 @@ static inline void pulp_nn_im2col_u2_to_u8(uint8_t * pInput, uint8_t * pOutput, 
   }
 }
 
-static inline void pulp_nn_compare_and_replace_if_larger_u8(uint8_t * base,
+static void __attribute__((noinline)) pulp_nn_compare_and_replace_if_larger_u8(uint8_t * base,
                                                 uint8_t * target,
                                                 uint16_t length)
 {
@@ -769,7 +771,7 @@ static inline void pulp_nn_compare_and_replace_if_larger_u8(uint8_t * base,
   }
 }
 
-static inline void pulp_nn_avg_and_replace_u8(uint8_t * base,
+static void __attribute__((noinline)) pulp_nn_avg_and_replace_u8(uint8_t * base,
                                   uint8_t * target,
                                   uint16_t length)
 {
@@ -786,7 +788,7 @@ static inline void pulp_nn_avg_and_replace_u8(uint8_t * base,
   }
 }
 
-static inline void pulp_nn_compare_and_replace_if_larger_u4(uint8_t * base,
+static void __attribute__((noinline)) pulp_nn_compare_and_replace_if_larger_u4(uint8_t * base,
                                                 uint8_t * target,
                                                 uint16_t length)
 {
@@ -846,7 +848,7 @@ static inline void pulp_nn_compare_and_replace_if_larger_u4(uint8_t * base,
   }
 }
 
-static inline void pulp_nn_avg_and_replace_u4(uint8_t * base,
+static void __attribute__((noinline)) pulp_nn_avg_and_replace_u4(uint8_t * base,
                                   uint8_t * target,
                                   uint16_t length)
 {
@@ -875,7 +877,7 @@ static inline void pulp_nn_avg_and_replace_u4(uint8_t * base,
   }
 }
 
-static inline void pulp_nn_compare_and_replace_if_larger_u2(uint8_t * base,
+static void __attribute__((noinline)) pulp_nn_compare_and_replace_if_larger_u2(uint8_t * base,
                                                 uint8_t * target,
                                                 uint16_t length)
 {
@@ -959,7 +961,7 @@ static inline void pulp_nn_compare_and_replace_if_larger_u2(uint8_t * base,
   }
 }
 
-static inline void pulp_nn_avg_and_replace_u2(uint8_t * base,
+static void __attribute__((noinline)) pulp_nn_avg_and_replace_u2(uint8_t * base,
                                   uint8_t * target,
                                   uint16_t length)
 {
@@ -1004,10 +1006,10 @@ static inline void pulp_nn_avg_and_replace_u2(uint8_t * base,
 }
 
 /*
-/* XpulpNN
-*/
+ * XpulpNN
+ */
 
-static inline void xpulp_nn_zero_mem_u8(uint8_t * pBuffer, unsigned int size)
+static void __attribute__((noinline)) xpulp_nn_zero_mem_u8(uint8_t * pBuffer, unsigned int size)
 {
   int lfover = size &0x3;
   for (int i=0; i<(size>>2); i++)
@@ -1023,7 +1025,7 @@ static inline void xpulp_nn_zero_mem_u8(uint8_t * pBuffer, unsigned int size)
   }
 }
 
-static inline void xpulp_nn_zero_mem_u4(uint8_t * pBuffer, unsigned int size)
+static void __attribute__((noinline)) xpulp_nn_zero_mem_u4(uint8_t * pBuffer, unsigned int size)
 {
   int lfover = size &0x7;
   for (int i=0; i<(size>>3); i++)
@@ -1039,7 +1041,7 @@ static inline void xpulp_nn_zero_mem_u4(uint8_t * pBuffer, unsigned int size)
   }
 }
 
-static inline void xpulp_nn_zero_mem_u2(uint8_t * pBuffer, unsigned int size)
+static void __attribute__((noinline)) xpulp_nn_zero_mem_u2(uint8_t * pBuffer, unsigned int size)
 {
   int lfover = size &0xf;
   for (int i=0; i<(size>>4); i++)
@@ -1055,7 +1057,7 @@ static inline void xpulp_nn_zero_mem_u2(uint8_t * pBuffer, unsigned int size)
   }
 }
 
-static inline void xpulp_nn_im2col_u8_to_u8(uint8_t * pInput, uint8_t * pOutput, unsigned int blockSize)
+static void __attribute__((noinline)) xpulp_nn_im2col_u8_to_u8(uint8_t * pInput, uint8_t * pOutput, unsigned int blockSize)
 {
   unsigned int blkCnt = blockSize >> 2u;
   int lfover = blockSize & 0x3;
@@ -1075,7 +1077,7 @@ static inline void xpulp_nn_im2col_u8_to_u8(uint8_t * pInput, uint8_t * pOutput,
   }
 }
 
-static inline void xpulp_nn_im2col_u4_to_u8(uint8_t * pInput, uint8_t * pOutput, unsigned int blockSize)
+static void __attribute__((noinline)) xpulp_nn_im2col_u4_to_u8(uint8_t * pInput, uint8_t * pOutput, unsigned int blockSize)
 {
   unsigned int blkCnt = blockSize >> 3u;
   int lfover = blockSize & 0x7;
@@ -1097,7 +1099,7 @@ static inline void xpulp_nn_im2col_u4_to_u8(uint8_t * pInput, uint8_t * pOutput,
   }
 }
 
-static inline void xpulp_nn_im2col_u4_to_u4(uint8_t * pInput, uint8_t * pOutput, unsigned int blockSize)
+static void __attribute__((noinline)) xpulp_nn_im2col_u4_to_u4(uint8_t * pInput, uint8_t * pOutput, unsigned int blockSize)
 {
   unsigned int blkCnt = blockSize >> 3u;
   int lfover = blockSize & 0x7;
@@ -1117,7 +1119,7 @@ static inline void xpulp_nn_im2col_u4_to_u4(uint8_t * pInput, uint8_t * pOutput,
   }
 }
 
-static inline void xpulp_nn_im2col_u2_to_u8(uint8_t * pInput, uint8_t * pOutput, unsigned int blockSize)
+static void __attribute__((noinline)) xpulp_nn_im2col_u2_to_u8(uint8_t * pInput, uint8_t * pOutput, unsigned int blockSize)
 {
   unsigned int blkCnt = blockSize >> 4u;
   int lfover = blockSize & 0xf;
@@ -1136,7 +1138,7 @@ static inline void xpulp_nn_im2col_u2_to_u8(uint8_t * pInput, uint8_t * pOutput,
   }
 }
 
-static inline void xpulp_nn_im2col_u2_to_u4(uint8_t * pInput, uint8_t * pOutput, unsigned int blockSize)
+static void __attribute__((noinline)) xpulp_nn_im2col_u2_to_u4(uint8_t * pInput, uint8_t * pOutput, unsigned int blockSize)
 {
   unsigned int blkCnt = blockSize >> 4u;
   int lfover = blockSize & 0xf;
@@ -1155,7 +1157,7 @@ static inline void xpulp_nn_im2col_u2_to_u4(uint8_t * pInput, uint8_t * pOutput,
   }
 }
 
-static inline void xpulp_nn_im2col_u2_to_u2(uint8_t * pInput, uint8_t * pOutput, unsigned int blockSize)
+static void __attribute__((noinline)) xpulp_nn_im2col_u2_to_u2(uint8_t * pInput, uint8_t * pOutput, unsigned int blockSize)
 {
   unsigned int blkCnt = blockSize >> 4u;
   int lfover = blockSize & 0xf;
@@ -1175,7 +1177,7 @@ static inline void xpulp_nn_im2col_u2_to_u2(uint8_t * pInput, uint8_t * pOutput,
   }
 }
 
-static inline void xpulp_nn_compare_and_replace_if_larger_u4(uint8_t * base,
+static void __attribute__((noinline)) xpulp_nn_compare_and_replace_if_larger_u4(uint8_t * base,
                                                 uint8_t * target,
                                                 uint16_t length)
 {
@@ -1220,7 +1222,7 @@ static inline void xpulp_nn_compare_and_replace_if_larger_u4(uint8_t * base,
   }
 }
 
-static inline void xpulp_nn_avg_and_replace_u4(uint8_t * base,
+static void __attribute__((noinline)) xpulp_nn_avg_and_replace_u4(uint8_t * base,
                                   uint8_t * target,
                                   uint16_t length)
 {
@@ -1262,7 +1264,7 @@ static inline void xpulp_nn_avg_and_replace_u4(uint8_t * base,
   }
 }
 
-static inline void xpulp_nn_compare_and_replace_if_larger_u2(uint8_t * base,
+static void __attribute__((noinline)) xpulp_nn_compare_and_replace_if_larger_u2(uint8_t * base,
                                                 uint8_t * target,
                                                 uint16_t length)
 {
@@ -1317,7 +1319,7 @@ static inline void xpulp_nn_compare_and_replace_if_larger_u2(uint8_t * base,
   }
 }
 
-static inline void xpulp_nn_avg_and_replace_u2(uint8_t * base,
+static void __attribute__((noinline)) xpulp_nn_avg_and_replace_u2(uint8_t * base,
                                   uint8_t * target,
                                   uint16_t length)
 {

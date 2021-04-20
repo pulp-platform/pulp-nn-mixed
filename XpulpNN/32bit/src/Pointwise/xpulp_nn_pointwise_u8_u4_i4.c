@@ -22,7 +22,7 @@
 #include "pulp_nn_kernels.h"
 
 
-void xpulp_nn_pointwise_u8_u4_i4(
+void __attribute__((noinline)) xpulp_nn_pointwise_u8_u4_i4(
           const uint8_t *pInBuffer,
           const uint16_t dim_in_x,
           const uint16_t dim_in_y,
@@ -51,8 +51,8 @@ void xpulp_nn_pointwise_u8_u4_i4(
           int flag_batch_norm,
           unsigned int * memory_chan
 ) {
-  uint16_t ch_in_r = ch_in;
-  uint16_t ch_out_r = ch_out >> 1;
+  uint16_t ch_in_r = PACK_INT8_SIZE(ch_in);
+  uint16_t ch_out_r = PACK_INT4_SIZE(ch_out);
 
   int core_id = pi_core_id();
   int i_out_y, i_out_x, i_ker_y, i_ker_x;
@@ -99,8 +99,8 @@ void xpulp_nn_pointwise_u8_u4_i4(
     {
       if((n & 0x0001) != 0)
       {
-          uint8_t *pIm2Col = (pInBuffer + (i_out_x * ch_in) + (i_out_y * dim_in_x * ch_in));
-          pOut = xpulp_nn_matmul_u8_u4_i4(
+        uint8_t *pIm2Col = (pInBuffer + (i_out_x * ch_in_r) + (i_out_y * dim_in_x * ch_in_r));
+        pOut = xpulp_nn_matmul_u8_u4_i4(
               pWeight,
               pIm2Col,
               ch_out,
@@ -115,7 +115,7 @@ void xpulp_nn_pointwise_u8_u4_i4(
               flag_relu,
               flag_batch_norm
               );
-          i_out_x+=2;
+        i_out_x+=2;
       }
     }
 
@@ -133,11 +133,13 @@ void xpulp_nn_pointwise_u8_u4_i4(
       uint8_t out[2];
       for(i = 0; i < ch_out; i++)
       {
-        int sum = 0;//((int)(bias[i]) << bias_shift);// + nn_round(out_shift);
+        int sum = 0;
 
         uint8_t *pB = (pInBuffer + (i_out_x * ch_in) + (i_out_y * dim_in_x * ch_in));
-        uint16_t col_cnt_im2col = ch_in * dim_kernel_x * dim_kernel_y >> 3;
-        for(int j=0; j < col_cnt_im2col; j++)
+
+        uint16_t col_cnt_im2col = ch_in * dim_kernel_x * dim_kernel_y;
+
+        for(int j=0; j < (col_cnt_im2col >> 3); j++)
         {
           inB = *((v4u*) pB);
 
@@ -152,7 +154,6 @@ void xpulp_nn_pointwise_u8_u4_i4(
           sum = SumDotp4(inB, inA[1], sum);
 
           pB+=4;
-          //pA+=4;
         }
         col_cnt_im2col = (ch_in * dim_kernel_y * dim_kernel_x) & 0x7;
         while (col_cnt_im2col)
@@ -160,7 +161,7 @@ void xpulp_nn_pointwise_u8_u4_i4(
           int8_t inA1 = (int8_t) bitext((int) *pA, 4, 0);
           uint8_t inB1 = *pB++;
           sum += inA1 * inB1;
-          inA1 = (int8_t) bitext((int) *pA, 4, 4);
+          inA1 = (int8_t) bitextu((int) *pA, 4, 4);
           inB1 = *pB++;
           sum += inA1 * inB1;
 

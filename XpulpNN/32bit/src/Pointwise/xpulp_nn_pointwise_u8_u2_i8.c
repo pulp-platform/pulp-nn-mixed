@@ -22,7 +22,7 @@
 #include "pulp_nn_kernels.h"
 
 
-void xpulp_nn_pointwise_u8_u2_i8(
+void __attribute__((noinline)) xpulp_nn_pointwise_u8_u2_i8(
           const uint8_t *pInBuffer,
           const uint16_t dim_in_x,
           const uint16_t dim_in_y,
@@ -51,8 +51,8 @@ void xpulp_nn_pointwise_u8_u2_i8(
           int flag_batch_norm,
           unsigned int * memory_chan
 ) {
-  uint16_t ch_in_r = ch_in;
-  uint16_t ch_out_r = ch_out >> 2;
+  uint16_t ch_in_r = PACK_INT8_SIZE(ch_in);
+  uint16_t ch_out_r = PACK_INT2_SIZE(ch_out);
 
   int core_id = pi_core_id();
   int i_out_y, i_out_x, i_ker_y, i_ker_x;
@@ -99,8 +99,8 @@ void xpulp_nn_pointwise_u8_u2_i8(
     {
       if((n & 0x0001) != 0)
       {
-          uint8_t *pIm2Col = (pInBuffer + (i_out_x * ch_in) + (i_out_y * dim_in_x * ch_in));
-          pOut = xpulp_nn_matmul_u8_u2_i8(
+        uint8_t *pIm2Col = (pInBuffer + (i_out_x * ch_in_r) + (i_out_y * dim_in_x * ch_in_r));
+        pOut = xpulp_nn_matmul_u8_u2_i8(
               pWeight,
               pIm2Col,
               ch_out,
@@ -115,7 +115,7 @@ void xpulp_nn_pointwise_u8_u2_i8(
               flag_relu,
               flag_batch_norm
               );
-          i_out_x+=2;
+        i_out_x+=2;
       }
     }
 
@@ -134,14 +134,18 @@ void xpulp_nn_pointwise_u8_u2_i8(
       int i;
       int32_t * k1 = k;
       int32_t * lambda1 = lambda;
+      v4s inA;
+      v4u inB;
       uint8_t out[4];
       for(i = 0; i < ch_out; i++)
       {
-        int sum = 0;//((int)(bias[i]) << bias_shift);// + nn_round(out_shift);
+        int sum = 0;
 
         uint8_t *pB = (pInBuffer + (i_out_x * ch_in) + (i_out_y * dim_in_x * ch_in));
-        uint16_t col_cnt_im2col = ch_in * dim_kernel_x * dim_kernel_y >> 2;
-        for(int j=0; j < col_cnt_im2col; j++)
+
+        uint16_t col_cnt_im2col = ch_in * dim_kernel_x * dim_kernel_y;
+
+        for(int j=0; j < (col_cnt_im2col >> 2); j++)
         {
           v4s inA = *((v4s*) pA);
           v4u inB = *((v4u*) pB);

@@ -21,7 +21,7 @@
 #include "pulp_nn_utils.h"
 
 
-uint8_t *${config.fn_name}(
+uint8_t * __attribute__((noinline)) ${config.fn_name}(
           const int8_t * pWeight,
           uint8_t * pInBuffer,
           uint16_t ch_out,
@@ -142,8 +142,8 @@ uint8_t *${config.fn_name}(
       sum7 = sum3;
       sum8 = sum4;
     }
-
-    for(int j=0; j<(num_col_im2col >> log2(${(((int(32/config.max_precision))*(int(config.max_precision/config.kernel.wt_data_t))))})); j++)
+<%! import math %>
+    for(int j=0; j<(num_col_im2col >> ${int(math.log2(((int(32/config.max_precision))*(int(config.max_precision/config.kernel.wt_data_t)))))}); j++)
     {
       ptrB2 = MacLoadInit(0, 1, 0, 1, ptrB2);
 
@@ -238,133 +238,488 @@ uint8_t *${config.fn_name}(
       ptrA4 = MacLoadUpdate(ptrA4);
 %endif
     }
-// %if config.kernel.wt_data_t == 2:
-//     uint16_t col_cnt_im2col = num_col_im2col & 0xf;
-// %elif config.kernel.wt_data_t == 4:
-//     uint16_t col_cnt_im2col = num_col_im2col & 0x7;
-// %else:
-//     uint16_t col_cnt_im2col = num_col_im2col & 0x3;
-// %endif
-//     while (col_cnt_im2col)
-//     {
-// %if config.kernel.wt_data_t == 2:
-//       int8_t inA = (int8_t) bitext((int) *pA, 2, 0);
-//       int8_t inA2 = (int8_t) bitext((int) *pA2, 2, 0);
-//       int8_t inA3 = (int8_t) bitext((int) *pA3, 2, 0);
-//       int8_t inA4 = (int8_t) bitext((int) *pA4, 2, 0);
-//       uint8_t inB = *pB++;
-//       uint8_t inB2 = *pB2++;
-//       sum += inA * inB;
-//       sum2 += inA2 * inB;
-//       sum3 += inA3 * inB;
-//       sum4 += inA4 * inB;
-//       sum5 += inA * inB2;
-//       sum6 += inA2 * inB2;
-//       sum7 += inA3 * inB2;
-//       sum8 += inA4 * inB2;
-//       inA = (int8_t) bitext((int) *pA, 2, 2);
-//       inA2 = (int8_t) bitext((int) *pA2, 2, 2);
-//       inA3 = (int8_t) bitext((int) *pA3, 2, 2);
-//       inA4 = (int8_t) bitext((int) *pA4, 2, 2);
-//       inB = *pB++;
-//       inB2 = *pB2++;
-//       sum += inA * inB;
-//       sum2 += inA2 * inB;
-//       sum3 += inA3 * inB;
-//       sum4 += inA4 * inB;
-//       sum5 += inA * inB2;
-//       sum6 += inA2 * inB2;
-//       sum7 += inA3 * inB2;
-//       sum8 += inA4 * inB2;
-//       inA = (int8_t) bitext((int) *pA, 2, 4);
-//       inA2 = (int8_t) bitext((int) *pA2, 2, 4);
-//       inA3 = (int8_t) bitext((int) *pA3, 2, 4);
-//       inA4 = (int8_t) bitext((int) *pA4, 2, 4);
-//       inB = *pB++;
-//       inB2 = *pB2++;
-//       sum += inA * inB;
-//       sum2 += inA2 * inB;
-//       sum3 += inA3 * inB;
-//       sum4 += inA4 * inB;
-//       sum5 += inA * inB2;
-//       sum6 += inA2 * inB2;
-//       sum7 += inA3 * inB2;
-//       sum8 += inA4 * inB2;
-//       inA = (int8_t) bitext((int) *pA, 2, 6);
-//       inA2 = (int8_t) bitext((int) *pA2, 2, 6);
-//       inA3 = (int8_t) bitext((int) *pA3, 2, 6);
-//       inA4 = (int8_t) bitext((int) *pA4, 2, 6);
-//       inB = *pB++;
-//       inB2 = *pB2++;
-//       sum += inA * inB;
-//       sum2 += inA2 * inB;
-//       sum3 += inA3 * inB;
-//       sum4 += inA4 * inB;
-//       sum5 += inA * inB2;
-//       sum6 += inA2 * inB2;
-//       sum7 += inA3 * inB2;
-//       sum8 += inA4 * inB2;
+%if config.kernel.wt_data_t < config.kernel.in_data_t:
+    pA-=4;
+    pA2-=4;
+    pA3-=4;
+    pA4-=4;
+%endif
 
-//       pA++;
-//       pA2++;
-//       pA3++;
-//       pA4++;
-//       col_cnt_im2col-=4;
-// %elif config.kernel.wt_data_t == 4:
-//       int8_t inA = (int8_t) bitext((int) *pA, 4, 0);
-//       int8_t inA2 = (int8_t) bitext((int) *pA2, 4, 0);
-//       int8_t inA3 = (int8_t) bitext((int) *pA3, 4, 0);
-//       int8_t inA4 = (int8_t) bitext((int) *pA4, 4, 0);
-//       uint8_t inB = *pB++;
-//       uint8_t inB2 = *pB2++;
-//       sum += inA * inB;
-//       sum2 += inA2 * inB;
-//       sum3 += inA3 * inB;
-//       sum4 += inA4 * inB;
-//       sum5 += inA * inB2;
-//       sum6 += inA2 * inB2;
-//       sum7 += inA3 * inB2;
-//       sum8 += inA4 * inB2;
-//       inA = (int8_t) bitext((int) *pA, 4, 4);
-//       inA2 = (int8_t) bitext((int) *pA2, 4, 4);
-//       inA3 = (int8_t) bitext((int) *pA3, 4, 4);
-//       inA4 = (int8_t) bitext((int) *pA4, 4, 4);
-//       inB = *pB++;
-//       inB2 = *pB2++;
-//       sum += inA * inB;
-//       sum2 += inA2 * inB;
-//       sum3 += inA3 * inB;
-//       sum4 += inA4 * inB;
-//       sum5 += inA * inB2;
-//       sum6 += inA2 * inB2;
-//       sum7 += inA3 * inB2;
-//       sum8 += inA4 * inB2;
+    int col_cnt_im2col = num_col_im2col & ${hex((((int(32/config.max_precision))*(int(config.max_precision/config.kernel.wt_data_t))))-1)};
 
-//       pA++;
-//       pA2++;
-//       pA3++;
-//       pA4++;
-//       col_cnt_im2col-=2;
-// %else:
-//       int8_t inA = *pA++;
-//       int8_t inA2 = *pA2++;
-//       int8_t inA3 = *pA3++;
-//       int8_t inA4 = *pA4++;
-//       uint8_t inB = *pB++;
-//       uint8_t inB2 = *pB2++;
-//       asm volatile("": : :"memory");
-//       sum += inA * inB;
-//       sum2 += inA2 * inB;
-//       sum3 += inA3 * inB;
-//       sum4 += inA4 * inB;
-//       sum5 += inA * inB2;
-//       sum6 += inA2 * inB2;
-//       sum7 += inA3 * inB2;
-//       sum8 += inA4 * inB2;
+    if(col_cnt_im2col)
+    {
+%if config.kernel.wt_data_t >= config.kernel.in_data_t:
+      uint16_t loop_cnt_im2col_w = (num_col_im2col >> ${int(math.log2(((int(32/config.max_precision))*(int(config.max_precision/config.kernel.wt_data_t)))))}) << 2;
+      pA+=loop_cnt_im2col_w;
+      pA2+=loop_cnt_im2col_w;
+      pA3+=loop_cnt_im2col_w;
+      pA4+=loop_cnt_im2col_w;
+%endif
 
-//       col_cnt_im2col--;
-// %endif
-//     }
+%if config.kernel.wt_data_t < config.kernel.in_data_t:
+      uint16_t loop_cnt_im2col_a = (num_col_im2col >> ${int(math.log2(((int(32/config.max_precision))*(int(config.max_precision/config.kernel.wt_data_t)))))}) << ${int(2+int(math.log2(int(config.kernel.in_data_t/config.kernel.wt_data_t))))};
+%else:
+      uint16_t loop_cnt_im2col_a = (num_col_im2col >> ${int(math.log2(((int(32/config.max_precision))*(int(config.max_precision/config.kernel.wt_data_t)))))}) << 2;
+%endif
+      pB+=loop_cnt_im2col_a;
+      pB2+=loop_cnt_im2col_a;
+
+      do
+      {
+%if config.kernel.in_data_t == 8:
+%if config.kernel.wt_data_t == 2:
+        int8_t inA = (int8_t) bitext((int) *pA, 2, 0);
+        int8_t inA2 = (int8_t) bitext((int) *pA2, 2, 0);
+        int8_t inA3 = (int8_t) bitext((int) *pA3, 2, 0);
+        int8_t inA4 = (int8_t) bitext((int) *pA4, 2, 0);
+
+        uint8_t inB = *pB++;
+        uint8_t inB2 = *pB2++;
+
+        sum += inA * inB;
+        sum2 += inA2 * inB;
+        sum3 += inA3 * inB;
+        sum4 += inA4 * inB;
+
+        sum5 += inA * inB2;
+        sum6 += inA2 * inB2;
+        sum7 += inA3 * inB2;
+        sum8 += inA4 * inB2;
+
+        inA = (int8_t) bitext((int) *pA, 2, 2);
+        inA2 = (int8_t) bitext((int) *pA2, 2, 2);
+        inA3 = (int8_t) bitext((int) *pA3, 2, 2);
+        inA4 = (int8_t) bitext((int) *pA4, 2, 2);
+
+        inB = *pB++;
+        inB2 = *pB2++;
+
+        sum += inA * inB;
+        sum2 += inA2 * inB;
+        sum3 += inA3 * inB;
+        sum4 += inA4 * inB;
+
+        sum5 += inA * inB2;
+        sum6 += inA2 * inB2;
+        sum7 += inA3 * inB2;
+        sum8 += inA4 * inB2;
+
+        inA = (int8_t) bitext((int) *pA, 2, 4);
+        inA2 = (int8_t) bitext((int) *pA2, 2, 4);
+        inA3 = (int8_t) bitext((int) *pA3, 2, 4);
+        inA4 = (int8_t) bitext((int) *pA4, 2, 4);
+
+        inB = *pB++;
+        inB2 = *pB2++;
+
+        sum += inA * inB;
+        sum2 += inA2 * inB;
+        sum3 += inA3 * inB;
+        sum4 += inA4 * inB;
+
+        sum5 += inA * inB2;
+        sum6 += inA2 * inB2;
+        sum7 += inA3 * inB2;
+        sum8 += inA4 * inB2;
+
+        inA = (int8_t) bitext((int) *pA, 2, 6);
+        inA2 = (int8_t) bitext((int) *pA2, 2, 6);
+        inA3 = (int8_t) bitext((int) *pA3, 2, 6);
+        inA4 = (int8_t) bitext((int) *pA4, 2, 6);
+
+        inB = *pB++;
+        inB2 = *pB2++;
+
+        sum += inA * inB;
+        sum2 += inA2 * inB;
+        sum3 += inA3 * inB;
+        sum4 += inA4 * inB;
+
+        sum5 += inA * inB2;
+        sum6 += inA2 * inB2;
+        sum7 += inA3 * inB2;
+        sum8 += inA4 * inB2;
+
+        pA++;
+        pA2++;
+        pA3++;
+        pA4++;
+
+        col_cnt_im2col-=4;
+%elif config.kernel.wt_data_t == 4:
+        int8_t inA = (int8_t) bitext((int) *pA, 4, 0);
+        int8_t inA2 = (int8_t) bitext((int) *pA2, 4, 0);
+        int8_t inA3 = (int8_t) bitext((int) *pA3, 4, 0);
+        int8_t inA4 = (int8_t) bitext((int) *pA4, 4, 0);
+
+        uint8_t inB = *pB++;
+        uint8_t inB2 = *pB2++;
+
+        sum += inA * inB;
+        sum2 += inA2 * inB;
+        sum3 += inA3 * inB;
+        sum4 += inA4 * inB;
+
+        sum5 += inA * inB2;
+        sum6 += inA2 * inB2;
+        sum7 += inA3 * inB2;
+        sum8 += inA4 * inB2;
+
+        inA = (int8_t) bitext((int) *pA, 4, 4);
+        inA2 = (int8_t) bitext((int) *pA2, 4, 4);
+        inA3 = (int8_t) bitext((int) *pA3, 4, 4);
+        inA4 = (int8_t) bitext((int) *pA4, 4, 4);
+
+        inB = *pB++;
+        inB2 = *pB2++;
+
+        sum += inA * inB;
+        sum2 += inA2 * inB;
+        sum3 += inA3 * inB;
+        sum4 += inA4 * inB;
+
+        sum5 += inA * inB2;
+        sum6 += inA2 * inB2;
+        sum7 += inA3 * inB2;
+        sum8 += inA4 * inB2;
+
+        pA++;
+        pA2++;
+        pA3++;
+        pA4++;
+
+        col_cnt_im2col-=2;
+%else:
+        int8_t inA = *pA++;
+        int8_t inA2 = *pA2++;
+        int8_t inA3 = *pA3++;
+        int8_t inA4 = *pA4++;
+
+        uint8_t inB = *pB++;
+        uint8_t inB2 = *pB2++;
+        asm volatile("": : :"memory");
+        sum += inA * inB;
+        sum2 += inA2 * inB;
+        sum3 += inA3 * inB;
+        sum4 += inA4 * inB;
+
+        sum5 += inA * inB2;
+        sum6 += inA2 * inB2;
+        sum7 += inA3 * inB2;
+        sum8 += inA4 * inB2;
+
+        col_cnt_im2col--;
+%endif
+%elif config.kernel.in_data_t == 4:
+%if config.kernel.wt_data_t == 2:
+        int8_t inA = (int8_t) bitext((int) *pA, 2, 0);
+        int8_t inA2 = (int8_t) bitext((int) *pA2, 2, 0);
+        int8_t inA3 = (int8_t) bitext((int) *pA3, 2, 0);
+        int8_t inA4 = (int8_t) bitext((int) *pA4, 2, 0);
+
+        uint8_t inB = (uint8_t)bitextu((unsigned int) *pB, 4, 0);
+        uint8_t inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 0);
+
+        sum += inA * inB;
+        sum2 += inA2 * inB;
+        sum3 += inA3 * inB;
+        sum4 += inA4 * inB;
+
+        sum5 += inA * inB2;
+        sum6 += inA2 * inB2;
+        sum7 += inA3 * inB2;
+        sum8 += inA4 * inB2;
+
+        inA = (int8_t) bitext((int) *pA, 2, 2);
+        inA2 = (int8_t) bitext((int) *pA2, 2, 2);
+        inA3 = (int8_t) bitext((int) *pA3, 2, 2);
+        inA4 = (int8_t) bitext((int) *pA4, 2, 2);
+
+        inB = (uint8_t)bitextu((unsigned int) *pB, 4, 4);
+        inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 4);
+
+        sum += inA * inB;
+        sum2 += inA2 * inB;
+        sum3 += inA3 * inB;
+        sum4 += inA4 * inB;
+
+        sum5 += inA * inB2;
+        sum6 += inA2 * inB2;
+        sum7 += inA3 * inB2;
+        sum8 += inA4 * inB2;
+
+        pB++;
+        pB2++;
+
+        inA = (int8_t) bitext((int) *pA, 2, 4);
+        inA2 = (int8_t) bitext((int) *pA2, 2, 4);
+        inA3 = (int8_t) bitext((int) *pA3, 2, 4);
+        inA4 = (int8_t) bitext((int) *pA4, 2, 4);
+
+        inB = (uint8_t)bitextu((unsigned int) *pB, 4, 0);
+        inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 0);
+
+        sum += inA * inB;
+        sum2 += inA2 * inB;
+        sum3 += inA3 * inB;
+        sum4 += inA4 * inB;
+
+        sum5 += inA * inB2;
+        sum6 += inA2 * inB2;
+        sum7 += inA3 * inB2;
+        sum8 += inA4 * inB2;
+
+        inA = (int8_t) bitext((int) *pA, 2, 6);
+        inA2 = (int8_t) bitext((int) *pA2, 2, 6);
+        inA3 = (int8_t) bitext((int) *pA3, 2, 6);
+        inA4 = (int8_t) bitext((int) *pA4, 2, 6);
+
+        inB = (uint8_t)bitextu((unsigned int) *pB, 4, 4);
+        inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 4);
+
+        sum += inA * inB;
+        sum2 += inA2 * inB;
+        sum3 += inA3 * inB;
+        sum4 += inA4 * inB;
+
+        sum5 += inA * inB2;
+        sum6 += inA2 * inB2;
+        sum7 += inA3 * inB2;
+        sum8 += inA4 * inB2;
+
+        pA++;
+        pA2++;
+        pA3++;
+        pA4++;
+
+        pB++;
+        pB2++;
+
+        col_cnt_im2col-=4;
+%elif config.kernel.wt_data_t == 4:
+        int8_t inA = (int8_t) bitext((int) *pA, 4, 0);
+        int8_t inA2 = (int8_t) bitext((int) *pA2, 4, 0);
+        int8_t inA3 = (int8_t) bitext((int) *pA3, 4, 0);
+        int8_t inA4 = (int8_t) bitext((int) *pA4, 4, 0);
+
+        uint8_t inB = (uint8_t)bitextu((unsigned int) *pB, 4, 0);
+        uint8_t inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 0);
+
+        sum += inA * inB;
+        sum2 += inA2 * inB;
+        sum3 += inA3 * inB;
+        sum4 += inA4 * inB;
+
+        sum5 += inA * inB2;
+        sum6 += inA2 * inB2;
+        sum7 += inA3 * inB2;
+        sum8 += inA4 * inB2;
+
+        inA = (int8_t) bitext((int) *pA, 4, 4);
+        inA2 = (int8_t) bitext((int) *pA2, 4, 4);
+        inA3 = (int8_t) bitext((int) *pA3, 4, 4);
+        inA4 = (int8_t) bitext((int) *pA4, 4, 4);
+
+        inB = (uint8_t)bitextu((unsigned int) *pB, 4, 4);
+        inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 4);
+
+        sum += inA * inB;
+        sum2 += inA2 * inB;
+        sum3 += inA3 * inB;
+        sum4 += inA4 * inB;
+
+        sum5 += inA * inB2;
+        sum6 += inA2 * inB2;
+        sum7 += inA3 * inB2;
+        sum8 += inA4 * inB2;
+
+        pA++;
+        pA2++;
+        pA3++;
+        pA4++;
+
+        pB++;
+        pB2++;
+
+        col_cnt_im2col-=2;
+%else:
+        int8_t inA = *pA++;
+        int8_t inA2 = *pA2++;
+        int8_t inA3 = *pA3++;
+        int8_t inA4 = *pA4++;
+
+        uint8_t inB = *pB++;
+        uint8_t inB2 = *pB2++;
+        asm volatile("": : :"memory");
+        sum += inA * inB;
+        sum2 += inA2 * inB;
+        sum3 += inA3 * inB;
+        sum4 += inA4 * inB;
+
+        sum5 += inA * inB2;
+        sum6 += inA2 * inB2;
+        sum7 += inA3 * inB2;
+        sum8 += inA4 * inB2;
+
+        col_cnt_im2col--;
+%endif
+%elif config.kernel.in_data_t == 2:
+%if config.kernel.wt_data_t == 2:
+        int8_t inA = (int8_t) bitext((int) *pA, 2, 0);
+        int8_t inA2 = (int8_t) bitext((int) *pA2, 2, 0);
+        int8_t inA3 = (int8_t) bitext((int) *pA3, 2, 0);
+        int8_t inA4 = (int8_t) bitext((int) *pA4, 2, 0);
+
+        uint8_t inB = (uint8_t)bitextu((unsigned int) *pB, 2, 0);
+        uint8_t inB2 = (uint8_t)bitextu((unsigned int) *pB2, 2, 0);
+
+        sum += inA * inB;
+        sum2 += inA2 * inB;
+        sum3 += inA3 * inB;
+        sum4 += inA4 * inB;
+
+        sum5 += inA * inB2;
+        sum6 += inA2 * inB2;
+        sum7 += inA3 * inB2;
+        sum8 += inA4 * inB2;
+
+        inA = (int8_t) bitext((int) *pA, 2, 2);
+        inA2 = (int8_t) bitext((int) *pA2, 2, 2);
+        inA3 = (int8_t) bitext((int) *pA3, 2, 2);
+        inA4 = (int8_t) bitext((int) *pA4, 2, 2);
+
+        inB = (uint8_t)bitextu((unsigned int) *pB, 2, 2);
+        inB2 = (uint8_t)bitextu((unsigned int) *pB2, 2, 2);
+
+        sum += inA * inB;
+        sum2 += inA2 * inB;
+        sum3 += inA3 * inB;
+        sum4 += inA4 * inB;
+
+        sum5 += inA * inB2;
+        sum6 += inA2 * inB2;
+        sum7 += inA3 * inB2;
+        sum8 += inA4 * inB2;
+
+        inA = (int8_t) bitext((int) *pA, 2, 4);
+        inA2 = (int8_t) bitext((int) *pA2, 2, 4);
+        inA3 = (int8_t) bitext((int) *pA3, 2, 4);
+        inA4 = (int8_t) bitext((int) *pA4, 2, 4);
+
+        inB = (uint8_t)bitextu((unsigned int) *pB, 2, 4);
+        inB2 = (uint8_t)bitextu((unsigned int) *pB2, 2, 4);
+
+        sum += inA * inB;
+        sum2 += inA2 * inB;
+        sum3 += inA3 * inB;
+        sum4 += inA4 * inB;
+
+        sum5 += inA * inB2;
+        sum6 += inA2 * inB2;
+        sum7 += inA3 * inB2;
+        sum8 += inA4 * inB2;
+
+        inA = (int8_t) bitext((int) *pA, 2, 6);
+        inA2 = (int8_t) bitext((int) *pA2, 2, 6);
+        inA3 = (int8_t) bitext((int) *pA3, 2, 6);
+        inA4 = (int8_t) bitext((int) *pA4, 2, 6);
+
+        inB = (uint8_t)bitextu((unsigned int) *pB, 2, 6);
+        inB2 = (uint8_t)bitextu((unsigned int) *pB2, 2, 6);
+
+        sum += inA * inB;
+        sum2 += inA2 * inB;
+        sum3 += inA3 * inB;
+        sum4 += inA4 * inB;
+
+        sum5 += inA * inB2;
+        sum6 += inA2 * inB2;
+        sum7 += inA3 * inB2;
+        sum8 += inA4 * inB2;
+
+        pA++;
+        pA2++;
+        pA3++;
+        pA4++;
+
+        pB++;
+        pB2++;
+
+        col_cnt_im2col-=4;
+%elif config.kernel.wt_data_t == 4:
+        int8_t inA = (int8_t) bitext((int) *pA, 4, 0);
+        int8_t inA2 = (int8_t) bitext((int) *pA2, 4, 0);
+        int8_t inA3 = (int8_t) bitext((int) *pA3, 4, 0);
+        int8_t inA4 = (int8_t) bitext((int) *pA4, 4, 0);
+
+        uint8_t inB = (uint8_t)bitextu((unsigned int) *pB, 4, 0);
+        uint8_t inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 0);
+
+        sum += inA * inB;
+        sum2 += inA2 * inB;
+        sum3 += inA3 * inB;
+        sum4 += inA4 * inB;
+
+        sum5 += inA * inB2;
+        sum6 += inA2 * inB2;
+        sum7 += inA3 * inB2;
+        sum8 += inA4 * inB2;
+
+        inA = (int8_t) bitext((int) *pA, 4, 4);
+        inA2 = (int8_t) bitext((int) *pA2, 4, 4);
+        inA3 = (int8_t) bitext((int) *pA3, 4, 4);
+        inA4 = (int8_t) bitext((int) *pA4, 4, 4);
+
+        inB = (uint8_t)bitextu((unsigned int) *pB, 4, 4);
+        inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 4);
+
+        sum += inA * inB;
+        sum2 += inA2 * inB;
+        sum3 += inA3 * inB;
+        sum4 += inA4 * inB;
+
+        sum5 += inA * inB2;
+        sum6 += inA2 * inB2;
+        sum7 += inA3 * inB2;
+        sum8 += inA4 * inB2;
+
+        pA++;
+        pA2++;
+        pA3++;
+        pA4++;
+
+        pB++;
+        pB2++;
+
+        col_cnt_im2col-=2;
+%else:
+        int8_t inA = *pA++;
+        int8_t inA2 = *pA2++;
+        int8_t inA3 = *pA3++;
+        int8_t inA4 = *pA4++;
+
+        uint8_t inB = *pB++;
+        uint8_t inB2 = *pB2++;
+        asm volatile("": : :"memory");
+        sum += inA * inB;
+        sum2 += inA2 * inB;
+        sum3 += inA3 * inB;
+        sum4 += inA4 * inB;
+
+        sum5 += inA * inB2;
+        sum6 += inA2 * inB2;
+        sum7 += inA3 * inB2;
+        sum8 += inA4 * inB2;
+
+        col_cnt_im2col--;
+%endif
+%endif
+      } while(col_cnt_im2col);
+%if config.kernel.wt_data_t >= config.kernel.in_data_t:
+      pA-=num_col_im2col_w;
+%endif
+    }
 %if config.kernel.out_data_t == 8 or config.kernel.quantization == 'shift_clip':
     if (flag_batch_norm && flag_relu)
     {
@@ -639,229 +994,448 @@ uint8_t *${config.fn_name}(
     pOut2++;
 %endif
 %if config.kernel.wt_data_t < config.kernel.in_data_t:
-    pA+=((3 * num_col_im2col_w) - 4);
+    pA+=(3 * num_col_im2col_w);
 %else:
     pA+=(4 * num_col_im2col_w);
 %endif
   }
-// %if config.kernel.out_data_t != 2:
-//   %if config.kernel.out_data_t == 4:
-//    uint16_t i = 0;
-//   %endif
-//    while(chan_left)
-//   {
-//     uint8_t *pB = pInBuffer ;
-//     uint8_t *pB2 = (pB + num_col_im2col);
-//     int sum = 0;
-//     if (bias != NULL)
-//       sum = ((int) (*bias++));    
-//     int sum2 = sum;
+%if config.kernel.out_data_t != 2:
+%if config.kernel.out_data_t == 4:
+  int i = 0;
+%endif
+  while(chan_left)
+  {
+    uint8_t *pB = pInBuffer;
+    uint8_t *pB2 = (pB + num_col_im2col_a);
 
-// %if config.kernel.out_data_t == 4:
-//     uint8_t out[2];
-//     uint8_t out2[2];
-// %endif
-//     for(int j=0; j < (num_col_im2col_w >> 2); j++)
-//     {
-// %if config.kernel.wt_data_t == 2:
-//       vecB = *((v4u*)pB);
-//       vecB2 = *((v4u*)pB2);
-//       vecB3 = *((v4u*)(pB + 4));
-//       vecB4 = *((v4u*)(pB2 + 4));
-//       vecB5 = *((v4u*)(pB + 8));
-//       vecB6 = *((v4u*)(pB2 + 8));
-//       vecB7 = *((v4u*)(pB + 12));
-//       vecB8 = *((v4u*)(pB2 + 12));
+    uint32_t *ptrB  = (uint32_t *) pB;
+    uint32_t *ptrB2 = (uint32_t *) pB2;
 
-//       pA = ${config.unpack_wt_fn}(pA,vecA);
+%if config.kernel.wt_data_t < config.kernel.in_data_t:
+    pA  = ${config.unpack_wt_fn}(pA , vecA);
 
-//       sum = SumDotp4(vecB, vecA[0], sum);
-//       sum2 = SumDotp4(vecB2, vecA[0], sum2);
-//       sum = SumDotp4(vecB3, vecA[1], sum);
-//       sum2 = SumDotp4(vecB4, vecA[1], sum2);
-//       sum = SumDotp4(vecB5, vecA[2], sum);
-//       sum2 = SumDotp4(vecB6, vecA[2], sum2);
-//       sum = SumDotp4(vecB7, vecA[3], sum);
-//       sum2 = SumDotp4(vecB8, vecA[3], sum2);
+    int32_t *startA;
 
-//       //pA+=4;
-//       pB+=16;
-//       pB2+=16;
-// %elif config.kernel.wt_data_t == 4:
-//       vecB = *((v4u*)pB);
-//       vecB2 = *((v4u*)pB2);
-//       vecB3 = *((v4u*)(pB + 4));
-//       vecB4 = *((v4u*)(pB2 + 4));
+    asm volatile("mv %0, %1":"=r"(startA):"r"(vecA));
 
-//       pA = ${config.unpack_wt_fn}(pA,vecA);
+    int32_t *ptrA  = (int32_t *) vecA;
+%else:
+    int32_t *ptrA  = (int32_t *) pA;
+%endif
 
-//       sum = SumDotp4(vecB, vecA[0], sum);
-//       sum2 = SumDotp4(vecB2, vecA[0], sum2);
+    ptrA  = MacLoadInit(1, 0, 0, 0, ptrA);
 
-//       sum = SumDotp4(vecB3, vecA[1], sum);
-//       sum2 = SumDotp4(vecB4, vecA[1], sum2);
+    ptrB  = MacLoadInit(0, 1, 0, 0, ptrB);
 
-//       //pA+=4;
-//       pB+=8;
-//       pB2+=8;
-// %else:
-//       vecA = *((v4s*) pA);
-//       vecB = *((v4u*) pB);
-//       vecB2 = *((v4u*) pB2);
+    int sum = 0;
+    if (bias != NULL)
+    {
+      sum = ((int) (*bias++));    
+    }
+    int sum2 = sum;
 
-//       sum = SumDotp4(vecB, vecA, sum);
-//       sum2 = SumDotp4(vecB2, vecA, sum2);
+%if config.kernel.out_data_t == 4:
+    uint8_t out[2];
+    uint8_t out2[2];
+%endif
+    for(int j=0; j < (num_col_im2col >> ${int(math.log2(((int(32/config.max_precision))*(int(config.max_precision/config.kernel.wt_data_t)))))}); j++)
+    {
+      ptrB2 = MacLoadInit(0, 1, 0, 1, ptrB2);
 
-//       pA+=4;
-//       pB+=4;
-//       pB2+=4;
-// %endif
-//     }
-// %if config.kernel.wt_data_t == 2:
-//     uint16_t col_cnt_im2col = num_col_im2col & 0xf;
-// %elif config.kernel.wt_data_t == 4:
-//     uint16_t col_cnt_im2col = num_col_im2col & 0x7;
-// %else:
-//     uint16_t col_cnt_im2col = num_col_im2col & 0x3;
-// %endif
-//     while(col_cnt_im2col)
-//     {
-// %if config.kernel.wt_data_t == 2:
-//       int8_t inA = (int8_t) bitext((int) *pA, 2, 0);
-//       uint8_t inB = *pB++;
-//       uint8_t inB2 = *pB2++;
-//       sum += inA * inB;
-//       sum2 += inA * inB2;
-//       inA = (int8_t) bitext((int) *pA, 2, 2);
-//       inB = *pB++;
-//       inB2 = *pB2++;
-//       sum += inA * inB;
-//       sum2 += inA * inB2;
-//       inA = (int8_t) bitext((int) *pA, 2, 4);
-//       inB = *pB++;
-//       inB2 = *pB2++;
-//       sum += inA * inB;
-//       sum2 += inA * inB2;
-//       inA = (int8_t) bitext((int) *pA, 2, 6);
-//       inB = *pB++;
-//       inB2 = *pB2++;
-//       sum += inA * inB;
-//       sum2 += inA * inB2;
+      sum  = MacLoad${int(32/config.max_precision)}(0, 1, 0, 0, ptrB, sum);
+      ptrB = MacLoadUpdate(ptrB);
 
-//       pA++;
-//       col_cnt_im2col-=4;
-// %elif config.kernel.wt_data_t == 4:
-//       int8_t inA = (int8_t) bitext((int) *pA, 4, 0);
-//       uint8_t inB = *pB++;
-//       uint8_t inB2 = *pB2++;
-//       sum += inA * inB;
-//       sum2 += inA * inB2;
-//       inA = (int8_t) bitext((int) *pA, 4, 4);
-//       inB = *pB++;
-//       inB2 = *pB2++;
-//       sum += inA * inB;
-//       sum2 += inA * inB2;
+      sum2 = MacLoad${int(32/config.max_precision)}(1, 0, 0, 1, ptrA, sum2);
+      ptrA = MacLoadUpdate(ptrA);
+%if config.kernel.wt_data_t < config.kernel.in_data_t:
+%if (config.kernel.in_data_t/config.kernel.wt_data_t) == 4:
+      ptrB2 = MacLoadInit(0, 1, 0, 1, ptrB2);
 
-//       pA++;
-//       col_cnt_im2col-=2;
-// %else:
-//       int8_t inA = *pA++;
-//       uint8_t inB = *pB++;
-//       uint8_t inB2 = *pB2++;
-//       asm volatile("": : :"memory");
-//       sum += inA * inB;
-//       sum2 += inA * inB2;
+      sum  = MacLoad${int(32/config.max_precision)}(0, 1, 0, 0, ptrB, sum);
+      ptrB = MacLoadUpdate(ptrB);
 
-//       col_cnt_im2col--;
-// %endif
-//     }
-// %if config.kernel.out_data_t == 8 or config.kernel.quantization == 'shift_clip':
-//     if (flag_batch_norm && flag_relu)
-//     {
-// %if config.kernel.out_data_t == 8:
-//       *pOut = ${config.bn_fn}(sum, *k, *lambda, out_shift);
-//       pOut++;
-//       *pOut2 = ${config.bn_fn}(sum2, *k, *lambda, out_shift);
-//       pOut2++;
-//       k++;
-//       lambda++;
-// %elif config.kernel.out_data_t == 4:
-//       uint8_t i_o = i & 0x01;
-//       out[i_o] = ${config.bn_fn}(sum, *k, *lambda, out_shift);
-//       out2[i_o] = ${config.bn_fn}(sum2, *k, *lambda, out_shift);
-//       k++;
-//       lambda++;
-//       if(i_o == 0x01)
-//       {
-//         *pOut = bitins(out[0], n_mask, out[1], mask, off);
-//         *pOut2 = bitins(out2[0], n_mask, out2[1], mask, off);
-//         pOut++;
-//         pOut2++;
-//       }
-// %endif
-//     }
-//     else
-//     {
-//       if (flag_relu == 1)
-//       {
-// %if config.kernel.out_data_t == 8:
-//         *pOut = ${config.relu_fn}(sum, out_mult, out_shift);
-//         pOut++;
-//         *pOut2 = ${config.relu_fn}(sum2, out_mult, out_shift);
-//         pOut2++;
-// %elif config.kernel.out_data_t == 4:
-//         uint8_t i_o = i & 0x01;
-//         out[i_o] = ${config.relu_fn}(sum, out_mult, out_shift);
-//         out2[i_o] = ${config.relu_fn}(sum2, out_mult, out_shift);
-//         if(i_o == 0x01)
-//         {
-//           *pOut = bitins(out[0], n_mask, out[1], mask, off);
-//           *pOut2 = bitins(out2[0], n_mask, out2[1], mask, off);
-//           pOut++;
-//           pOut2++;
-//         }
-// %endif
-//       }
-//       else
-//       {
-// %if config.kernel.out_data_t == 8:
-//         *pOut = (uint8_t) clip8(sum >> out_shift);
-//         pOut++;
-//         *pOut2 = (uint8_t) clip8(sum2 >> out_shift);
-//         pOut2++;
-// %elif config.kernel.out_data_t == 4:
-//         uint8_t i_o = i & 0x01;
-//         out[i_o] = (uint8_t) clip4(sum >> out_shift);
-//         out2[i_o] = (uint8_t) clip4(sum2 >> out_shift);
-//         if(i_o == 0x01)
-//         {
-//           *pOut = bitins(out[0], n_mask, out[1], mask, off);
-//           *pOut2 = bitins(out2[0], n_mask, out2[1], mask, off);
-//           pOut++;
-//           pOut2++;
-//         }
-// %endif
-//       }
-//     }
-// %elif config.kernel.out_data_t == 4:
-//     uint8_t i_o = i & 0x01;
-//     out[i_o] = pulp_nn_i4_quant(sum, pThr);
-//     out2[i_o] = pulp_nn_i4_quant(sum2, pThr);
-//     pThr+=16;
-//     if(i_o == 0x01)
-//     {
-//       *pOut = bitins(out[0], n_mask, out[1], mask, off);
-//       *pOut2 = bitins(out2[0], n_mask, out2[1], mask, off);
-//       pOut++;
-//       pOut2++;
-//     }
-// %endif
-// %if config.kernel.out_data_t == 4:
-//     i++;
-// %endif
-//     chan_left--;
-//   }
-// %endif
+      sum2 = MacLoad${int(32/config.max_precision)}(1, 0, 0, 1, ptrA, sum2);
+      ptrA = MacLoadUpdate(ptrA);
+
+      ptrB2 = MacLoadInit(0, 1, 0, 1, ptrB2);
+
+      sum  = MacLoad${int(32/config.max_precision)}(0, 1, 0, 0, ptrB, sum);
+      ptrB = MacLoadUpdate(ptrB);
+
+      sum2 = MacLoad${int(32/config.max_precision)}(1, 0, 0, 1, ptrA, sum2);
+      ptrA = MacLoadUpdate(ptrA);
+%endif
+      ptrB2  = MacLoadInit(0, 1, 0, 1, ptrB2);
+
+      sum  = MacLoad${int(32/config.max_precision)}(0, 1, 0, 0, ptrB, sum);   
+      ptrB = MacLoadUpdate(ptrB);
+
+      pA  = ${config.unpack_wt_fn}(pA , vecA);
+
+      ptrA   = MacLoadAssign(vecA);
+
+      sum2  = MacLoad${int(32/config.max_precision)}(1, 0, 0, 1, ptrA, sum2);
+      ptrA  = MacLoadUpdate(ptrA);
+%endif
+    }
+%if config.kernel.wt_data_t < config.kernel.in_data_t:
+    pA-=4;
+%endif
+    int col_cnt_im2col = num_col_im2col & ${hex((((int(32/config.max_precision))*(int(config.max_precision/config.kernel.wt_data_t))))-1)};
+
+    if(col_cnt_im2col)
+    {
+%if config.kernel.wt_data_t >= config.kernel.in_data_t:
+      uint16_t loop_cnt_im2col_w = (num_col_im2col >> ${int(math.log2(((int(32/config.max_precision))*(int(config.max_precision/config.kernel.wt_data_t)))))}) << 2;
+      pA+=loop_cnt_im2col_w;
+%endif
+
+%if config.kernel.wt_data_t < config.kernel.in_data_t:
+      uint16_t loop_cnt_im2col_a = (num_col_im2col >> ${int(math.log2(((int(32/config.max_precision))*(int(config.max_precision/config.kernel.wt_data_t)))))}) << ${int(2+int(math.log2(int(config.kernel.in_data_t/config.kernel.wt_data_t))))};
+%else:
+      uint16_t loop_cnt_im2col_a = (num_col_im2col >> ${int(math.log2(((int(32/config.max_precision))*(int(config.max_precision/config.kernel.wt_data_t)))))}) << 2;
+%endif
+      pB+=loop_cnt_im2col_a;
+      pB2+=loop_cnt_im2col_a;
+
+      do
+      {
+%if config.kernel.in_data_t == 8:
+%if config.kernel.wt_data_t == 2:
+        int8_t inA = (int8_t) bitext((int) *pA, 2, 0);
+
+        uint8_t inB = *pB++;
+        uint8_t inB2 = *pB2++;
+
+        sum += inA * inB;
+
+        sum2 += inA * inB2;
+
+        inA = (int8_t) bitext((int) *pA, 2, 2);
+
+        inB = *pB++;
+        inB2 = *pB2++;
+
+        sum += inA * inB;
+
+        sum2 += inA * inB2;
+
+        inA = (int8_t) bitext((int) *pA, 2, 4);
+
+        inB = *pB++;
+        inB2 = *pB2++;
+
+        sum += inA * inB;
+
+        sum2 += inA * inB2;
+
+        inA = (int8_t) bitext((int) *pA, 2, 6);
+
+        inB = *pB++;
+        inB2 = *pB2++;
+
+        sum += inA * inB;
+
+        sum2 += inA * inB2;
+
+        pA++;
+
+        col_cnt_im2col-=4;
+%elif config.kernel.wt_data_t == 4:
+        int8_t inA = (int8_t) bitext((int) *pA, 4, 0);
+
+        uint8_t inB = *pB++;
+        uint8_t inB2 = *pB2++;
+
+        sum += inA * inB;
+
+        sum2 += inA * inB2;
+
+        inA = (int8_t) bitext((int) *pA, 4, 4);
+
+        inB = *pB++;
+        inB2 = *pB2++;
+
+        sum += inA * inB;
+
+        sum2 += inA * inB2;
+
+        pA++;
+
+        col_cnt_im2col-=2;
+%else:
+        int8_t inA = *pA++;
+
+        uint8_t inB = *pB++;
+        uint8_t inB2 = *pB2++;
+        asm volatile("": : :"memory");
+        sum += inA * inB;
+
+        sum2 += inA * inB2;
+
+        col_cnt_im2col--;
+%endif
+%elif config.kernel.in_data_t == 4:
+%if config.kernel.wt_data_t == 2:
+        int8_t inA = (int8_t) bitext((int) *pA, 2, 0);
+
+        uint8_t inB = (uint8_t)bitextu((unsigned int) *pB, 4, 0);
+        uint8_t inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 0);
+
+        sum += inA * inB;
+
+        sum2 += inA * inB2;
+
+        inA = (int8_t) bitext((int) *pA, 2, 2);
+
+        inB = (uint8_t)bitextu((unsigned int) *pB, 4, 4);
+        inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 4);
+
+        sum += inA * inB;
+
+        sum2 += inA * inB2;
+
+        pB++;
+        pB2++;
+
+        inA = (int8_t) bitext((int) *pA, 2, 4);
+
+        inB = (uint8_t)bitextu((unsigned int) *pB, 4, 0);
+        inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 0);
+
+        sum += inA * inB;
+
+        sum2 += inA * inB2;
+
+        inA = (int8_t) bitext((int) *pA, 2, 6);
+
+        inB = (uint8_t)bitextu((unsigned int) *pB, 4, 4);
+        inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 4);
+
+        sum += inA * inB;
+
+        sum2 += inA * inB2;
+
+        pA++;
+
+        pB++;
+        pB2++;
+
+        col_cnt_im2col-=4;
+%elif config.kernel.wt_data_t == 4:
+        int8_t inA = (int8_t) bitext((int) *pA, 4, 0);
+
+        uint8_t inB = (uint8_t)bitextu((unsigned int) *pB, 4, 0);
+        uint8_t inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 0);
+
+        sum += inA * inB;
+
+        sum2 += inA * inB2;
+
+        inA = (int8_t) bitext((int) *pA, 4, 4);
+
+        inB = (uint8_t)bitextu((unsigned int) *pB, 4, 4);
+        inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 4);
+
+        sum += inA * inB;
+
+        sum2 += inA * inB2;
+
+        pA++;
+
+        pB++;
+        pB2++;
+
+        col_cnt_im2col-=2;
+%else:
+        int8_t inA = *pA++;
+
+        uint8_t inB = *pB++;
+        uint8_t inB2 = *pB2++;
+        asm volatile("": : :"memory");
+        sum += inA * inB;
+
+        sum2 += inA * inB2;
+
+        col_cnt_im2col--;
+%endif
+%elif config.kernel.in_data_t == 2:
+%if config.kernel.wt_data_t == 2:
+        int8_t inA = (int8_t) bitext((int) *pA, 2, 0);
+
+        uint8_t inB = (uint8_t)bitextu((unsigned int) *pB, 2, 0);
+        uint8_t inB2 = (uint8_t)bitextu((unsigned int) *pB2, 2, 0);
+
+        sum += inA * inB;
+
+        sum2 += inA * inB2;
+
+        inA = (int8_t) bitext((int) *pA, 2, 2);
+
+        inB = (uint8_t)bitextu((unsigned int) *pB, 2, 2);
+        inB2 = (uint8_t)bitextu((unsigned int) *pB2, 2, 2);
+
+        sum += inA * inB;
+
+        sum2 += inA * inB2;
+
+        inA = (int8_t) bitext((int) *pA, 2, 4);
+
+        inB = (uint8_t)bitextu((unsigned int) *pB, 2, 4);
+        inB2 = (uint8_t)bitextu((unsigned int) *pB2, 2, 4);
+
+        sum += inA * inB;
+
+        sum2 += inA * inB2;
+
+        inA = (int8_t) bitext((int) *pA, 2, 6);
+
+        inB = (uint8_t)bitextu((unsigned int) *pB, 2, 6);
+        inB2 = (uint8_t)bitextu((unsigned int) *pB2, 2, 6);
+
+        sum += inA * inB;
+
+        sum2 += inA * inB2;
+
+        pA++;
+
+        pB++;
+        pB2++;
+
+        col_cnt_im2col-=4;
+%elif config.kernel.wt_data_t == 4:
+        int8_t inA = (int8_t) bitext((int) *pA, 4, 0);
+
+        uint8_t inB = (uint8_t)bitextu((unsigned int) *pB, 4, 0);
+        uint8_t inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 0);
+
+        sum += inA * inB;
+
+        sum2 += inA * inB2;
+
+        inA = (int8_t) bitext((int) *pA, 4, 4);
+
+        inB = (uint8_t)bitextu((unsigned int) *pB, 4, 0);
+        inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 0);
+
+        sum += inA * inB;
+
+        sum2 += inA * inB2;
+
+        pA++;
+
+        pB++;
+        pB2++;
+
+        col_cnt_im2col-=2;
+%else:
+        int8_t inA = *pA++;
+
+        uint8_t inB = *pB++;
+        uint8_t inB2 = *pB2++;
+        asm volatile("": : :"memory");
+        sum += inA * inB;
+
+        sum2 += inA * inB2;
+
+        col_cnt_im2col--;
+%endif
+%endif
+      } while(col_cnt_im2col);
+%if config.kernel.wt_data_t >= config.kernel.in_data_t:
+      pA-=num_col_im2col_w;
+%endif
+    }
+%if config.kernel.out_data_t == 8 or config.kernel.quantization == 'shift_clip':
+    if (flag_batch_norm && flag_relu)
+    {
+%if config.kernel.out_data_t == 8:
+      *pOut = ${config.bn_fn}(sum, *k, *lambda, out_shift);
+      pOut++;
+      *pOut2 = ${config.bn_fn}(sum2, *k, *lambda, out_shift);
+      pOut2++;
+      k++;
+      lambda++;
+%elif config.kernel.out_data_t == 4:
+      uint8_t i_o = i & 0x01;
+      out[i_o] = ${config.bn_fn}(sum, *k, *lambda, out_shift);
+      out2[i_o] = ${config.bn_fn}(sum2, *k, *lambda, out_shift);
+      k++;
+      lambda++;
+      if(i_o == 0x01)
+      {
+        *pOut = bitins(out[0], n_mask, out[1], mask, off);
+        *pOut2 = bitins(out2[0], n_mask, out2[1], mask, off);
+        pOut++;
+        pOut2++;
+      }
+%endif
+    }
+    else
+    {
+      if (flag_relu == 1)
+      {
+%if config.kernel.out_data_t == 8:
+        *pOut = ${config.relu_fn}(sum, out_mult, out_shift);
+        pOut++;
+        *pOut2 = ${config.relu_fn}(sum2, out_mult, out_shift);
+        pOut2++;
+%elif config.kernel.out_data_t == 4:
+        uint8_t i_o = i & 0x01;
+        out[i_o] = ${config.relu_fn}(sum, out_mult, out_shift);
+        out2[i_o] = ${config.relu_fn}(sum2, out_mult, out_shift);
+        if(i_o == 0x01)
+        {
+          *pOut = bitins(out[0], n_mask, out[1], mask, off);
+          *pOut2 = bitins(out2[0], n_mask, out2[1], mask, off);
+          pOut++;
+          pOut2++;
+        }
+%endif
+      }
+      else
+      {
+%if config.kernel.out_data_t == 8:
+        *pOut = (uint8_t) clip8(sum >> out_shift);
+        pOut++;
+        *pOut2 = (uint8_t) clip8(sum2 >> out_shift);
+        pOut2++;
+%elif config.kernel.out_data_t == 4:
+        uint8_t i_o = i & 0x01;
+        out[i_o] = (uint8_t) clip4(sum >> out_shift);
+        out2[i_o] = (uint8_t) clip4(sum2 >> out_shift);
+        if(i_o == 0x01)
+        {
+          *pOut = bitins(out[0], n_mask, out[1], mask, off);
+          *pOut2 = bitins(out2[0], n_mask, out2[1], mask, off);
+          pOut++;
+          pOut2++;
+        }
+%endif
+      }
+    }
+%elif config.kernel.out_data_t == 4:
+    uint8_t i_o = i & 0x01;
+    out[i_o] = pulp_nn_i4_quant(sum, pThr);
+    out2[i_o] = pulp_nn_i4_quant(sum2, pThr);
+    pThr+=16;
+    if(i_o == 0x01)
+    {
+      *pOut = bitins(out[0], n_mask, out[1], mask, off);
+      *pOut2 = bitins(out2[0], n_mask, out2[1], mask, off);
+      pOut++;
+      pOut2++;
+    }
+%endif
+%if config.kernel.out_data_t == 4:
+    i++;
+%endif
+%if config.kernel.wt_data_t >= config.kernel.in_data_t:
+    pA+=num_col_im2col_w;
+%endif
+    chan_left--;
+  }
+%endif
   pOut+=ch_out_r;
   return pOut;
 }
