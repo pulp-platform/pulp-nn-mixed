@@ -91,14 +91,16 @@ def main():
                             pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='linear_q', comp=lin_q, api=pulp_nn_init.PULPNNAPI)
 
             for i in pulp_nn_init.PULPNNDataPrecisions:
-                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='maxpool', inp=i, out=None, wt=None, quant=None, act_prec=a, ext=e)
-                maxp=pulp_nn_factory.PULPNNMaxPool(kernel=kernel_to_test, layer=None)
-                pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='maxpool', comp=maxp, api=pulp_nn_init.PULPNNAPI)
+                if (i < 8 and e == 'XpulpNN') or e == 'XpulpV2':
+                    kernel_to_test = pulp_nn_factory.PULPNNKernel(name='maxpool', inp=i, out=None, wt=None, quant=None, act_prec=a, ext=e)
+                    maxp=pulp_nn_factory.PULPNNMaxPool(kernel=kernel_to_test, layer=None)
+                    pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='maxpool', comp=maxp, api=pulp_nn_init.PULPNNAPI)
 
             for i in pulp_nn_init.PULPNNDataPrecisions:
-                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='avgpool', inp=i, out=None, wt=None, quant=None, act_prec=a, ext=e)
-                avgp=pulp_nn_factory.PULPNNAvgPool(kernel=kernel_to_test, layer=None)
-                pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='avgpool', comp=avgp, api=pulp_nn_init.PULPNNAPI)
+                if (i < 8 and e == 'XpulpNN') or e == 'XpulpV2':
+                    kernel_to_test = pulp_nn_factory.PULPNNKernel(name='avgpool', inp=i, out=None, wt=None, quant=None, act_prec=a, ext=e)
+                    avgp=pulp_nn_factory.PULPNNAvgPool(kernel=kernel_to_test, layer=None)
+                    pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='avgpool', comp=avgp, api=pulp_nn_init.PULPNNAPI)
 
             for i in pulp_nn_init.PULPNNDataPrecisions:
                 for j in pulp_nn_init.PULPNNDataPrecisions:

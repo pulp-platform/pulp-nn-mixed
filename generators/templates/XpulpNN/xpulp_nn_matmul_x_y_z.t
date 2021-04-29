@@ -22,27 +22,25 @@
 
 
 uint8_t * __attribute__((noinline)) ${config.fn_name}(
-          const int8_t * pWeight,
-          uint8_t * pInBuffer,
-          uint16_t ch_out,
-          uint16_t num_col_im2col,
-          uint16_t bias_shift,
-          int8_t out_shift,
-          uint16_t out_mult,
-%if config.kernel.quantization == 'shift_clip' and config.kernel.act_prec == '32bit':
-          int32_t *k,
-          int32_t *lambda,
-%elif config.kernel.quantization == 'shift_clip' and config.kernel.act_prec == '64bit':
-          int64_t *k,
-          int64_t *lambda,
-%else:
-          int16_t *pThr,
+                        uint8_t *pIn,
+                        int8_t *pBias,
+                        uint8_t *pOut,
+                        uint8_t *pOut2,
+                        int8_t *pWeight,
+%if config.kernel.act_prec == '32bit':
+                        int32_t *pKappa,
+                        int32_t *pLambda,
+%elif config.kernel.act_prec == '64bit':
+                        int64_t *pKappa,
+                        int64_t *pLambda,
 %endif
-          const int8_t * bias,
-          uint8_t * pOut,
-          int flag_relu,
-          int flag_batch_norm
-) {
+                        uint16_t out_mult,
+                        uint16_t out_shift,
+                        uint16_t num_col_im2col,
+                        uint16_t ch_out,
+                        uint8_t flag_relu,
+                        uint8_t flag_batch_norm)
+{
 %if config.kernel.out_data_t == 2:
   int8_t mask2 = 0x0c;
   int8_t n_mask2 = ~ mask2;
@@ -70,14 +68,14 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
   uint16_t num_col_im2col_w = PACK_INT${config.kernel.wt_data_t}_SIZE(num_col_im2col);
   uint16_t num_col_im2col_a = PACK_INT${config.max_precision}_SIZE(num_col_im2col);
 
-  uint8_t *pOut2 = pOut + ch_out_r;
+  //uint8_t *pOut2 = pOut + ch_out_r;
   int8_t *pA = pWeight;
 
   uint16_t chan_left = ch_out & 0x3;
 
   for(int i=0; i < (ch_out >> 2); i++)
   {
-    uint8_t *pB =  pInBuffer;
+    uint8_t *pB =  pIn;
     uint8_t *pB2 = (pB + num_col_im2col_a);
 
     uint32_t *ptrB  = (uint32_t *) pB;
@@ -130,12 +128,12 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
     int sum7 = 0;
     int sum8 = 0;
 
-    if (bias != NULL)
+    if (pBias != NULL)
     {
-      sum = ((int) (*bias++));
-      sum2 = ((int) (*bias++));      
-      sum3 = ((int) (*bias++));      
-      sum4 = ((int) (*bias++));
+      sum = ((int) (*pBias++));
+      sum2 = ((int) (*pBias++));
+      sum3 = ((int) (*pBias++));
+      sum4 = ((int) (*pBias++));
 
       sum5 = sum;
       sum6 = sum2;
@@ -724,75 +722,75 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
     if (flag_batch_norm && flag_relu)
     {
 %if config.kernel.out_data_t == 8:
-      *pOut = ${config.bn_fn}(sum, *k, *lambda, out_shift);
+      *pOut = ${config.bn_fn}(sum, *pKappa, *pLambda, out_shift);
       pOut++;
-      *pOut2 = ${config.bn_fn}(sum5, *k, *lambda, out_shift);
+      *pOut2 = ${config.bn_fn}(sum5, *pKappa, *pLambda, out_shift);
       pOut2++;
-      k++;
-      lambda++;
+      pKappa++;
+      pLambda++;
 
-      *pOut = ${config.bn_fn}(sum2, *k, *lambda, out_shift);
+      *pOut = ${config.bn_fn}(sum2, *pKappa, *pLambda, out_shift);
       pOut++;
-      *pOut2 = ${config.bn_fn}(sum6, *k, *lambda, out_shift);
+      *pOut2 = ${config.bn_fn}(sum6, *pKappa, *pLambda, out_shift);
       pOut2++;
-      k++;
-      lambda++;
+      pKappa++;
+      pLambda++;
 
-      *pOut = ${config.bn_fn}(sum3, *k, *lambda, out_shift);
+      *pOut = ${config.bn_fn}(sum3, *pKappa, *pLambda, out_shift);
       pOut++;
-      *pOut2 = ${config.bn_fn}(sum7, *k, *lambda, out_shift);
+      *pOut2 = ${config.bn_fn}(sum7, *pKappa, *pLambda, out_shift);
       pOut2++;
-      k++;
-      lambda++;
+      pKappa++;
+      pLambda++;
 
-      *pOut = ${config.bn_fn}(sum4, *k, *lambda, out_shift);
+      *pOut = ${config.bn_fn}(sum4, *pKappa, *pLambda, out_shift);
       pOut++;
-      *pOut2 = ${config.bn_fn}(sum8, *k, *lambda, out_shift);
+      *pOut2 = ${config.bn_fn}(sum8, *pKappa, *pLambda, out_shift);
       pOut2++;
-      k++;
-      lambda++;
+      pKappa++;
+      pLambda++;
 %elif config.kernel.out_data_t == 4:
-      sum = ${config.bn_fn}(sum, *k, *lambda, out_shift);
-      sum5 = ${config.bn_fn}(sum5, *k, *lambda, out_shift);
-      k++;
-      lambda++;
-      sum2 = ${config.bn_fn}(sum2, *k, *lambda, out_shift);
-      sum6 = ${config.bn_fn}(sum6, *k, *lambda, out_shift);
+      sum = ${config.bn_fn}(sum, *pKappa, *pLambda, out_shift);
+      sum5 = ${config.bn_fn}(sum5, *pKappa, *pLambda, out_shift);
+      pKappa++;
+      pLambda++;
+      sum2 = ${config.bn_fn}(sum2, *pKappa, *pLambda, out_shift);
+      sum6 = ${config.bn_fn}(sum6, *pKappa, *pLambda, out_shift);
       *pOut = bitins(sum, n_mask, sum2, mask, off);
       *pOut2 = bitins(sum5, n_mask, sum6, mask, off);
-      k++;
-      lambda++;
+      pKappa++;
+      pLambda++;
       pOut++;
       pOut2++;
-      sum3 = ${config.bn_fn}(sum3, *k, *lambda, out_shift);
-      sum7 = ${config.bn_fn}(sum7, *k, *lambda, out_shift);
-      k++;
-      lambda++;
-      sum4 = ${config.bn_fn}(sum4, *k, *lambda, out_shift);
-      sum8 = ${config.bn_fn}(sum8, *k, *lambda, out_shift);
-      k++;
-      lambda++;
+      sum3 = ${config.bn_fn}(sum3, *pKappa, *pLambda, out_shift);
+      sum7 = ${config.bn_fn}(sum7, *pKappa, *pLambda, out_shift);
+      pKappa++;
+      pLambda++;
+      sum4 = ${config.bn_fn}(sum4, *pKappa, *pLambda, out_shift);
+      sum8 = ${config.bn_fn}(sum8, *pKappa, *pLambda, out_shift);
+      pKappa++;
+      pLambda++;
       *pOut = bitins(sum3, n_mask, sum4, mask, off);
       *pOut2 = bitins(sum7, n_mask, sum8, mask, off);
       pOut++;
       pOut2++;
 %elif config.kernel.out_data_t == 2:
-      sum = ${config.bn_fn}(sum, *k, *lambda, out_shift);
-      sum5 = ${config.bn_fn}(sum5, *k, *lambda, out_shift);
-      k++;
-      lambda++;
-      sum2 = ${config.bn_fn}(sum2, *k, *lambda, out_shift);
-      sum6 = ${config.bn_fn}(sum6, *k, *lambda, out_shift);
-      k++;
-      lambda++;
-      sum3 = ${config.bn_fn}(sum3, *k, *lambda, out_shift);
-      sum7 = ${config.bn_fn}(sum7, *k, *lambda, out_shift);
-      k++;
-      lambda++;
-      sum4 = ${config.bn_fn}(sum4, *k, *lambda, out_shift);
-      sum8 = ${config.bn_fn}(sum8, *k, *lambda, out_shift);
-      k++;
-      lambda++;
+      sum = ${config.bn_fn}(sum, *pKappa, *pLambda, out_shift);
+      sum5 = ${config.bn_fn}(sum5, *pKappa, *pLambda, out_shift);
+      pKappa++;
+      pLambda++;
+      sum2 = ${config.bn_fn}(sum2, *pKappa, *pLambda, out_shift);
+      sum6 = ${config.bn_fn}(sum6, *pKappa, *pLambda, out_shift);
+      pKappa++;
+      pLambda++;
+      sum3 = ${config.bn_fn}(sum3, *pKappa, *pLambda, out_shift);
+      sum7 = ${config.bn_fn}(sum7, *pKappa, *pLambda, out_shift);
+      pKappa++;
+      pLambda++;
+      sum4 = ${config.bn_fn}(sum4, *pKappa, *pLambda, out_shift);
+      sum8 = ${config.bn_fn}(sum8, *pKappa, *pLambda, out_shift);
+      pKappa++;
+      pLambda++;
       sum = bitins(sum, n_mask2, sum2, mask2, off2);
       sum = bitins(sum, n_mask4, sum3, mask4, off4);
       *pOut = bitins(sum, n_mask6, sum4, mask6, off6);
@@ -1005,7 +1003,7 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 %endif
   while(chan_left)
   {
-    uint8_t *pB = pInBuffer;
+    uint8_t *pB = pIn;
     uint8_t *pB2 = (pB + num_col_im2col_a);
 
     uint32_t *ptrB  = (uint32_t *) pB;
@@ -1028,9 +1026,9 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
     ptrB  = MacLoadInit(0, 1, 0, 0, ptrB);
 
     int sum = 0;
-    if (bias != NULL)
+    if (pBias != NULL)
     {
-      sum = ((int) (*bias++));    
+      sum = ((int) (*pBias++));    
     }
     int sum2 = sum;
 
@@ -1350,18 +1348,18 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
     if (flag_batch_norm && flag_relu)
     {
 %if config.kernel.out_data_t == 8:
-      *pOut = ${config.bn_fn}(sum, *k, *lambda, out_shift);
+      *pOut = ${config.bn_fn}(sum, *pKappa, *pLambda, out_shift);
       pOut++;
-      *pOut2 = ${config.bn_fn}(sum2, *k, *lambda, out_shift);
+      *pOut2 = ${config.bn_fn}(sum2, *pKappa, *pLambda, out_shift);
       pOut2++;
-      k++;
-      lambda++;
+      pKappa++;
+      pLambda++;
 %elif config.kernel.out_data_t == 4:
       uint8_t i_o = i & 0x01;
-      out[i_o] = ${config.bn_fn}(sum, *k, *lambda, out_shift);
-      out2[i_o] = ${config.bn_fn}(sum2, *k, *lambda, out_shift);
-      k++;
-      lambda++;
+      out[i_o] = ${config.bn_fn}(sum, *pKappa, *pLambda, out_shift);
+      out2[i_o] = ${config.bn_fn}(sum2, *pKappa, *pLambda, out_shift);
+      pKappa++;
+      pLambda++;
       if(i_o == 0x01)
       {
         *pOut = bitins(out[0], n_mask, out[1], mask, off);

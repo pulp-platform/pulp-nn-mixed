@@ -19,33 +19,26 @@
 
 #include "pmsis.h"
 #include "pulp_nn_utils.h"
-#include "pulp_nn_kernels.h"
 
 
 void ${config.fn_name}(
-                  uint8_t *pInBuffer,
-                  int8_t *pWeights,
-                  uint16_t dim_vec,
-                  uint16_t num_o_neurons,
-                  int8_t *bias,
-                  uint16_t bias_shift,
-                  int8_t out_shift,
-                  uint16_t out_mult,
+                        uint8_t *pIn,
+                        int8_t *pBias,
+                        uint8_t *pOut,
+                        int8_t *pWeight,
 %if config.kernel.act_prec == '32bit':
-                  int32_t *k,
-                  int32_t *lambda,
+                        int32_t *pKappa,
+                        int32_t *pLambda,
 %elif config.kernel.act_prec == '64bit':
-                  int64_t *k,
-                  int64_t *lambda,
+                        int64_t *pKappa,
+                        int64_t *pLambda,
 %endif
-%if config.kernel.quantization == 'thresholds':
-                  int16_t *pThr,
-%endif
-                  uint8_t *pOutBuffer,
-                  int flag_relu,
-                  int flag_batch_norm,
-                  unsigned int * memory_chan
-)
+                        uint16_t out_mult,
+                        uint16_t out_shift,
+                        uint16_t dim_vec,
+                        uint16_t num_o_neurons,
+                        uint8_t flag_relu,
+                        uint8_t flag_batch_norm)
 {
 %if config.kernel.out_data_t == 2:
     int8_t mask2 = 0x0c;
@@ -123,22 +116,22 @@ void ${config.fn_name}(
 %endif
 
 %if config.kernel.out_data_t == 8:
-    uint8_t *pOut = (uint8_t *) pOutBuffer + start;
+    uint8_t *pOutBuffer = (uint8_t *) pOut + start;
     int lft_neurons = chunk & 0x01;
     int stop_even = stop - lft_neurons;
 %elif config.kernel.out_data_t == 4:
-    uint8_t *pOut = (uint8_t *) pOutBuffer + (start >> 1);
+    uint8_t *pOutBuffer = (uint8_t *) pOut + (start >> 1);
 %elif config.kernel.out_data_t == 2:
-    uint8_t *pOut = (uint8_t *) pOutBuffer + (start >> 2);
+    uint8_t *pOutBuffer = (uint8_t *) pOut + (start >> 2);
 %endif
 
     int i;
 %if config.kernel.act_prec == '32bit':
-    int32_t *k1 = k + start;
-    int32_t *lambda1 = lambda + start;
+    int32_t *k1 = pKappa + start;
+    int32_t *lambda1 = pLambda + start;
 %elif config.kernel.act_prec == '64bit':
-    int64_t *k1 = k + start;
-    int64_t *lambda1 = lambda + start;
+    int64_t *k1 = pKappa + start;
+    int64_t *lambda1 = pLambda + start;
 %endif
 
 %if config.kernel.out_data_t == 2:
@@ -156,8 +149,8 @@ void ${config.fn_name}(
         int sum4 = 0;
 %endif
 
-        uint8_t *pA = pInBuffer;
-        int8_t *pB = pWeights + (i * dim_vec_wt);
+        uint8_t *pA = pIn;
+        int8_t *pB = pWeight + (i * dim_vec_wt);
         int8_t *pB2 = pB + dim_vec_wt;
 %if config.kernel.out_data_t == 2:
         int8_t *pB3 = pB2 + dim_vec_wt;
@@ -336,12 +329,12 @@ void ${config.fn_name}(
           sum4 = SumDotp4(vecA[3], vecB4[3], sum4);
 %endif
 %endif
-          //pA+=4;
-          //pB+=4;
-          //pB2+=4;
+          pA+=4;
+          pB+=4;
+          pB2+=4;
 %if config.kernel.out_data_t == 2:
-          //pB3+=4;
-          //pB4+=4;
+          pB3+=4;
+          pB4+=4;
 %endif
         }
 %if config.less_precision == 2:
@@ -562,17 +555,17 @@ void ${config.fn_name}(
         if (flag_batch_norm && flag_relu)
         {
 %if config.kernel.out_data_t == 8:
-          *pOut = ${config.bn_fn}(sum, *k1, *lambda1, out_shift);
-          pOut++;
-          *pOut = ${config.bn_fn}(sum2, *(k1 + 1), *(lambda1 + 1), out_shift);
-          pOut++;
+          *pOutBuffer = ${config.bn_fn}(sum, *k1, *lambda1, out_shift);
+          pOutBuffer++;
+          *pOutBuffer = ${config.bn_fn}(sum2, *(k1 + 1), *(lambda1 + 1), out_shift);
+          pOutBuffer++;
           k1+=2;
           lambda1+=2;
 %elif config.kernel.out_data_t == 4:
           sum = ${config.bn_fn}(sum, *k1, *lambda1, out_shift);
           sum2 = ${config.bn_fn}(sum2, *(k1 + 1), *(lambda1 + 1), out_shift);
-          *pOut = bitins(sum, n_mask, sum2, mask, off);
-          pOut++;
+          *pOutBuffer = bitins(sum, n_mask, sum2, mask, off);
+          pOutBuffer++;
           k1+=2;
           lambda1+=2;
 %elif config.kernel.out_data_t == 2:
@@ -584,8 +577,8 @@ void ${config.fn_name}(
           lambda1+=4;
           sum = bitins(sum, n_mask2, sum2, mask2, off2);
           sum = bitins(sum, n_mask4, sum3, mask4, off4);
-          *pOut = bitins(sum, n_mask6, sum4, mask6, off6);
-          pOut++;
+          *pOutBuffer = bitins(sum, n_mask6, sum4, mask6, off6);
+          pOutBuffer++;
 %endif
         }
         else
@@ -593,15 +586,15 @@ void ${config.fn_name}(
           if (flag_relu == 1)
           {
 %if config.kernel.out_data_t == 8:
-            *pOut = ${config.relu_fn}(sum, out_mult, out_shift);
-            pOut++;
-            *pOut = ${config.relu_fn}(sum2, out_mult, out_shift);
-            pOut++;
+            *pOutBuffer = ${config.relu_fn}(sum, out_mult, out_shift);
+            pOutBuffer++;
+            *pOutBuffer = ${config.relu_fn}(sum2, out_mult, out_shift);
+            pOutBuffer++;
 %elif config.kernel.out_data_t == 4:
             sum = ${config.relu_fn}(sum, out_mult, out_shift);
             sum2 = ${config.relu_fn}(sum2, out_mult, out_shift);
-            *pOut = bitins(sum, n_mask, sum2, mask, off);
-            pOut++;
+            *pOutBuffer = bitins(sum, n_mask, sum2, mask, off);
+            pOutBuffer++;
 %elif config.kernel.out_data_t == 2:
             sum = ${config.relu_fn}(sum, out_mult, out_shift);
             sum2 = ${config.relu_fn}(sum2, out_mult, out_shift);
@@ -609,22 +602,22 @@ void ${config.fn_name}(
             sum4 = ${config.relu_fn}(sum4, out_mult, out_shift);
             sum = bitins(sum, n_mask2, sum2, mask2, off2);
             sum = bitins(sum, n_mask4, sum3, mask4, off4);
-            *pOut = bitins(sum, n_mask6, sum4, mask6, off6);
-            pOut++;
+            *pOutBuffer = bitins(sum, n_mask6, sum4, mask6, off6);
+            pOutBuffer++;
 %endif
           }
           else
           {
 %if config.kernel.out_data_t == 8:
-            *pOut = (uint8_t) clip8(sum >> out_shift);
-            pOut++;
-            *pOut = (uint8_t) clip8(sum2 >> out_shift);
-            pOut++;
+            *pOutBuffer = (uint8_t) clip8(sum >> out_shift);
+            pOutBuffer++;
+            *pOutBuffer = (uint8_t) clip8(sum2 >> out_shift);
+            pOutBuffer++;
 %elif config.kernel.out_data_t == 4:
             sum = (uint8_t) clip4(sum >> out_shift);
             sum2 = (uint8_t) clip4(sum2 >> out_shift);
-            *pOut = bitins(sum, n_mask, sum2, mask, off);
-            pOut++;
+            *pOutBuffer = bitins(sum, n_mask, sum2, mask, off);
+            pOutBuffer++;
 %elif config.kernel.out_data_t == 2:
             sum = (uint8_t) clip2(sum >> out_shift);
             sum2 = (uint8_t) clip2(sum2 >> out_shift);
@@ -632,8 +625,8 @@ void ${config.fn_name}(
             sum4 = (uint8_t) clip2(sum4 >> out_shift);
             sum = bitins(sum, n_mask2, sum2, mask2, off2);
             sum = bitins(sum, n_mask4, sum3, mask4, off4);
-            *pOut = bitins(sum, n_mask6, sum4, mask6, off6);
-            pOut++;
+            *pOutBuffer = bitins(sum, n_mask6, sum4, mask6, off6);
+            pOutBuffer++;
 %endif
           }
         }
@@ -643,8 +636,8 @@ void ${config.fn_name}(
     {
         int sum = 0;
 
-        uint8_t *pA = pInBuffer;
-        int8_t *pB = pWeights + (i * dim_vec_wt);
+        uint8_t *pA = pIn;
+        int8_t *pB = pWeight + (i * dim_vec_wt);
 
 %if config.less_precision == 8:
         for (int j=0; j<(dim_vec >> 2); j++)
@@ -808,22 +801,22 @@ void ${config.fn_name}(
         }
         if (flag_batch_norm && flag_relu)
         {
-          *pOut = ${config.bn_fn}(sum, *k, *lambda, out_shift);
-          pOut++;
-          k++;
-          lambda++;
+          *pOutBuffer = ${config.bn_fn}(sum, *pKappa, *pLambda, out_shift);
+          pOutBuffer++;
+          pKappa++;
+          pLambda++;
         }
         else
         {
           if (flag_relu == 1)
           {
-            *pOut = ${config.relu_fn}(sum, out_mult, out_shift);
-            pOut++;
+            *pOutBuffer = ${config.relu_fn}(sum, out_mult, out_shift);
+            pOutBuffer++;
           }
           else
           {
-            *pOut = (uint8_t) clip8(sum >> out_shift);
-            pOut++;
+            *pOutBuffer = (uint8_t) clip8(sum >> out_shift);
+            pOutBuffer++;
           }
         }
     }

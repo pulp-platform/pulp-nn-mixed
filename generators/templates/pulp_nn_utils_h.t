@@ -426,7 +426,7 @@ static v4u __attribute__((noinline)) pulp_nn_u2_to_u4_r(uint8_t *pSrc)
   return res;
 }
 
-static int8_t *__attribute__((noinline)) pulp_nn_i4_to_i8( int8_t *pSrc, int8_t *pDst)
+static int8_t *__attribute__((always_inline)) pulp_nn_i4_to_i8( int8_t *pSrc, int8_t *pDst)
 {
   v4s Src = *((v4s*) pSrc);
   int8_t bext1, bext2, bext3, bext4;
@@ -438,7 +438,7 @@ static int8_t *__attribute__((noinline)) pulp_nn_i4_to_i8( int8_t *pSrc, int8_t 
   bext3 = (int8_t) bitext((int) Src, 4, 8);
   bext4 = (int8_t) bitext((int) Src, 4, 12);
   *((v4s*)pDst) = pack((int8_t) bext1, (int8_t) bext2, (int8_t) bext3, (int8_t) bext4);
-    asm volatile(""::: "memory");
+   MemoryFence();
   pDst+=4;
   bext1 = (int8_t) bitext((int) Src, 4, 16);
   bext2 = (int8_t) bitext((int) Src, 4, 20);
@@ -449,7 +449,7 @@ static int8_t *__attribute__((noinline)) pulp_nn_i4_to_i8( int8_t *pSrc, int8_t 
   return pSrc;
 }
 
-static uint8_t *__attribute__((noinline)) pulp_nn_u4_to_u8(uint8_t *pSrc, uint8_t *pDst)
+static uint8_t *__attribute__((always_inline)) pulp_nn_u4_to_u8(uint8_t *pSrc, uint8_t *pDst)
 {
   v4u Src = *((v4u*) pSrc);
   uint8_t bext1, bext2, bext3, bext4;
@@ -461,7 +461,7 @@ static uint8_t *__attribute__((noinline)) pulp_nn_u4_to_u8(uint8_t *pSrc, uint8_
   bext3 = (uint8_t) bitextu((unsigned int) Src, 4, 8);
   bext4 = (uint8_t) bitextu((unsigned int) Src, 4, 12);
   *((v4u*)pDst) = pack((uint8_t) bext1, (uint8_t) bext2, (uint8_t) bext3, (uint8_t) bext4);
-    asm volatile(""::: "memory");
+  MemoryFence();
   pDst+=4;
   bext1 = (uint8_t) bitextu((unsigned int) Src, 4, 16);
   bext2 = (uint8_t) bitextu((unsigned int) Src, 4, 20);
@@ -484,21 +484,21 @@ static int8_t *__attribute__((always_inline)) pulp_nn_i2_to_i8( int8_t * pSrc, i
   bext3 = (int8_t) bitext((int) Src, 2, 4);
   bext4 = (int8_t) bitext((int) Src, 2, 6);
   *((v4s*)pDst) = pack((int8_t) bext1, (int8_t) bext2, (int8_t) bext3, (int8_t) bext4);
-    asm volatile(""::: "memory");
+  MemoryFence();
   pDst+=4;
   bext1 = (int8_t) bitext((int) Src, 2, 8);
   bext2 = (int8_t) bitext((int) Src, 2, 10);
   bext3 = (int8_t) bitext((int) Src, 2, 12);
   bext4 = (int8_t) bitext((int) Src, 2, 14);
   *((v4s*)pDst) = pack((int8_t) bext1, (int8_t) bext2, (int8_t) bext3, (int8_t) bext4);
-    asm volatile(""::: "memory");
+  MemoryFence();
   pDst+=4;
   bext1 = (int8_t) bitext((int) Src, 2, 16);
   bext2 = (int8_t) bitext((int) Src, 2, 18);
   bext3 = (int8_t) bitext((int) Src, 2, 20);
   bext4 = (int8_t) bitext((int) Src, 2, 22);
   *((v4s*)pDst) = pack((int8_t) bext1, (int8_t) bext2, (int8_t) bext3, (int8_t) bext4);
-    asm volatile(""::: "memory");
+  MemoryFence();
   pDst+=4;
   bext1 = (int8_t) bitext((int) Src, 2, 24);
   bext2 = (int8_t) bitext((int) Src, 2, 26);
@@ -509,7 +509,7 @@ static int8_t *__attribute__((always_inline)) pulp_nn_i2_to_i8( int8_t * pSrc, i
   return pSrc;
 }
 
-static uint8_t *__attribute__((noinline)) pulp_nn_u2_to_u8(uint8_t * pSrc, uint8_t * pDst)
+static uint8_t *__attribute__((always_inline)) pulp_nn_u2_to_u8(uint8_t * pSrc, uint8_t * pDst)
 {
   v4u Src = *((v4u*) pSrc);
   uint8_t bext1, bext2, bext3, bext4;
@@ -521,21 +521,21 @@ static uint8_t *__attribute__((noinline)) pulp_nn_u2_to_u8(uint8_t * pSrc, uint8
   bext3 = (uint8_t) bitextu((unsigned int) Src, 2, 4);
   bext4 = (uint8_t) bitextu((unsigned int) Src, 2, 6);
   *((v4u*)pDst) = pack((uint8_t) bext1, (uint8_t) bext2, (uint8_t) bext3, (uint8_t) bext4);
-    asm volatile(""::: "memory");
+  MemoryFence();
   pDst+=4;
   bext1 = (uint8_t) bitextu((unsigned int) Src, 2, 8);
   bext2 = (uint8_t) bitextu((unsigned int) Src, 2, 10);
   bext3 = (uint8_t) bitextu((unsigned int) Src, 2, 12);
   bext4 = (uint8_t) bitextu((unsigned int) Src, 2, 14);
   *((v4u*)pDst) = pack((uint8_t) bext1, (uint8_t) bext2, (uint8_t) bext3, (uint8_t) bext4);
-    asm volatile(""::: "memory");
+  MemoryFence();
   pDst+=4;
   bext1 = (uint8_t) bitextu((unsigned int) Src, 2, 16);
   bext2 = (uint8_t) bitextu((unsigned int) Src, 2, 18);
   bext3 = (uint8_t) bitextu((unsigned int) Src, 2, 20);
   bext4 = (uint8_t) bitextu((unsigned int) Src, 2, 22);
   *((v4u*)pDst) = pack((uint8_t) bext1, (uint8_t) bext2, (uint8_t) bext3, (uint8_t) bext4);
-    asm volatile(""::: "memory");
+  MemoryFence();
   pDst+=4;
   bext1 = (uint8_t) bitextu((unsigned int) Src, 2, 24);
   bext2 = (uint8_t) bitextu((unsigned int) Src, 2, 26);
@@ -546,7 +546,7 @@ static uint8_t *__attribute__((noinline)) pulp_nn_u2_to_u8(uint8_t * pSrc, uint8
   return pSrc;
 }
 
-static int8_t *__attribute__((noinline)) pulp_nn_i2_to_i4( int8_t * pSrc, int8_t * pDst)
+static int8_t *__attribute__((always_inline)) pulp_nn_i2_to_i4( int8_t * pSrc, int8_t * pDst)
 {
   int8_t mask = 0xf0;
   int8_t n_mask = ~ mask;
@@ -565,7 +565,7 @@ static int8_t *__attribute__((noinline)) pulp_nn_i2_to_i4( int8_t * pSrc, int8_t
 
   out1 = bitins(bext1, n_mask, bext2, mask, off);
   out2 = bitins(bext3, n_mask, bext4, mask, off);
-  asm volatile(""::: "memory");
+  MemoryFence();
 
   bext1 = (int8_t) bitext((int) Src, 2, 8);
   bext2 = (int8_t) bitext((int) Src, 2, 10);
@@ -576,7 +576,7 @@ static int8_t *__attribute__((noinline)) pulp_nn_i2_to_i4( int8_t * pSrc, int8_t
   out4 = bitins(bext3, n_mask, bext4, mask, off);
 
   *((v4s*)pDst) = pack((int8_t) out1, (int8_t) out2, (int8_t) out3, (int8_t) out4);
-  asm volatile(""::: "memory");
+  MemoryFence();
 
   pDst+=4;
   bext1 = (int8_t) bitext((int) Src, 2, 16);
@@ -586,7 +586,7 @@ static int8_t *__attribute__((noinline)) pulp_nn_i2_to_i4( int8_t * pSrc, int8_t
 
   out1 = bitins(bext1, n_mask, bext2, mask, off);
   out2 = bitins(bext3, n_mask, bext4, mask, off);
-  asm volatile(""::: "memory");
+  MemoryFence();
 
   bext1 = (int8_t) bitext((int) Src, 2, 24);
   bext2 = (int8_t) bitext((int) Src, 2, 26);
@@ -601,7 +601,7 @@ static int8_t *__attribute__((noinline)) pulp_nn_i2_to_i4( int8_t * pSrc, int8_t
   return pSrc;
 }
 
-static uint8_t *__attribute__((noinline)) pulp_nn_u2_to_u4( uint8_t * pSrc, uint8_t * pDst)
+static uint8_t *__attribute__((always_inline)) pulp_nn_u2_to_u4( uint8_t * pSrc, uint8_t * pDst)
 {
   int8_t mask = 0xf0;
   int8_t n_mask = ~ mask;
@@ -620,7 +620,7 @@ static uint8_t *__attribute__((noinline)) pulp_nn_u2_to_u4( uint8_t * pSrc, uint
 
   out1 = bitins(bext1, n_mask, bext2, mask, off);
   out2 = bitins(bext3, n_mask, bext4, mask, off);
-  asm volatile(""::: "memory");
+  MemoryFence();
 
   bext1 = (uint8_t) bitextu((unsigned int) Src, 2, 8);
   bext2 = (uint8_t) bitextu((unsigned int) Src, 2, 10);
@@ -631,7 +631,7 @@ static uint8_t *__attribute__((noinline)) pulp_nn_u2_to_u4( uint8_t * pSrc, uint
   out4 = bitins(bext3, n_mask, bext4, mask, off);
 
   *((v4u*)pDst) = pack((uint8_t) out1, (uint8_t) out2, (uint8_t) out3, (uint8_t) out4);
-  asm volatile(""::: "memory");
+  MemoryFence();
 
   pDst+=4;
   bext1 = (uint8_t) bitextu((unsigned int) Src, 2, 16);
@@ -641,7 +641,7 @@ static uint8_t *__attribute__((noinline)) pulp_nn_u2_to_u4( uint8_t * pSrc, uint
 
   out1 = bitins(bext1, n_mask, bext2, mask, off);
   out2 = bitins(bext3, n_mask, bext4, mask, off);
-  asm volatile(""::: "memory");
+  MemoryFence();
 
   bext1 = (uint8_t) bitextu((unsigned int) Src, 2, 24);
   bext2 = (uint8_t) bitextu((unsigned int) Src, 2, 26);
@@ -666,7 +666,7 @@ static void __attribute__((noinline)) pulp_zero_mem(uint8_t * pBuffer, unsigned 
   for (int i=0; i<(size>>2); i++)
   {
     *((v4u *)pBuffer) = (v4u){0,0,0,0};
-    asm volatile("":::"memory");
+    MemoryFence();
     pBuffer+=4;
   }
   while(lfover)
@@ -704,7 +704,7 @@ static void __attribute__((noinline)) pulp_nn_im2col_u4_to_u8(uint8_t * pInput, 
   for (int i = 0; i<blkCnt; i++)
   {
     pInput = pulp_nn_u4_to_u8(pInput, pOutput);
-    asm volatile("":::"memory");
+    MemoryFence();
     pOutput+=8;
   }
   while(lfover)
@@ -1015,7 +1015,7 @@ static void __attribute__((noinline)) xpulp_nn_zero_mem_u8(uint8_t * pBuffer, un
   for (int i=0; i<(size>>2); i++)
   {
     *((v4u *)pBuffer) = (v4u){0,0,0,0};
-    asm volatile("":::"memory");
+    MemoryFence();
     pBuffer+=4;
   }
   while(lfover)
@@ -1031,7 +1031,7 @@ static void __attribute__((noinline)) xpulp_nn_zero_mem_u4(uint8_t * pBuffer, un
   for (int i=0; i<(size>>3); i++)
   {
     *((v4u *)pBuffer) = (v4u){0,0,0,0};
-    asm volatile("":::"memory");
+    MemoryFence();
     pBuffer+=4;
   }
   while(lfover)
@@ -1047,7 +1047,7 @@ static void __attribute__((noinline)) xpulp_nn_zero_mem_u2(uint8_t * pBuffer, un
   for (int i=0; i<(size>>4); i++)
   {
     *((v4u *)pBuffer) = (v4u){0,0,0,0};
-    asm volatile("":::"memory");
+    MemoryFence();
     pBuffer+=4;
   }
   while(lfover)
@@ -1085,7 +1085,7 @@ static void __attribute__((noinline)) xpulp_nn_im2col_u4_to_u8(uint8_t * pInput,
   for (int i = 0; i<blkCnt; i++)
   {
     pInput = pulp_nn_u4_to_u8(pInput, pOutput);
-    asm volatile("":::"memory");
+    MemoryFence();
     pOutput+=8;
   }
   while(lfover)
