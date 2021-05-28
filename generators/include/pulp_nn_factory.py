@@ -229,8 +229,11 @@ class PULPNNConvolvePointwise(PULPNNFactory):
 class PULPNNConvolveDepthwise(PULPNNFactory):
     def __init__(self, kernel, layer):
         super().__init__(kernel, layer)
-
-        self.fn_name = "pulp_nn_depthwise_u{0}_u{1}_i{2}{3}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
+        if self.kernel.extentions == 'XpulpV2':
+            self.fn_name = "pulp_nn_depthwise_u{0}_u{1}_i{2}{3}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
+                        str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""))
+        elif self.kernel.extentions == 'XpulpNN':
+            self.fn_name = "pulp_nn_depthwise_u{0}_u{1}_i{2}{3}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
                         str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""))
         self.filename = self.fn_name + ".c"
         self.api = self.__class__.__name__
@@ -680,12 +683,12 @@ def clip8(conv, bits):
     return out
 
 def matmul_mixed_tests_generator(layer, kernel):
-    print("Matmul Mixed Test Generator (type: " + str(kernel.type) +
-                                        ", bn: " + str(layer.bn) +
-                                        ", relu: " + str(layer.relu) +
-                                        ", quant: " + str(kernel.quantization) +
-                                        ", ISA: " + str(kernel.extentions) +
-                                        ")")
+    # print("Matmul Mixed Test Generator (type: " + str(kernel.type) +
+    #                                     ", bn: " + str(layer.bn) +
+    #                                     ", relu: " + str(layer.relu) +
+    #                                     ", quant: " + str(kernel.quantization) +
+    #                                     ", ISA: " + str(kernel.extentions) +
+    #                                     ")")
     torch.manual_seed(5)
     random.seed(5)
     # input vectors
@@ -751,16 +754,16 @@ def matmul_mixed_tests_generator(layer, kernel):
 
 # Generating all convolution kernels (default: standard convolution) followed by all quantization possibilities (default: bn+shift_clip)
 def convolution_mixed_tests_generator(layer, kernel):
-    print("Convolution Mixed Test Generator (type: " + str(kernel.type) +
-                                                ", in_data_t: " + str(kernel.in_data_t) +
-                                                ", out_data_t: " + str(kernel.out_data_t) +
-                                                ", wt_data_t: " + str(kernel.wt_data_t) +
-                                                ", bn: " + str(layer.bn) +
-                                                ", act_prec: " + str(kernel.act_prec) +
-                                                ", relu: " + str(layer.relu) +
-                                                ", quant: " + str(kernel.quantization) +
-                                                ", ISA: " + str(kernel.extentions) +
-                                                ")")
+    # print("Convolution Mixed Test Generator (type: " + str(kernel.type) +
+    #                                             ", in_data_t: " + str(kernel.in_data_t) +
+    #                                             ", out_data_t: " + str(kernel.out_data_t) +
+    #                                             ", wt_data_t: " + str(kernel.wt_data_t) +
+    #                                             ", bn: " + str(layer.bn) +
+    #                                             ", act_prec: " + str(kernel.act_prec) +
+    #                                             ", relu: " + str(layer.relu) +
+    #                                             ", quant: " + str(kernel.quantization) +
+    #                                             ", ISA: " + str(kernel.extentions) +
+    #                                             ")")
     torch.manual_seed(5)
     random.seed(5)
     # Setting input activations
@@ -827,16 +830,16 @@ def convolution_mixed_tests_generator(layer, kernel):
 
 # Generating all linear kernels (default: linear with quantized output) followed by all output possibilities (default: bn+shift_clip)
 def linear_mixed_tests_generator(layer, kernel):
-    print("Linear Mixed Test Generator (type: " + str(kernel.type) +
-                                            ", in_data_t: " + str(kernel.in_data_t) +
-                                            ", out_data_t: " + str(kernel.out_data_t) +
-                                            ", wt_data_t: " + str(kernel.wt_data_t) +
-                                            ", bn: " + str(layer.bn) +
-                                            ", act_prec: " + str(kernel.act_prec) +
-                                            ", relu: " + str(layer.relu) +
-                                            ", quant: " + str(kernel.quantization) +
-                                            ", ISA: " + str(kernel.extentions) +
-                                            ")")
+    # print("Linear Mixed Test Generator (type: " + str(kernel.type) +
+    #                                         ", in_data_t: " + str(kernel.in_data_t) +
+    #                                         ", out_data_t: " + str(kernel.out_data_t) +
+    #                                         ", wt_data_t: " + str(kernel.wt_data_t) +
+    #                                         ", bn: " + str(layer.bn) +
+    #                                         ", act_prec: " + str(kernel.act_prec) +
+    #                                         ", relu: " + str(layer.relu) +
+    #                                         ", quant: " + str(kernel.quantization) +
+    #                                         ", ISA: " + str(kernel.extentions) +
+    #                                         ")")
     torch.manual_seed(5)
     random.seed(5)
     # Setting input activations
@@ -911,9 +914,9 @@ def linear_mixed_tests_generator(layer, kernel):
     return str_out
 
 def pooling_mixed_tests_generator(layer, kernel):
-    print("Pooling Mixed Test Generator (type: " + str(kernel.type) +
-                                        ", ISA: " + str(kernel.extentions) +
-                                        ")")
+    # print("Pooling Mixed Test Generator (type: " + str(kernel.type) +
+    #                                     ", ISA: " + str(kernel.extentions) +
+    #                                     ")")
     torch.manual_seed(5)
     random.seed(5)
     # Setting input activations
@@ -930,9 +933,9 @@ def pooling_mixed_tests_generator(layer, kernel):
     return str_out
 
 def add_mixed_tests_generator(layer, kernel):
-    print("Add Mixed Test Generator (type: " + str(kernel.type) +
-                                    ", ISA: " + str(kernel.extentions) +
-                                    ")")
+    # print("Add Mixed Test Generator (type: " + str(kernel.type) +
+    #                                 ", ISA: " + str(kernel.extentions) +
+    #                                 ")")
     torch.manual_seed(5)
     random.seed(5)
     # Setting input activations

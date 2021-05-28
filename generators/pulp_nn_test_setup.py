@@ -31,7 +31,7 @@ ISA 				= 'XpulpNN'
 
 # -> convolution, pointwise, depthwise, linear_no_quant, linear_quant, maxpool, avgpool, add
 
-TYPE_OF_KERNEL 		= 'linear_quant'
+TYPE_OF_KERNEL 		= 'convolution'
 
 # If SINGLE_KERNEL = 0 these will be ignored. Otherwise, select the possibilities from the supported ones
 #
@@ -64,13 +64,13 @@ quantization_type 	= 'shift_clip'
 #       - all values for dim_y
 
 # if depthwise CH_IM_IN must be equal to CH_IM_OUT
-DIM_IM_IN_X 		= 8
-DIM_IM_IN_Y 		= 8
-CH_IM_IN 			= 8
+DIM_IM_IN_X 		= 16
+DIM_IM_IN_Y 		= 16
+CH_IM_IN 			= 32
 # if pooling, output dimensions must be relative to kernel and stride sizes
-DIM_IM_OUT_X 		= 8
-DIM_IM_OUT_Y 		= 8
-CH_IM_OUT 			= 8
+DIM_IM_OUT_X 		= 16
+DIM_IM_OUT_Y 		= 16
+CH_IM_OUT 			= 64
 # if is not linear
 DIM_KERNEL_X 		= 3 # 1 if is pointwise, free otherwise
 DIM_KERNEL_Y 		= 3 # 1 if is pointwise, free otherwise

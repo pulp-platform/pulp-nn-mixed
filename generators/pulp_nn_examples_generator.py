@@ -38,6 +38,8 @@ def main():
                         pool_kernel=pulp_nn_test_setup.POOL_KERNEL, pool_stride=pulp_nn_test_setup.POOL_STRIDE, bias=pulp_nn_test_setup.BIAS, bn=pulp_nn_test_setup.BN, relu=pulp_nn_test_setup.RELU)
 
     for a in pulp_nn_init.BN_ACTIVATIONS:
+
+        print("PULP-NN Test Generator (type: " + str(pulp_nn_test_setup.TYPE_OF_KERNEL) + ", Model normalization: " + str(a) + ", ISA: " + str(pulp_nn_test_setup.ISA) + ")")
       
         pulp_nn_struct.mkdir_test(kernel=pulp_nn_test_setup.TYPE_OF_KERNEL, act_prec=a, ext=pulp_nn_test_setup.ISA)
         pulp_nn_factory.headers(act_prec=a, ext=pulp_nn_test_setup.ISA)

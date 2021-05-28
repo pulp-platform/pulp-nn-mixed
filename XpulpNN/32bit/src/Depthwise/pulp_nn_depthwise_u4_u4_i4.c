@@ -214,9 +214,9 @@ void pulp_nn_depthwise_u4_u4_i4(
             sum  = MacLoad4(1, 0, 0, 0, ptrA, sum);
             ptrA = MacLoadUpdate(ptrA);
             ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
-            sum2  = MacLoad4(1, 0, 1, 0, ptrA2, sum2);
+            sum2  = MacLoad4(1, 0, 1, 1, ptrA2, sum2);
             ptrA2 = MacLoadUpdate(ptrA2);
-            ptrB2 = MacLoadInit(0, 1, 0, 1, ptrB2);
+            ptrB2 = MacLoadInit(0, 1, 1, 1, ptrB2);
             j++;
           }while(j<colCnt);
           if(leftCnt)
@@ -360,9 +360,9 @@ void pulp_nn_depthwise_u4_u4_i4(
           sum  = MacLoad4(1, 0, 0, 0, ptrA, sum);
           ptrA = MacLoadUpdate(ptrA);
           ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
-          sum2  = MacLoad4(1, 0, 1, 0, ptrA2, sum2);
+          sum2  = MacLoad4(1, 0, 1, 1, ptrA2, sum2);
           ptrA2 = MacLoadUpdate(ptrA2);
-          ptrB2 = MacLoadInit(0, 1, 0, 1, ptrB2);
+          ptrB2 = MacLoadInit(0, 1, 1, 1, ptrB2);
           j++;
         }while(j<colCnt);
         if(leftCnt)
@@ -517,9 +517,9 @@ void pulp_nn_depthwise_u4_u4_i4(
           sum  = MacLoad4(1, 0, 0, 0, ptrA, sum);
           ptrA = MacLoadUpdate(ptrA);
           ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
-          sum2  = MacLoad4(1, 0, 1, 0, ptrA2, sum2);
+          sum2  = MacLoad4(1, 0, 1, 1, ptrA2, sum2);
           ptrA2 = MacLoadUpdate(ptrA2);
-          ptrB2 = MacLoadInit(0, 1, 0, 1, ptrB2);
+          ptrB2 = MacLoadInit(0, 1, 1, 1, ptrB2);
           j++;
         }while(j<colCnt);
         if(leftCnt)

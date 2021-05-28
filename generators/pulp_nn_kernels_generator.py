@@ -29,7 +29,7 @@ def main():
 
         for e in pulp_nn_init.CORE_EXTENTIONS:
 
-            print("ISA: " + e + " Model normalization: " + a)
+            print("PULP-NN Kernels Generator (Model normalization: " + a + ", ISA : " + e + ")")
             
             pulp_nn_struct.mkdir_src(act_prec=a, ext=e)
 

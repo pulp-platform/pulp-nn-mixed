@@ -602,9 +602,9 @@ void ${config.fn_name}(
             sum  = MacLoad4(1, 0, 0, 0, ptrA, sum);
             ptrA = MacLoadUpdate(ptrA);
             ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
-            sum2  = MacLoad4(1, 0, 1, 0, ptrA2, sum2);
+            sum2  = MacLoad4(1, 0, 1, 1, ptrA2, sum2);
             ptrA2 = MacLoadUpdate(ptrA2);
-            ptrB2 = MacLoadInit(0, 1, 0, 1, ptrB2);
+            ptrB2 = MacLoadInit(0, 1, 1, 1, ptrB2);
   %elif config.less_precision == 2:
             v4s w = *(v4s *) pWt;
             v4u x = *(v4u *) pIm2Col;
@@ -1099,9 +1099,9 @@ void ${config.fn_name}(
           sum  = MacLoad4(1, 0, 0, 0, ptrA, sum);
           ptrA = MacLoadUpdate(ptrA);
           ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
-          sum2  = MacLoad4(1, 0, 1, 0, ptrA2, sum2);
+          sum2  = MacLoad4(1, 0, 1, 1, ptrA2, sum2);
           ptrA2 = MacLoadUpdate(ptrA2);
-          ptrB2 = MacLoadInit(0, 1, 0, 1, ptrB2);
+          ptrB2 = MacLoadInit(0, 1, 1, 1, ptrB2);
 %elif config.less_precision == 2:
           v4s w = *(v4s *) pWt;
           v4u x = *(v4u *) pIm2Col;
@@ -1596,9 +1596,9 @@ void ${config.fn_name}(
           sum  = MacLoad4(1, 0, 0, 0, ptrA, sum);
           ptrA = MacLoadUpdate(ptrA);
           ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
-          sum2  = MacLoad4(1, 0, 1, 0, ptrA2, sum2);
+          sum2  = MacLoad4(1, 0, 1, 1, ptrA2, sum2);
           ptrA2 = MacLoadUpdate(ptrA2);
-          ptrB2 = MacLoadInit(0, 1, 0, 1, ptrB2);
+          ptrB2 = MacLoadInit(0, 1, 1, 1, ptrB2);
 %elif config.less_precision == 2:
           v4s w = *(v4s *) pWt;
           v4u x = *(v4u *) pIm2Col;
