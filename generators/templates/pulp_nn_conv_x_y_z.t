@@ -1,3 +1,4 @@
+<%! import math %>
 /*
  * ${config.filename}
  * Nazareno Bruschi <nazareno.bruschi@unibo.it>
@@ -54,20 +55,8 @@ void ${config.fn_name}(
                         uint8_t flag_relu,
                         uint8_t flag_batch_norm)
 {
-%if config.kernel.in_data_t == 8:
-  uint16_t ch_in_r = ch_in;
-%elif config.kernel.in_data_t == 4:
-  uint16_t ch_in_r = ch_in >> 1;
-%else:
-  uint16_t ch_in_r = ch_in >> 2;
-%endif
-%if config.kernel.out_data_t == 8:
-  uint16_t ch_out_r = ch_out;
-%elif config.kernel.out_data_t == 4:
-  uint16_t ch_out_r = ch_out >> 1;
-%else:
-  uint16_t ch_out_r = ch_out >> 2;
-%endif
+  uint16_t ch_in_r  = PACK_INT${config.kernel.in_data_t}_SIZE(ch_in);
+  uint16_t ch_out_r = PACK_INT${config.kernel.out_data_t}_SIZE(ch_out);
 
   int core_id = pi_core_id();
   uint8_t * pIm2ColBase = pIm2ColBuffer + (2 * core_id * ch_in * dim_kernel_x * dim_kernel_y);
@@ -216,26 +205,19 @@ void ${config.fn_name}(
         pIm2Col = pIm2ColBase;
       }
     }
-  //   pOut+=(extra_chunk * ((dim_out_x_r + ((1 - section) * flag_dim_out_x_odd)) * ch_out_r));
-  // }
 
     if(pIm2Col != pIm2ColBase)
     {
-  %if config.kernel.out_data_t == 2:
-      int8_t mask2 = 0x0c;
-      int8_t n_mask2 = ~ mask2;
-      int8_t mask4 = 0x30;
-      int8_t n_mask4 = ~ mask4;
-      int8_t mask6 = 0xc0;
-      int8_t n_mask6 = ~ mask6;
-      int8_t off2 = 2;
-      int8_t off4 = 4;
-      int8_t off6 = 6;
-  %elif config.kernel.out_data_t == 4:
-      int8_t mask = 0xf0;
-      int8_t n_mask = ~ mask;
-      int8_t off = 0x04;
-  %endif
+%for i in range(int(8/config.kernel.out_data_t)-1):
+%if config.kernel.out_data_t > 1:
+      int8_t mask${(i+1)*config.kernel.out_data_t} = ${hex(((config.kernel.out_data_t*config.kernel.out_data_t)-1)<<((i+1)*config.kernel.out_data_t))};
+%else:
+      int8_t mask${(i+1)*config.kernel.out_data_t} = ${hex(config.kernel.out_data_t<<((i+1)*config.kernel.out_data_t))};
+%endif
+      int8_t n_mask${(i+1)*config.kernel.out_data_t} = ~ mask${(i+1)*config.kernel.out_data_t};
+      int8_t off${(i+1)*config.kernel.out_data_t} = ${(i+1)*config.kernel.out_data_t};
+%endfor
+
       const int8_t *pA = pWeight;
       int i;
 %if config.kernel.act_prec == '32bit':
@@ -245,18 +227,11 @@ void ${config.fn_name}(
       int64_t * k1 = pKappa;
       int64_t * lambda1 = pLambda;
 %endif
-  %if config.kernel.wt_data_t == 2:
-      v4s inA[4];
+      v4s inA[${int(8/config.kernel.wt_data_t)}];
       v4u inB;
-  %elif config.kernel.wt_data_t == 4:
-      v4s inA[2];
-      v4u inB;
-  %endif
-  %if config.kernel.out_data_t == 4:
-      uint8_t out[2];
-  %elif config.kernel.out_data_t == 2:
-      uint8_t out[4];
-  %endif
+
+      uint8_t out[${int(8/config.kernel.out_data_t)}];
+
       for(i = 0; i < ch_out; i++)
       {
         int sum = 0;
@@ -266,107 +241,54 @@ void ${config.fn_name}(
         }
 
         uint8_t *pB = pIm2ColBase;
-  %if config.kernel.wt_data_t == 8:
-        uint16_t col_cnt_im2col = ch_in * dim_kernel_x * dim_kernel_y >> 2;
-  %elif config.kernel.wt_data_t == 4:
-        uint16_t col_cnt_im2col = ch_in * dim_kernel_x * dim_kernel_y >> 3;
-  %elif config.kernel.wt_data_t == 2:
-        uint16_t col_cnt_im2col = ch_in * dim_kernel_x * dim_kernel_y >> 4;
-  %endif
+        uint16_t col_cnt_im2col = ch_in * dim_kernel_x * dim_kernel_y >> ${int(math.log2(int(16/config.kernel.wt_data_t)))};
+
         for(int j=0; j < col_cnt_im2col; j++)
         {
-  %if config.kernel.wt_data_t == 2:
+% if config.kernel.wt_data_t != 8:
+% for j in range(int(8/config.kernel.wt_data_t)):
           inB = *((v4u*) pB);
 
           pB+=4;
 
           pA = ${config.unpack_fn}(pA,inA);
 
-          sum = SumDotp4(inB, inA[0], sum);
-
-          inB = *((v4u*) pB);
-
-          pB+=4;
-
-          sum = SumDotp4(inB, inA[1], sum);
-
-          inB = *((v4u*) pB);
-
-          pB+=4;
-
-          sum = SumDotp4(inB, inA[2], sum);
-
-          inB = *((v4u*) pB);
-
-          pB+=4;
-
-          sum = SumDotp4(inB, inA[3], sum);
-  %elif config.kernel.wt_data_t == 4:
-          inB = *((v4u*) pB);
-
-          pB+=4;
-
-          pA = ${config.unpack_fn}(pA,inA);
-
-          sum = SumDotp4(inB, inA[0], sum);
-
-          inB = *((v4u*) pB);
-
-          sum = SumDotp4(inB, inA[1], sum);
-
-          pB+=4;
-  %else:
+          sum = SumDotp4(inB, inA[${j}], sum);
+% endfor
+%else:
           v4s inA = *((v4s*) pA);
           v4u inB = *((v4u*) pB);
 
           sum = SumDotp4(inB, inA, sum);
           pA+=4;
           pB+=4;
-  %endif
+%endif
         }
-  %if config.kernel.wt_data_t == 2:
-        col_cnt_im2col = (ch_in * dim_kernel_y * dim_kernel_x) & 0xf;
-  %elif config.kernel.wt_data_t == 4:
-        col_cnt_im2col = (ch_in * dim_kernel_y * dim_kernel_x) & 0x7;
-  %else:
-        col_cnt_im2col = (ch_in * dim_kernel_y * dim_kernel_x) & 0x3;
-  %endif
+        col_cnt_im2col = (ch_in * dim_kernel_y * dim_kernel_x) & ${hex(int(32/config.kernel.wt_data_t-1))};
+
         while (col_cnt_im2col)
         {
-  %if config.kernel.wt_data_t == 2:
-          int8_t inA1 = (int8_t) bitext((int) *pA, 2, 0);
+% if config.kernel.wt_data_t != 8:
+% for i in range(int(8/config.kernel.wt_data_t)):
+%if i == 0:
+          int8_t inA1 = (int8_t) bitext((int) *pA, ${config.kernel.wt_data_t}, ${i*config.kernel.wt_data_t});
           uint8_t inB1 = *pB++;
-          sum += inA1 * inB1;
-          inA1 = (int8_t) bitext((int) *pA, 2, 2);
+%else:
+          inA1 = (int8_t) bitext((int) *pA, ${config.kernel.wt_data_t}, ${i*config.kernel.wt_data_t});
           inB1 = *pB++;
+%endif
           sum += inA1 * inB1;
-          inA1 = (int8_t) bitext((int) *pA, 2, 4);
-          inB1 = *pB++;
-          sum += inA1 * inB1;
-          inA1 = (int8_t) bitext((int) *pA, 2, 6);
-          inB1 = *pB++;
-          sum += inA1 * inB1;
-
+% endfor
           pA++;
-          col_cnt_im2col-=4;
-  %elif config.kernel.wt_data_t == 4:
-          int8_t inA1 = (int8_t) bitext((int) *pA, 4, 0);
-          uint8_t inB1 = *pB++;
-          sum += inA1 * inB1;
-          inA1 = (int8_t) bitext((int) *pA, 4, 4);
-          inB1 = *pB++;
-          sum += inA1 * inB1;
-
-          pA++;
-          col_cnt_im2col-=2;
-  %else:
+          col_cnt_im2col-=${int(8/config.kernel.wt_data_t)};
+%else:
           int8_t inA1 = *pA++;
           uint8_t inB1 = *pB++;
           asm volatile("": : :"memory");
           sum += inA1 * inB1;
 
           col_cnt_im2col--;
-  %endif
+%endif
         }
   %if config.kernel.out_data_t == 8 or config.kernel.quantization == 'shift_clip':
         if (flag_batch_norm && flag_relu)
@@ -383,7 +305,7 @@ void ${config.fn_name}(
           lambda1++;
           if(i_o == 0x01)
           {
-            *pOutBuffer = bitins(out[0], n_mask, out[1], mask, off);
+            *pOutBuffer = bitins(out[0], n_mask4, out[1], mask4, off4);
             pOutBuffer++;
           }
   %elif config.kernel.out_data_t == 2:
@@ -398,6 +320,22 @@ void ${config.fn_name}(
             *pOutBuffer = bitins(out[0], n_mask6, out[3], mask6, off6);
             pOutBuffer++;
           }
+          %elif config.kernel.out_data_t == 1:
+                  uint8_t i_o = i & 0x07;
+                  out[i_o] = ${config.bn_fn}(sum, *k1, *lambda1, out_shift);
+                  k1++;
+                  lambda1++;
+                  if(i_o == 0x07)
+                  {
+                    out[0] = bitins(out[0], n_mask1, out[1], mask1, off1);
+                    out[0] = bitins(out[0], n_mask2, out[2], mask2, off2);
+                    out[0] = bitins(out[0], n_mask3, out[3], mask3, off3);
+                    out[0] = bitins(out[0], n_mask4, out[4], mask4, off4);
+                    out[0] = bitins(out[0], n_mask5, out[5], mask5, off5);
+                    out[0] = bitins(out[0], n_mask6, out[6], mask6, off6);
+                    *pOutBuffer = bitins(out[0], n_mask7, out[7], mask7, off7);
+                    pOutBuffer++;
+                  }
   %endif
         }
         else
@@ -412,7 +350,7 @@ void ${config.fn_name}(
             out[i_o] = ${config.relu_fn}(sum, out_mult, out_shift);
             if(i_o == 0x01)
             {
-              *pOutBuffer = bitins(out[0], n_mask, out[1], mask, off);
+              *pOutBuffer = bitins(out[0], n_mask4, out[1], mask4, off4);
               pOutBuffer++;
             }
   %elif config.kernel.out_data_t == 2:
@@ -425,6 +363,20 @@ void ${config.fn_name}(
               *pOutBuffer = bitins(out[0], n_mask6, out[3], mask6, off6);
               pOutBuffer++;
             }
+            %elif config.kernel.out_data_t == 1:
+                      uint8_t i_o = i & 0x07;
+                      out[i_o] = ${config.relu_fn}(sum, out_mult, out_shift);
+                      if(i_o == 0x07)
+                      {
+                        out[0] = bitins(out[0], n_mask1, out[1], mask1, off1);
+                        out[0] = bitins(out[0], n_mask2, out[2], mask2, off2);
+                        out[0] = bitins(out[0], n_mask3, out[3], mask3, off3);
+                        out[0] = bitins(out[0], n_mask4, out[4], mask4, off4);
+                        out[0] = bitins(out[0], n_mask5, out[5], mask5, off5);
+                        out[0] = bitins(out[0], n_mask6, out[6], mask6, off6);
+                        *pOutBuffer = bitins(out[0], n_mask7, out[7], mask7, off7);
+                        pOutBuffer++;
+                      }
   %endif
           }
           else
@@ -437,7 +389,7 @@ void ${config.fn_name}(
             out[i_o] = (uint8_t) clip4(sum >> out_shift);
             if(i_o == 0x01)
             {
-              *pOutBuffer = bitins(out[0], n_mask, out[1], mask, off);
+              *pOutBuffer = bitins(out[0], n_mask4, out[1], mask4, off4);
               pOutBuffer++;
             }
   %elif config.kernel.out_data_t == 2:
@@ -450,6 +402,20 @@ void ${config.fn_name}(
               *pOutBuffer = bitins(out[0], n_mask6, out[3], mask6, off6);
               pOutBuffer++;
             }
+            %elif config.kernel.out_data_t == 1:
+                      uint8_t i_o = i & 0x07;
+                      out[i_o] = (uint8_t) clip1(sum >> out_shift);
+                      if(i_o == 0x07)
+                      {
+                        out[0] = bitins(out[0], n_mask1, out[1], mask1, off1);
+                        out[0] = bitins(out[0], n_mask2, out[2], mask2, off2);
+                        out[0] = bitins(out[0], n_mask3, out[3], mask3, off3);
+                        out[0] = bitins(out[0], n_mask4, out[4], mask4, off4);
+                        out[0] = bitins(out[0], n_mask5, out[5], mask5, off5);
+                        out[0] = bitins(out[0], n_mask6, out[6], mask6, off6);
+                        *pOutBuffer = bitins(out[0], n_mask7, out[7], mask7, off7);
+                        pOutBuffer++;
+                      }
   %endif
           }
         }
@@ -459,7 +425,7 @@ void ${config.fn_name}(
         pThr++;
         if(i_o == 0x01)
         {
-          *pOutBuffer = bitins(out[0], n_mask, out[1], mask, off);
+          *pOutBuffer = bitins(out[0], n_mask4, out[1], mask4, off4);
           pOutBuffer++;
         }
   %elif config.kernel.out_data_t == 2:

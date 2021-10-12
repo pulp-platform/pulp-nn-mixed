@@ -17,8 +17,8 @@
 # limitations under the License.
 #
 
-PULPNNDataPrecisions = [8, 4, 2]
-PULPNNWeightsPrecisions = [8, 4, 2]
+PULPNNDataPrecisions = [8, 4, 2, 1]
+PULPNNWeightsPrecisions = [8, 4, 2, 1]
 PULPNNQuantizationMethods = ['shift_clip'] #,'thresholds']
 BN_ACTIVATIONS = ['32bit', '64bit']
 CORE_EXTENTIONS = ['XpulpV2', 'XpulpNN']

@@ -1,3 +1,4 @@
+
 /*
  * pulp_nn_conv_u4_u4_i2.c
  * Nazareno Bruschi <nazareno.bruschi@unibo.it>
@@ -49,8 +50,8 @@ void pulp_nn_conv_u4_u4_i2(
                         uint8_t flag_relu,
                         uint8_t flag_batch_norm)
 {
-  uint16_t ch_in_r = ch_in >> 1;
-  uint16_t ch_out_r = ch_out >> 1;
+  uint16_t ch_in_r  = PACK_INT4_SIZE(ch_in);
+  uint16_t ch_out_r = PACK_INT4_SIZE(ch_out);
 
   int core_id = pi_core_id();
   uint8_t * pIm2ColBase = pIm2ColBuffer + (2 * core_id * ch_in * dim_kernel_x * dim_kernel_y);
@@ -199,21 +200,22 @@ void pulp_nn_conv_u4_u4_i2(
         pIm2Col = pIm2ColBase;
       }
     }
-  //   pOut+=(extra_chunk * ((dim_out_x_r + ((1 - section) * flag_dim_out_x_odd)) * ch_out_r));
-  // }
 
     if(pIm2Col != pIm2ColBase)
     {
-      int8_t mask = 0xf0;
-      int8_t n_mask = ~ mask;
-      int8_t off = 0x04;
+      int8_t mask4 = 0xf0;
+      int8_t n_mask4 = ~ mask4;
+      int8_t off4 = 4;
+
       const int8_t *pA = pWeight;
       int i;
       int32_t * k1 = pKappa;
       int32_t * lambda1 = pLambda;
       v4s inA[4];
       v4u inB;
+
       uint8_t out[2];
+
       for(i = 0; i < ch_out; i++)
       {
         int sum = 0;
@@ -223,7 +225,8 @@ void pulp_nn_conv_u4_u4_i2(
         }
 
         uint8_t *pB = pIm2ColBase;
-        uint16_t col_cnt_im2col = ch_in * dim_kernel_x * dim_kernel_y >> 4;
+        uint16_t col_cnt_im2col = ch_in * dim_kernel_x * dim_kernel_y >> 3;
+
         for(int j=0; j < col_cnt_im2col; j++)
         {
           inB = *((v4u*) pB);
@@ -233,26 +236,30 @@ void pulp_nn_conv_u4_u4_i2(
           pA = pulp_nn_i2_to_i8(pA,inA);
 
           sum = SumDotp4(inB, inA[0], sum);
-
           inB = *((v4u*) pB);
 
           pB+=4;
+
+          pA = pulp_nn_i2_to_i8(pA,inA);
 
           sum = SumDotp4(inB, inA[1], sum);
-
           inB = *((v4u*) pB);
 
           pB+=4;
+
+          pA = pulp_nn_i2_to_i8(pA,inA);
 
           sum = SumDotp4(inB, inA[2], sum);
-
           inB = *((v4u*) pB);
 
           pB+=4;
+
+          pA = pulp_nn_i2_to_i8(pA,inA);
 
           sum = SumDotp4(inB, inA[3], sum);
         }
         col_cnt_im2col = (ch_in * dim_kernel_y * dim_kernel_x) & 0xf;
+
         while (col_cnt_im2col)
         {
           int8_t inA1 = (int8_t) bitext((int) *pA, 2, 0);
@@ -267,7 +274,6 @@ void pulp_nn_conv_u4_u4_i2(
           inA1 = (int8_t) bitext((int) *pA, 2, 6);
           inB1 = *pB++;
           sum += inA1 * inB1;
-
           pA++;
           col_cnt_im2col-=4;
         }
@@ -279,7 +285,7 @@ void pulp_nn_conv_u4_u4_i2(
           lambda1++;
           if(i_o == 0x01)
           {
-            *pOutBuffer = bitins(out[0], n_mask, out[1], mask, off);
+            *pOutBuffer = bitins(out[0], n_mask4, out[1], mask4, off4);
             pOutBuffer++;
           }
         }
@@ -291,7 +297,7 @@ void pulp_nn_conv_u4_u4_i2(
             out[i_o] = pulp_nn_quant_u4(sum, out_mult, out_shift);
             if(i_o == 0x01)
             {
-              *pOutBuffer = bitins(out[0], n_mask, out[1], mask, off);
+              *pOutBuffer = bitins(out[0], n_mask4, out[1], mask4, off4);
               pOutBuffer++;
             }
           }
@@ -301,7 +307,7 @@ void pulp_nn_conv_u4_u4_i2(
             out[i_o] = (uint8_t) clip4(sum >> out_shift);
             if(i_o == 0x01)
             {
-              *pOutBuffer = bitins(out[0], n_mask, out[1], mask, off);
+              *pOutBuffer = bitins(out[0], n_mask4, out[1], mask4, off4);
               pOutBuffer++;
             }
           }

@@ -25,7 +25,7 @@ SINGLE_KERNEL		= 0
 
 # -> XpulpV2, XpulpNN
 
-ISA 				= 'XpulpNN'
+ISA 				= 'XpulpV2'
 
 # Select from the supported ones:
 
@@ -44,7 +44,7 @@ TYPE_OF_KERNEL 		= 'convolution'
 # -> quantization method:
 #       - shift_clip
 
-in_precision 		= 8
+in_precision 		= 1
 wt_precision 		= 8
 out_precision 		= 8 # if is add layer, out_precision is the second input precision
 quantization_type 	= 'shift_clip'
@@ -64,13 +64,13 @@ quantization_type 	= 'shift_clip'
 #       - all values for dim_y
 
 # if depthwise CH_IM_IN must be equal to CH_IM_OUT
-DIM_IM_IN_X 		= 16
-DIM_IM_IN_Y 		= 16
-CH_IM_IN 			= 32
+DIM_IM_IN_X 		= 4
+DIM_IM_IN_Y 		= 4
+CH_IM_IN 			= 16
 # if pooling, output dimensions must be relative to kernel and stride sizes
-DIM_IM_OUT_X 		= 16
-DIM_IM_OUT_Y 		= 16
-CH_IM_OUT 			= 64
+DIM_IM_OUT_X 		= 4
+DIM_IM_OUT_Y 		= 4
+CH_IM_OUT 			= 16
 # if is not linear
 DIM_KERNEL_X 		= 3 # 1 if is pointwise, free otherwise
 DIM_KERNEL_Y 		= 3 # 1 if is pointwise, free otherwise
@@ -87,5 +87,3 @@ RELU 				= True
 # If is pooling
 POOL_KERNEL 		= 2
 POOL_STRIDE 		= 2
-
-

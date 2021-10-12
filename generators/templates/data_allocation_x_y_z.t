@@ -63,7 +63,12 @@ PI_L1 int16_t THR_INT4_L1[CH_IM_OUT << 4];
 %if config.kernel.type == 'matmul':
 PI_L2 uint8_t IN_INT8_L2[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN)] = IN_INT8;
 PI_L1 uint8_t IN_INT8_L1[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN)];
-%if config.kernel.out_data_t == 2:
+%if config.kernel.out_data_t == 1:
+PI_L2 uint8_t OUT_INT1_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT1;
+PI_L2 uint8_t OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 3];
+PI_L2 uint8_t OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 3];
+PI_L1 uint8_t OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 3];
+%elif config.kernel.out_data_t == 2:
 PI_L2 uint8_t OUT_INT2_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT2;
 PI_L2 uint8_t OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
 PI_L2 uint8_t OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
@@ -78,7 +83,10 @@ PI_L2 uint8_t OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT8;
 PI_L2 uint8_t OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)];
 PI_L1 uint8_t OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)];
 %endif
-%if config.kernel.wt_data_t == 2:
+%if config.kernel.wt_data_t == 1:
+PI_L2 int8_t WEIGHT_INT1_L2[(DIM_KERNEL_X * DIM_KERNEL_Y * CH_IM_IN * CH_IM_OUT)] = WEIGHT_INT1;
+PI_L1 int8_t WEIGHT_INT8_L1[(DIM_KERNEL_X * DIM_KERNEL_Y * CH_IM_IN * CH_IM_OUT) >> 3];
+%elif config.kernel.wt_data_t == 2:
 PI_L2 int8_t WEIGHT_INT2_L2[(DIM_KERNEL_X * DIM_KERNEL_Y * CH_IM_IN * CH_IM_OUT)] = WEIGHT_INT2;
 PI_L1 int8_t WEIGHT_INT8_L1[(DIM_KERNEL_X * DIM_KERNEL_Y * CH_IM_IN * CH_IM_OUT) >> 2];
 %elif config.kernel.wt_data_t == 4:
@@ -94,7 +102,10 @@ PI_L1 int8_t BIAS_L1[CH_IM_OUT] = BIAS;
 PI_L1 int8_t BIAS_L1[CH_IM_OUT] = {0};
 %endif
 %elif config.kernel.type == 'convolution' or config.kernel.type == 'pointwise':
-%if config.kernel.in_data_t == 2:
+%if config.kernel.in_data_t == 1:
+PI_L2 uint8_t IN_INT1_L2[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN)] = IN_INT1;
+PI_L1 uint8_t IN_INT8_L1[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN) >> 3];
+%elif config.kernel.in_data_t == 2:
 PI_L2 uint8_t IN_INT2_L2[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN)] = IN_INT2;
 PI_L1 uint8_t IN_INT8_L1[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN) >> 2];
 %elif config.kernel.in_data_t == 4:
@@ -104,7 +115,12 @@ PI_L1 uint8_t IN_INT8_L1[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN) >> 1];
 PI_L2 uint8_t IN_INT8_L2[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN)] = IN_INT8;
 PI_L1 uint8_t IN_INT8_L1[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN)];
 %endif
-%if config.kernel.out_data_t == 2:
+%if config.kernel.out_data_t == 1:
+PI_L2 uint8_t OUT_INT1_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT1;
+PI_L2 uint8_t OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 3];
+PI_L2 uint8_t OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 3];
+PI_L1 uint8_t OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 3];
+%elif config.kernel.out_data_t == 2:
 PI_L2 uint8_t OUT_INT2_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT2;
 PI_L2 uint8_t OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
 PI_L2 uint8_t OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
@@ -119,7 +135,10 @@ PI_L2 uint8_t OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT8;
 PI_L2 uint8_t OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)];
 PI_L1 uint8_t OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)];
 %endif
-%if config.kernel.wt_data_t == 2:
+%if config.kernel.wt_data_t == 1:
+PI_L2 int8_t WEIGHT_INT1_L2[(DIM_KERNEL_X * DIM_KERNEL_Y * CH_IM_IN * CH_IM_OUT)] = WEIGHT_INT1;
+PI_L1 int8_t WEIGHT_INT8_L1[(DIM_KERNEL_X * DIM_KERNEL_Y * CH_IM_IN * CH_IM_OUT) >> 3];
+%elif config.kernel.wt_data_t == 2:
 PI_L2 int8_t WEIGHT_INT2_L2[(DIM_KERNEL_X * DIM_KERNEL_Y * CH_IM_IN * CH_IM_OUT)] = WEIGHT_INT2;
 PI_L1 int8_t WEIGHT_INT8_L1[(DIM_KERNEL_X * DIM_KERNEL_Y * CH_IM_IN * CH_IM_OUT) >> 2];
 %elif config.kernel.wt_data_t == 4:
