@@ -39,15 +39,16 @@ def main():
                 for j in pulp_nn_init.PULPNNDataPrecisions:
                     for z in pulp_nn_init.PULPNNWeightsPrecisions:
                         for q in pulp_nn_init.PULPNNQuantizationMethods:
-                            kernel_to_test = pulp_nn_factory.PULPNNKernel(name='convolution', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=e)
-                            conv=pulp_nn_factory.PULPNNConvolve(kernel=kernel_to_test, layer=None)
-                            pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='convolution', comp=conv, api=pulp_nn_init.PULPNNAPI)
+                            for m in pulp_nn_init.MATMUL_FORMAT:
+                                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='convolution', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=e, mm_fmt=m)
+                                conv=pulp_nn_factory.PULPNNConvolve(kernel=kernel_to_test, layer=None)
+                                pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='convolution', comp=conv, api=pulp_nn_init.PULPNNAPI)
 
             for i in pulp_nn_init.PULPNNDataPrecisions:
                 for j in pulp_nn_init.PULPNNDataPrecisions:
                     for z in pulp_nn_init.PULPNNWeightsPrecisions:
                         for q in pulp_nn_init.PULPNNQuantizationMethods:
-                            kernel_to_test = pulp_nn_factory.PULPNNKernel(name='pointwise', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=e)
+                            kernel_to_test = pulp_nn_factory.PULPNNKernel(name='pointwise', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=e, mm_fmt='4x2')
                             pw=pulp_nn_factory.PULPNNConvolvePointwise(kernel=kernel_to_test, layer=None)
                             pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='pointwise', comp=pw, api=pulp_nn_init.PULPNNAPI)
 
@@ -55,7 +56,7 @@ def main():
                 for i in pulp_nn_init.PULPNNDataPrecisions:
                     for j in pulp_nn_init.PULPNNWeightsPrecisions:
                         for q in pulp_nn_init.PULPNNQuantizationMethods:
-                            kernel_to_test = pulp_nn_factory.PULPNNKernel(name='matmul', inp=8, out=i, wt=j, quant=q, act_prec=a, ext=e)
+                            kernel_to_test = pulp_nn_factory.PULPNNKernel(name='matmul', inp=8, out=i, wt=j, quant=q, act_prec=a, ext=e, mm_fmt='4x2')
                             matmul=pulp_nn_factory.PULPNNMatMul(kernel=kernel_to_test, layer=None)
                             pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='matmul', comp=matmul, api=pulp_nn_init.PULPNNAPI)
 
@@ -64,9 +65,21 @@ def main():
                     for j in pulp_nn_init.PULPNNWeightsPrecisions:
                         for z in pulp_nn_init.PULPNNWeightsPrecisions:
                             for q in pulp_nn_init.PULPNNQuantizationMethods:
-                                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='matmul', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=e)
-                                matmul=pulp_nn_factory.PULPNNMatMul(kernel=kernel_to_test, layer=None)
-                                pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='matmul', comp=matmul, api=pulp_nn_init.PULPNNAPI)                
+                                for m in pulp_nn_init.MATMUL_FORMAT:
+                                    kernel_to_test = pulp_nn_factory.PULPNNKernel(name='matmul', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=e, mm_fmt=m)
+                                    matmul=pulp_nn_factory.PULPNNMatMul(kernel=kernel_to_test, layer=None)
+                                    pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='matmul', comp=matmul, api=pulp_nn_init.PULPNNAPI)
+
+            elif e == 'XpulpNN-mixed':
+                for i in pulp_nn_init.PULPNNDataPrecisions:
+                    for j in pulp_nn_init.PULPNNWeightsPrecisions:
+                        for z in pulp_nn_init.PULPNNWeightsPrecisions:
+                            for q in pulp_nn_init.PULPNNQuantizationMethods:
+                                for m in pulp_nn_init.MATMUL_FORMAT:    
+                                    kernel_to_test = pulp_nn_factory.PULPNNKernel(name='matmul', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=e, mm_fmt=m)
+                                    matmul=pulp_nn_factory.PULPNNMatMul(kernel=kernel_to_test, layer=None)
+                                    pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='matmul', comp=matmul, api=pulp_nn_init.PULPNNAPI)
+
 
             for i in pulp_nn_init.PULPNNDataPrecisions:
                 for j in pulp_nn_init.PULPNNDataPrecisions:

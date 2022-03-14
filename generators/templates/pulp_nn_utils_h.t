@@ -1,6 +1,7 @@
 /*
  * pulp_nn_utils.h
- * Nazareno Bruschi <nazareno.bruschi@unibo.it>
+ * Nazareno   Bruschi  <nazareno.bruschi@unibo.it>
+ * Alessandro Nadalini <alessandro.nadalini3@unibo.it>
  *
  * Copyright (C) 2019-2020 University of Bologna
  *
@@ -58,6 +59,17 @@
 
 #define MemoryFence()                                        asm volatile("":::"memory")
 
+#define LEGACY_MODE(x)                                       asm volatile ("csrwi 0x010," x)
+#define IVEC_FMT(x)                                          asm volatile ("csrwi 0x00D," x)
+#define MIXED_SKIP(x)                                        asm volatile ("csrwi 0x00F," x)
+#define A_ADDRESS(x)                                         asm volatile ("csrw 0x100, %0" :: "r" (x))
+#define W_ADDRESS(x)                                         asm volatile ("csrw 0x101, %0" :: "r" (x))
+#define A_STRIDE(x)                                          asm volatile ("csrw 0x102, %0":: "r" (x))
+#define W_STRIDE(x)                                          asm volatile ("csrw 0x103, %0":: "r" (x))
+#define A_ROLLBACK(x)                                        asm volatile ("csrw 0x104, %0":: "r" (x))
+#define W_ROLLBACK(x)                                        asm volatile ("csrw 0x105, %0":: "r" (x))
+#define A_SKIP(x)                                            asm volatile ("csrwi 0x106," x)
+#define W_SKIP(x)                                            asm volatile ("csrwi 0x107," x)
 
 static uint8_t __attribute__((noinline)) pulp_nn_bn_quant_u8 (
   int32_t phi,

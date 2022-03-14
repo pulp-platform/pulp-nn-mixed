@@ -139,6 +139,14 @@ PI_L1 uint8_t IM2COL_L1[(((CH_IM_IN >> 1) * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) *
 %elif max(config.kernel.in_data_t, config.kernel.wt_data_t) == 2:
 PI_L1 uint8_t IM2COL_L1[(((CH_IM_IN >> 2) * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) * NUM_CORES];
 %endif
+%elif config.kernel.extentions == 'XpulpNN-mixed':
+%if max(config.kernel.in_data_t, config.kernel.wt_data_t) == 8:
+PI_L1 uint8_t IM2COL_L1[((CH_IM_IN * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) * NUM_CORES];
+%elif max(config.kernel.in_data_t, config.kernel.wt_data_t) == 4:
+PI_L1 uint8_t IM2COL_L1[(((CH_IM_IN >> 1) * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) * NUM_CORES];
+%elif max(config.kernel.in_data_t, config.kernel.wt_data_t) == 2:
+PI_L1 uint8_t IM2COL_L1[(((CH_IM_IN >> 2) * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) * NUM_CORES];
+%endif
 %endif
 %if config.layer.bias == True:
 PI_L1 int8_t BIAS_L1[CH_IM_OUT] = BIAS;

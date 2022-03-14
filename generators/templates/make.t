@@ -32,10 +32,10 @@ ifeq ($(check), 1)
 APP_CFLAGS += -DVERBOSE_CHECK
 endif
 
-APP_CFLAGS += -O3 -Iinclude -w -flto
+APP_CFLAGS += -O3 -Iinclude -w #-flto
 APP_CFLAGS += -DNUM_CORES=$(cores) -DKERNEL=$(kernel)
 
-APP_LDFLAGS += -lm -flto
+APP_LDFLAGS += -lm #-flto
 
 
 include $(RULES_DIR)/pmsis_rules.mk

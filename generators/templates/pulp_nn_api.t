@@ -68,6 +68,10 @@ uint8_t *${config.fn_name}(
                         int8_t *pBias,
                         uint8_t *pOut,
                         uint8_t *pOut2,
+%if config.kernel.matmul_fmt == '4x4':
+                        uint8_t *pOut3,
+                        uint8_t *pOut4,
+%endif                        
                         int8_t *pWeight,
 %if config.kernel.act_prec == '32bit':
                         int32_t *pKappa,
