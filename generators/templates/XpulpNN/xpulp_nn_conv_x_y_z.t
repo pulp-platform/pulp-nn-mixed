@@ -58,7 +58,11 @@ void __attribute__((noinline)) ${config.fn_name}(
   uint16_t ch_out_r = PACK_INT${config.kernel.out_data_t}_SIZE(ch_out);
 
   int core_id = pi_core_id();
+%if config.kernel.matmul_fmt == '4x2':
   uint8_t * pIm2ColBase = pIm2ColBuffer + (2 * core_id * PACK_INT${config.max_precision}_SIZE(ch_in) * dim_kernel_x * dim_kernel_y);
+%elif config.kernel.matmul_fmt == '4x4':
+  uint8_t * pIm2ColBase = pIm2ColBuffer + (4 * core_id * PACK_INT${config.max_precision}_SIZE(ch_in) * dim_kernel_x * dim_kernel_y);
+%endif
   int i_out_y, i_out_x, i_ker_y, i_ker_x;
   int Log2Core;
 
@@ -183,13 +187,21 @@ void __attribute__((noinline)) ${config.fn_name}(
           }
         }
       }
+%if config.kernel.matmul_fmt == '4x2':
       if(pIm2Col == (pIm2ColBase + ((PACK_INT${config.max_precision}_SIZE(ch_in) * dim_kernel_x * dim_kernel_y) << 1)))
+%elif config.kernel.matmul_fmt == '4x4':
+      if(pIm2Col == (pIm2ColBase + ((PACK_INT${config.max_precision}_SIZE(ch_in) * dim_kernel_x * dim_kernel_y) << 2)))
+%endif
       {
         pOutBuffer = ${config.mat_mul_fn}(
           pIm2ColBase,
           pBias,
           pOutBuffer,
           pOutBuffer + ch_out_r,
+%if config.kernel.matmul_fmt == '4x4':
+          pOutBuffer + (ch_out_r << 1),
+          pOutBuffer + (ch_out_r << 1) + ch_out_r,
+%endif
           pWeight,
           pKappa,
           pLambda,

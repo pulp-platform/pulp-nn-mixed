@@ -35,7 +35,7 @@ from include.pulp_nn_struct import PULPNNSrcDirsSW32bit, PULPNNSrcDirsSW64bit, P
 ##################################################################################### PULP-NN Factory ############################################################
 
 class PULPNNKernel(object):
-    def __init__(self, name, inp, out, wt, quant, act_prec, ext, mm_fmt=''):
+    def __init__(self, name, inp, out, wt, quant, act_prec, ext, mm_fmt):
         self.type = name
         self.in_data_t = inp
         self.out_data_t = out
@@ -174,7 +174,7 @@ class PULPNNConvolve(PULPNNFactory):
             self.unpack_fn = "pulp_nn_i{0}_to_i{1}".format(str(self.kernel.wt_data_t), '8')
         elif self.kernel.extentions == 'XpulpNN':
             self.max_precision = max([self.kernel.in_data_t, self.kernel.wt_data_t])
-            self.fn_name = "xpulp_nn_conv_u{0}_u{1}_i{2}{3}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
+            self.fn_name = "xpulp_nn_conv_u{0}_u{1}_i{2}{3}{4}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
                 str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""),
                 str("_" + self.kernel.matmul_fmt if self.kernel.matmul_fmt == '4x4' else ""))
             self.zeromem_fn = "xpulp_nn_zero_mem_u{0}".format(str(self.max_precision))

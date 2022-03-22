@@ -85,13 +85,13 @@ def main():
                 for j in pulp_nn_init.PULPNNDataPrecisions:
                     for z in pulp_nn_init.PULPNNWeightsPrecisions:
                         for q in pulp_nn_init.PULPNNQuantizationMethods:
-                            kernel_to_test = pulp_nn_factory.PULPNNKernel(name='depthwise', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=e)
+                            kernel_to_test = pulp_nn_factory.PULPNNKernel(name='depthwise', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=e, mm_fmt='')
                             dw=pulp_nn_factory.PULPNNConvolveDepthwise(kernel=kernel_to_test, layer=None)
                             pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='depthwise', comp=dw, api=pulp_nn_init.PULPNNAPI)
 
             for i in pulp_nn_init.PULPNNDataPrecisions:
                 for z in pulp_nn_init.PULPNNWeightsPrecisions:
-                    kernel_to_test = pulp_nn_factory.PULPNNKernel(name='linear_no_quant', inp=i, out=32, wt=z, quant=None, act_prec=a, ext=e)
+                    kernel_to_test = pulp_nn_factory.PULPNNKernel(name='linear_no_quant', inp=i, out=32, wt=z, quant=None, act_prec=a, ext=e, mm_fmt='')
                     lin_nq=pulp_nn_factory.PULPNNLinearNoQuant(kernel=kernel_to_test, layer=None)
                     pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='linear_nq', comp=lin_nq, api=pulp_nn_init.PULPNNAPI)
 
@@ -99,26 +99,26 @@ def main():
                 for j in pulp_nn_init.PULPNNDataPrecisions:
                     for z in pulp_nn_init.PULPNNWeightsPrecisions:
                         for q in pulp_nn_init.PULPNNQuantizationMethods:
-                            kernel_to_test = pulp_nn_factory.PULPNNKernel(name='linear_quant', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=e)
+                            kernel_to_test = pulp_nn_factory.PULPNNKernel(name='linear_quant', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=e, mm_fmt='')
                             lin_q=pulp_nn_factory.PULPNNLinearQuant(kernel=kernel_to_test, layer=None)
                             pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='linear_q', comp=lin_q, api=pulp_nn_init.PULPNNAPI)
 
             for i in pulp_nn_init.PULPNNDataPrecisions:
                 if (i < 8 and e == 'XpulpNN') or e == 'XpulpV2':
-                    kernel_to_test = pulp_nn_factory.PULPNNKernel(name='maxpool', inp=i, out=None, wt=None, quant=None, act_prec=a, ext=e)
+                    kernel_to_test = pulp_nn_factory.PULPNNKernel(name='maxpool', inp=i, out=None, wt=None, quant=None, act_prec=a, ext=e, mm_fmt='')
                     maxp=pulp_nn_factory.PULPNNMaxPool(kernel=kernel_to_test, layer=None)
                     pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='maxpool', comp=maxp, api=pulp_nn_init.PULPNNAPI)
 
             for i in pulp_nn_init.PULPNNDataPrecisions:
                 if (i < 8 and e == 'XpulpNN') or e == 'XpulpV2':
-                    kernel_to_test = pulp_nn_factory.PULPNNKernel(name='avgpool', inp=i, out=None, wt=None, quant=None, act_prec=a, ext=e)
+                    kernel_to_test = pulp_nn_factory.PULPNNKernel(name='avgpool', inp=i, out=None, wt=None, quant=None, act_prec=a, ext=e, mm_fmt='')
                     avgp=pulp_nn_factory.PULPNNAvgPool(kernel=kernel_to_test, layer=None)
                     pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='avgpool', comp=avgp, api=pulp_nn_init.PULPNNAPI)
 
             for i in pulp_nn_init.PULPNNDataPrecisions:
                 for j in pulp_nn_init.PULPNNDataPrecisions:
                     if j <= i:
-                        kernel_to_test = pulp_nn_factory.PULPNNKernel(name='add', inp=i, out=j, wt=None, quant=None, act_prec=a, ext=e)
+                        kernel_to_test = pulp_nn_factory.PULPNNKernel(name='add', inp=i, out=j, wt=None, quant=None, act_prec=a, ext=e, mm_fmt='')
                         add=pulp_nn_factory.PULPNNAdd(kernel=kernel_to_test, layer=None)
                         pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='add', comp=add, api=pulp_nn_init.PULPNNAPI)
                             

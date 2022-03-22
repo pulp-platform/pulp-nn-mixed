@@ -24,8 +24,8 @@
 #ifndef __XPULPNN_KERNELS__
 #define __XPULPNN_KERNELS__
 %elif PULPNNEXT == 'XpulpNN-mixed':
-#ifndef __XPULPNN_KERNELS__
-#define __XPULPNN_KERNELS__
+#ifndef __XPULPNN-MIXED_KERNELS__
+#define __XPULPNN-MIXED_KERNELS__
 %endif
 
 ${PULPNNAPI}
