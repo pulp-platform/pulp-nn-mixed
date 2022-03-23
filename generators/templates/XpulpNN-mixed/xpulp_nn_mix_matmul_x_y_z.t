@@ -1909,6 +1909,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
     chan_left--;
   }
 %endif
+%if config.kernel.matmul_fmt == '4x2':
   pOut+=ch_out_r;
+%elif config.kernel.matmul_fmt == '4x4':
+  pOut += 3 * ch_out_r;
+%endif
   return pOut;
 }
