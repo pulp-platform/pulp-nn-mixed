@@ -201,7 +201,7 @@ void __attribute__((noinline)) ${config.fn_name}(
           pOutBuffer + ch_out_r,
 %if config.kernel.matmul_fmt == '4x4':
           pOutBuffer + (ch_out_r << 1),
-          pOutBuffer + (ch_out_r << 1 + ch_out_r),
+          pOutBuffer + (ch_out_r << 1) + ch_out_r,
 %endif
           pWeight,
           pKappa,
