@@ -312,7 +312,7 @@ class PULPNNMaxPool(PULPNNFactory):
         self.fn_name = "pulp_nn_maxpool_u{0}".format(str(self.kernel.in_data_t))
         self.filename = self.fn_name + ".c"
         self.api = self.__class__.__name__
-        if self.kernel.extentions == 'XpulpV2':
+        if self.kernel.extentions == 'XpulpV2' or int(self.kernel.in_data_t) == 8:
             self.comp_and_replace_fn = "pulp_nn_compare_and_replace_if_larger_u{0}".format(str(self.kernel.in_data_t))
         elif self.kernel.extentions == 'XpulpNN':
             self.comp_and_replace_fn = "xpulp_nn_compare_and_replace_if_larger_u{0}".format(str(self.kernel.in_data_t))
@@ -326,7 +326,7 @@ class PULPNNAvgPool(PULPNNFactory):
         self.fn_name = "pulp_nn_avgpool_u{0}".format(str(self.kernel.in_data_t))
         self.filename = self.fn_name + ".c"
         self.api = self.__class__.__name__
-        if self.kernel.extentions == 'XpulpV2':
+        if self.kernel.extentions == 'XpulpV2' or int(self.kernel.in_data_t) == 8:
             self.comp_and_avg_fn = "pulp_nn_avg_and_replace_u{0}".format(str(self.kernel.in_data_t))
         elif self.kernel.extentions == 'XpulpNN':
             self.comp_and_avg_fn = "xpulp_nn_avg_and_replace_u{0}".format(str(self.kernel.in_data_t))

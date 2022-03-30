@@ -79,7 +79,7 @@ void __attribute__ ((noinline))  pulp_nn_avgpool_u8(
       win_start += ch_im_in_r;
       for (; win_start < win_stop; win_start += ch_im_in_r)
       {
-        xpulp_nn_avg_and_replace_u8(target, win_start, ch_im_in_r);
+        pulp_nn_avg_and_replace_u8(target, win_start, ch_im_in_r);
       }
     }
   }
@@ -129,7 +129,7 @@ void __attribute__ ((noinline))  pulp_nn_avgpool_u8(
 
     for (; row_start < row_end; row_start += dim_im_in * ch_im_in_r)
     {
-      xpulp_nn_avg_and_replace_u8(target, row_start, dim_im_out * ch_im_in_r);
+      pulp_nn_avg_and_replace_u8(target, row_start, dim_im_out * ch_im_in_r);
     }
   }
 
