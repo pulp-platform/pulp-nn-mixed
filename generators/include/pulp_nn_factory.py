@@ -334,6 +334,18 @@ class PULPNNAvgPool(PULPNNFactory):
     def generate_code(self):
         return Template(filename="templates/pulp_nn_avgpool_x.t").render(config=self)
 
+
+class PULPNNAvgPoolNew(PULPNNFactory):
+    def __init__(self, kernel, layer):
+        super().__init__(kernel, layer)
+        self.fn_name = "pulp_nn_avgpool_u{}_u{}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t))
+        self.filename = self.fn_name + ".c"
+        self.api = self.__class__.__name__
+
+    def generate_code(self):
+        return Template(filename="templates/pulp_nn_avgpool_new.t", strict_undefined=True).render(config=self)
+
+
 class PULPNNAdd(PULPNNFactory):
     def __init__(self, kernel, layer):
         super().__init__(kernel, layer)

@@ -190,4 +190,24 @@ void ${config.fn_name}(
     uint16_t out_mult2,   
     uint16_t out_shift    
 );
+%elif config.api=="PULPNNAvgPoolNew":
+void ${config.fn_name}(
+    uint8_t * Im_in,
+    uint16_t dim_im_in_x,
+    uint16_t dim_im_in_y,
+    uint16_t ch_im_in,
+    uint16_t dim_kernel_x,
+    uint16_t dim_kernel_y,
+    uint16_t padding_x,
+    uint16_t padding_y,
+    uint16_t stride,
+    uint16_t dim_im_out_x,
+    uint16_t dim_im_out_y,
+    uint16_t out_shift,
+    uint32_t out_add,
+    uint32_t lambda,
+    uint8_t * Im_out,
+    int flag_requant,
+    unsigned int * memory_chan
+);
 %endif
