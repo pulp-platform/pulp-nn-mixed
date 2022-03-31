@@ -31,8 +31,10 @@ void __attribute__ ((noinline))  pulp_nn_avgpool_u2_u8(
   uint16_t ch_im_in,
   uint16_t dim_kernel_x,
   uint16_t dim_kernel_y,
-  uint16_t padding_x,
-  uint16_t padding_y,
+  uint16_t padding_t,
+  uint16_t padding_b,
+  uint16_t padding_l,
+  uint16_t padding_r,
   uint16_t stride,
   uint16_t dim_im_out_x,
   uint16_t dim_im_out_y,
@@ -71,11 +73,11 @@ void __attribute__ ((noinline))  pulp_nn_avgpool_u2_u8(
             const int8_t *pTmp, *pTmpInner;
             int8_t *pDst;
 
-            k_y_start = max16(0, i_y * stride_y - pad_y);
-            k_y_end = min16(i_y * stride_y - pad_y + kernel_y, input_y);
+            k_y_start = max16(0, i_y * stride_y - padding_b);
+            k_y_end = min16(i_y * stride_y - padding_t + kernel_y, input_y);
 
-            k_x_start = max16(0, i_x * stride_x - pad_x);
-            k_x_end = min16(i_x * stride_x - pad_x + kernel_x, input_x);
+            k_x_start = max16(0, i_x * stride_x - padding_l);
+            k_x_end = min16(i_x * stride_x - padding_r + kernel_x, input_x);
 
             pTmp = Im_in;
             pDst = &Im_out[ch_im_out_r * (i_x + i_y * output_x)];
