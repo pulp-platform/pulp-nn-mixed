@@ -33,7 +33,8 @@ void __attribute__ ((noinline))  ${config.fn_name}(
     uint16_t  padding_b,
     uint16_t  padding_l,
     uint16_t  padding_r,
-    uint16_t  stride,
+    uint16_t  stride_x,
+    uint16_t  stride_y,
     uint16_t  dim_im_out_x,
     uint16_t  dim_im_out_y,
     uint8_t * Im_out,
@@ -68,13 +69,13 @@ void __attribute__ ((noinline))  ${config.fn_name}(
             uint8_t     *target = Im_in + (i_y * dim_im_in_x + i_x) * ch_im_in_r; //to test: prob dim_im_in_x
             uint8_t     *win_start;
             uint8_t     *win_stop;
-            if (i_x * stride - padding_l < 0)
+            if (i_x * stride_x - padding_l < 0)
             {
                 win_start = target;
             }
             else
             {
-                win_start = Im_in + (i_y * dim_im_in_x + i_x * stride - padding_l) * ch_im_in_r;//to test: prob dim_im_in_x
+                win_start = Im_in + (i_y * dim_im_in_x + i_x * stride_x - padding_l) * ch_im_in_r;//to test: prob dim_im_in_x
             }
 
             if (i_x * stride - padding_l + dim_kernel >= dim_im_in_x)
@@ -83,7 +84,7 @@ void __attribute__ ((noinline))  ${config.fn_name}(
             }
             else
             {
-                win_stop = Im_in + (i_y * dim_im_in_x + i_x * stride - padding_l + dim_kernel) * ch_im_in_r;//to test: prob dim_im_in_x
+                win_stop = Im_in + (i_y * dim_im_in_x + i_x * stride_x - padding_l + dim_kernel) * ch_im_in_r;//to test: prob dim_im_in_x
             }
 
             /* first step is to copy over initial data */
@@ -116,22 +117,22 @@ void __attribute__ ((noinline))  ${config.fn_name}(
     uint8_t *row_start;
     uint8_t *row_end;
     /* setting the starting row */
-    if (i_y * stride - padding_t < 0)
+    if (i_y * stride_y - padding_t < 0)
     {
       row_start = Im_in;
     }
     else
     {
-      row_start = Im_in + (i_y * stride - padding_t) * dim_im_in_x * ch_im_in_r; //to test: prob dim_im_in_x
+      row_start = Im_in + (i_y * stride_y - padding_t) * dim_im_in_x * ch_im_in_r; //to test: prob dim_im_in_x
     }
     /* setting the stopping row */
-    if (i_y * stride - padding_t + dim_kernel >= dim_im_in_y)
+    if (i_y * stride_y - padding_t + dim_kernel >= dim_im_in_y)
     {
       row_end = Im_in + dim_im_in_x * dim_im_in_y * ch_im_in_r;//to test: prob dim_im_in_x
     }
     else
     {
-        row_end = Im_in + (i_y * stride - padding_t + dim_kernel) * dim_im_in_x * ch_im_in_r; //to test: prob dim_im_in_x
+        row_end = Im_in + (i_y * stride_y - padding_t + dim_kernel) * dim_im_in_x * ch_im_in_r; //to test: prob dim_im_in_x
     }
 
     /* copy over the first row */
