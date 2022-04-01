@@ -50,8 +50,12 @@ void __attribute__ ((noinline))  pulp_nn_avgpool_u2_u8(
   /* parallelization */
   int core_id = pi_core_id();
   int n_cores = NUM_CORES;
+  if (dim_im_in_y < NUM_CORES)
+  {
+    n_cores = dim_im_in_y;
+  }
   int Log2Core = log2(n_cores);
-  int chunck = (dim_im_out_y >> Log2Core) + (dim_im_out_y & (n_cores -1)!=0);
+  int chunck = (dim_im_out_y >> Log2Core) + ((dim_im_out_y & (n_cores -1))!=0);
   int start = chunck * core_id;
   int stop = min(start + chunck, dim_im_out_y);
   int   i_x, i_y;
@@ -64,27 +68,26 @@ void __attribute__ ((noinline))  pulp_nn_avgpool_u2_u8(
   uint32_t sum[4] = {0};
   for (i_y = start; i_y < stop; i_y++)
     {
-        for (i_x = 0; i_x < dim_im_out_y; i_x++)
+        for (i_x = 0; i_x < dim_im_out_x; i_x++)
         {
-
-            uint16_t k_y_start, k_y_end;
-            uint16_t k_x_start, k_x_end;
-            int32_t chCnt;
+            int k_y_start, k_y_end;
+            int k_x_start, k_x_end;
+            
             int32_t out_ch_cnt = 0;
             const int8_t *pTmp, *pTmpInner;
             int8_t *pDst;
 
-            k_y_start = max16(0, i_y * stride_y - padding_b);
-            k_y_end = min16(i_y * stride_y - padding_t + kernel_y, input_y);
+            k_y_start = maxs32(0, i_y * stride_y - padding_b);
+            k_y_end = mins32(i_y * stride_y - padding_t + dim_kernel_y, dim_im_in_y);
 
-            k_x_start = max16(0, i_x * stride_x - padding_l);
-            k_x_end = min16(i_x * stride_x - padding_r + kernel_x, input_x);
+            k_x_start = maxs32(0, i_x * stride_x - padding_l);
+            k_x_end = mins32(i_x * stride_x - padding_r + dim_kernel_x, dim_im_in_x);
 
             pTmp = Im_in;
-            pDst = &Im_out[ch_im_out_r * (i_x + i_y * output_x)];
-
-            chCnt = ch_im_in_r;
-            while (chCnt > 0)
+            pDst = &Im_out[ch_im_out_r * (i_x + i_y * dim_im_out_x)];
+            int k_x, k_y;
+            
+            for (int ch_cnt = 0; ch_cnt < ch_im_in_r; ch_cnt++)
             {
               sum[0] = 0;
               sum[1] = 0;
@@ -95,7 +98,7 @@ void __attribute__ ((noinline))  pulp_nn_avgpool_u2_u8(
                 {
                     for (k_x = k_x_start; k_x < k_x_end; k_x++)
                     {
-                        pTmpInner = pTmp + (ch_im_in_r * (k_x + k_y * input_x));
+                        pTmpInner = pTmp + (ch_im_in_r * (k_x + k_y * dim_im_in_x));
                         uint8_t cur_chans = *pTmpInner;
 
                         sum[0] += (uint32_t) ((cur_chans & 0x03) >> 0);
@@ -107,36 +110,37 @@ void __attribute__ ((noinline))  pulp_nn_avgpool_u2_u8(
                         sum[3] += (uint32_t) ((cur_chans & 0xc0) >> 6);
                     }
                 }
-                chCnt--;
                 uint32_t out_large;
                 if (flag_requant) {
                   out_large = (sum[0] * lambda + out_add) >> out_shift;
-                  out_el = (clip8(out_large);
-                  pDst[(chCnt >> (-2)) + 0] = out_el;
+                  out_el = (clip8(out_large));
+                  pDst[(ch_cnt << (2)) + 0] = out_el;
                   out_large = (sum[1] * lambda + out_add) >> out_shift;
-                  out_el = (clip8(out_large);
-                  pDst[(chCnt >> (-2)) + 1] = out_el;
+                  out_el = (clip8(out_large));
+                  pDst[(ch_cnt << (2)) + 1] = out_el;
                   out_large = (sum[2] * lambda + out_add) >> out_shift;
-                  out_el = (clip8(out_large);
-                  pDst[(chCnt >> (-2)) + 2] = out_el;
+                  out_el = (clip8(out_large));
+                  pDst[(ch_cnt << (2)) + 2] = out_el;
                   out_large = (sum[3] * lambda + out_add) >> out_shift;
-                  out_el = (clip8(out_large);
-                  pDst[(chCnt >> (-2)) + 3] = out_el;
-                } else {
+                  out_el = (clip8(out_large));
+                  pDst[(ch_cnt << (2)) + 3] = out_el;
+                  } else {
                   out_large = sum[0] / kernel_size_tot;
-                  out_el = (clip8(out_large);
-                  pDst[(chCnt >> (-2)) + 0] = out_el;
+                  out_el = (clip8(out_large));
+                  pDst[(ch_cnt << (2)) + 0] = out_el;
                   out_large = sum[1] / kernel_size_tot;
-                  out_el = (clip8(out_large);
-                  pDst[(chCnt >> (-2)) + 1] = out_el;
+                  out_el = (clip8(out_large));
+                  pDst[(ch_cnt << (2)) + 1] = out_el;
                   out_large = sum[2] / kernel_size_tot;
-                  out_el = (clip8(out_large);
-                  pDst[(chCnt >> (-2)) + 2] = out_el;
+                  out_el = (clip8(out_large));
+                  pDst[(ch_cnt << (2)) + 2] = out_el;
                   out_large = sum[3] / kernel_size_tot;
-                  out_el = (clip8(out_large);
-                  pDst[(chCnt >> (-2)) + 3] = out_el;
+                  out_el = (clip8(out_large));
+                  pDst[(ch_cnt << (2)) + 3] = out_el;
                 }
+                pTmp++;
             }
-
+        }
+    }
  pi_cl_team_barrier(0);
 }
