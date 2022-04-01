@@ -24,6 +24,10 @@
 
 
 
+
+#define bitins(dst,not_mask_imm,src,mask_imm,off) __builtin_pulp_binsert(dst,not_mask_imm,src,mask_imm,off)
+#define bitext_u(x,size,off) __builtin_pulp_bextractu(x,size,off)
+
 void __attribute__ ((noinline))  pulp_nn_avgpool_u4_u2(
   uint8_t * Im_in,
   uint16_t dim_im_in_x,
@@ -61,6 +65,7 @@ void __attribute__ ((noinline))  pulp_nn_avgpool_u4_u2(
   int   i_x, i_y;
 
 
+
   uint32_t kernel_size_tot = dim_kernel_x * dim_kernel_y;
   int ch_im_in_r = ch_im_in >> 1;
   int ch_im_out_r = ch_im_in >> 2;
@@ -72,7 +77,7 @@ void __attribute__ ((noinline))  pulp_nn_avgpool_u4_u2(
         {
             int k_y_start, k_y_end;
             int k_x_start, k_x_end;
-            
+
             int32_t out_ch_cnt = 0;
             const int8_t *pTmp, *pTmpInner;
             int8_t *pDst;
@@ -92,7 +97,7 @@ void __attribute__ ((noinline))  pulp_nn_avgpool_u4_u2(
             pDst = &Im_out[ch_im_out_r * (i_x + i_y * dim_im_out_x)];
             int k_x, k_y;
             uint8_t out_el = 0;
-            
+
             for (int ch_cnt = 0; ch_cnt < ch_im_in_r; ch_cnt++)
             {
               sum[0] = 0;
@@ -104,9 +109,9 @@ void __attribute__ ((noinline))  pulp_nn_avgpool_u4_u2(
                         pTmpInner = pTmp + (ch_im_in_r * (k_x + k_y * dim_im_in_x));
                         uint8_t cur_chans = *pTmpInner;
 
-                        sum[0] += (uint32_t) ((cur_chans & 0x0f) >> 0);
+                        sum[0] += (uint32_t) bitext_u((unsigned int) cur_chans, 4, 0);
 
-                        sum[1] += (uint32_t) ((cur_chans & 0xf0) >> 4);
+                        sum[1] += (uint32_t) bitext_u((unsigned int) cur_chans, 4, 4);
                     }
                 }
                 uint32_t out_large;

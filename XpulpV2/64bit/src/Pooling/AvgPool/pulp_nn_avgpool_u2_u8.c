@@ -24,6 +24,10 @@
 
 
 
+
+#define bitins(dst,not_mask_imm,src,mask_imm,off) __builtin_pulp_binsert(dst,not_mask_imm,src,mask_imm,off)
+#define bitext_u(x,size,off) __builtin_pulp_bextractu(x,size,off)
+
 void __attribute__ ((noinline))  pulp_nn_avgpool_u2_u8(
   uint8_t * Im_in,
   uint16_t dim_im_in_x,
@@ -61,6 +65,7 @@ void __attribute__ ((noinline))  pulp_nn_avgpool_u2_u8(
   int   i_x, i_y;
 
 
+
   uint32_t kernel_size_tot = dim_kernel_x * dim_kernel_y;
   int ch_im_in_r = ch_im_in >> 2;
   int ch_im_out_r = ch_im_in >> 0;
@@ -72,7 +77,7 @@ void __attribute__ ((noinline))  pulp_nn_avgpool_u2_u8(
         {
             int k_y_start, k_y_end;
             int k_x_start, k_x_end;
-            
+
             int32_t out_ch_cnt = 0;
             const int8_t *pTmp, *pTmpInner;
             int8_t *pDst;
@@ -86,7 +91,7 @@ void __attribute__ ((noinline))  pulp_nn_avgpool_u2_u8(
             pTmp = Im_in;
             pDst = &Im_out[ch_im_out_r * (i_x + i_y * dim_im_out_x)];
             int k_x, k_y;
-            
+
             for (int ch_cnt = 0; ch_cnt < ch_im_in_r; ch_cnt++)
             {
               sum[0] = 0;
@@ -101,41 +106,41 @@ void __attribute__ ((noinline))  pulp_nn_avgpool_u2_u8(
                         pTmpInner = pTmp + (ch_im_in_r * (k_x + k_y * dim_im_in_x));
                         uint8_t cur_chans = *pTmpInner;
 
-                        sum[0] += (uint32_t) ((cur_chans & 0x03) >> 0);
+                        sum[0] += (uint32_t) bitext_u((unsigned int) cur_chans, 2, 0);
 
-                        sum[1] += (uint32_t) ((cur_chans & 0x0c) >> 2);
+                        sum[1] += (uint32_t) bitext_u((unsigned int) cur_chans, 2, 2);
 
-                        sum[2] += (uint32_t) ((cur_chans & 0x30) >> 4);
+                        sum[2] += (uint32_t) bitext_u((unsigned int) cur_chans, 2, 4);
 
-                        sum[3] += (uint32_t) ((cur_chans & 0xc0) >> 6);
+                        sum[3] += (uint32_t) bitext_u((unsigned int) cur_chans, 2, 6);
                     }
                 }
                 uint32_t out_large;
                 if (flag_requant) {
                   out_large = (sum[0] * lambda + out_add) >> out_shift;
-                  out_el = (clip8(out_large));
+                  out_el = clip8(out_large);
                   pDst[(ch_cnt << (2)) + 0] = out_el;
                   out_large = (sum[1] * lambda + out_add) >> out_shift;
-                  out_el = (clip8(out_large));
+                  out_el = clip8(out_large);
                   pDst[(ch_cnt << (2)) + 1] = out_el;
                   out_large = (sum[2] * lambda + out_add) >> out_shift;
-                  out_el = (clip8(out_large));
+                  out_el = clip8(out_large);
                   pDst[(ch_cnt << (2)) + 2] = out_el;
                   out_large = (sum[3] * lambda + out_add) >> out_shift;
-                  out_el = (clip8(out_large));
+                  out_el = clip8(out_large);
                   pDst[(ch_cnt << (2)) + 3] = out_el;
                   } else {
                   out_large = sum[0] / kernel_size_tot;
-                  out_el = (clip8(out_large));
+                  out_el = clip8(out_large);
                   pDst[(ch_cnt << (2)) + 0] = out_el;
                   out_large = sum[1] / kernel_size_tot;
-                  out_el = (clip8(out_large));
+                  out_el = clip8(out_large);
                   pDst[(ch_cnt << (2)) + 1] = out_el;
                   out_large = sum[2] / kernel_size_tot;
-                  out_el = (clip8(out_large));
+                  out_el = clip8(out_large);
                   pDst[(ch_cnt << (2)) + 2] = out_el;
                   out_large = sum[3] / kernel_size_tot;
-                  out_el = (clip8(out_large));
+                  out_el = clip8(out_large);
                   pDst[(ch_cnt << (2)) + 3] = out_el;
                 }
                 pTmp++;

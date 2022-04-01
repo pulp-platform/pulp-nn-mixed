@@ -26,6 +26,10 @@
 import numpy as np
 %>
 
+
+#define bitins(dst,not_mask_imm,src,mask_imm,off) __builtin_pulp_binsert(dst,not_mask_imm,src,mask_imm,off)
+#define bitext_u(x,size,off) __builtin_pulp_bextractu(x,size,off)
+
 void __attribute__ ((noinline))  ${config.fn_name}(
   uint8_t * Im_in,
   uint16_t dim_im_in_x,
@@ -64,14 +68,28 @@ void __attribute__ ((noinline))  ${config.fn_name}(
 <%
 els_per_byte_in = 8//config.kernel.in_data_t
 els_per_byte_out = 8//config.kernel.out_data_t
-base_mask = 0xff >> (8-config.kernel.in_data_t)
+dw_in = config.kernel.in_data_t
+dw_out = config.kernel.out_data_t
+in_base_mask = 0xff >> (8-dw_in)
+in_masks = []
+for c in range(els_per_byte_in):
+    in_masks.append(in_base_mask << (c*dw_in))
+in_mask_strings = [f"0x{m:02x}" for m in in_masks]
+in_mask_n_strings = [f"0x{m^0xff:02x}" for m in in_masks]
+out_base_mask = 0xff >> (8-dw_out)
+out_masks = []
+for c in range(els_per_byte_out):
+    out_masks.append(out_base_mask << (c*dw_out))
+out_mask_strings = [f"0x{m:02x}" for m in out_masks]
+out_mask_n_strings = [f"0x{m^0xff:02x}" for m in out_masks]
 # the following flag signals that we don't write an output every input channel block iteration
-wr_not_in_every_iter = config.kernel.in_data_t > config.kernel.out_data_t
-wr_every_in_iter = int(config.kernel.in_data_t/config.kernel.out_data_t)
+wr_not_in_every_iter = dw_in > dw_out
+wr_every_in_iter = int(dw_in/dw_out)
 byte_chan_shift_in = int(np.log2(els_per_byte_in))
 byte_chan_shift_out = int(np.log2(els_per_byte_out))
 byte_chan_shift_diff = byte_chan_shift_out - byte_chan_shift_in
 %>
+
 
   uint32_t kernel_size_tot = dim_kernel_x * dim_kernel_y;
   int ch_im_in_r = ch_im_in >> ${byte_chan_shift_in};
@@ -84,14 +102,14 @@ byte_chan_shift_diff = byte_chan_shift_out - byte_chan_shift_in
         {
             int k_y_start, k_y_end;
             int k_x_start, k_x_end;
-            
+
             int32_t out_ch_cnt = 0;
             const int8_t *pTmp, *pTmpInner;
             int8_t *pDst;
 % if wr_not_in_every_iter:
-            // in data width: ${config.kernel.in_data_t}
-            // out data width: ${config.kernel.out_data_t}
-            // -> we need to do an output write every ${int(config.kernel.in_data_t/config.kernel.out_data_t)}
+            // in data width: ${dw_in}
+            // out data width: ${dw_out}
+            // -> we need to do an output write every ${int(dw_in/dw_out)}
             //    input channel "block" (1 byte) iterations
             uint32_t in_iter_cnt = 0;
 % endif
@@ -108,7 +126,7 @@ byte_chan_shift_diff = byte_chan_shift_out - byte_chan_shift_in
 % if wr_not_in_every_iter:
             uint8_t out_el = 0;
 % endif
-            
+
             for (int ch_cnt = 0; ch_cnt < ch_im_in_r; ch_cnt++)
             {
 % for sum_idx in range(els_per_byte_in):
@@ -125,10 +143,9 @@ byte_chan_shift_diff = byte_chan_shift_out - byte_chan_shift_in
                         uint8_t cur_chans = *pTmpInner;
                         % for c in range(els_per_byte_in):
 <%
-cur_mask_shift = c * config.kernel.in_data_t
-cur_mask_str = f"0x{base_mask << cur_mask_shift:02x}"
+cur_mask_shift = c * dw_in
 %>
-                        sum[${c}] += (uint32_t) ((cur_chans & ${cur_mask_str}) >> ${cur_mask_shift});
+                        sum[${c}] += (uint32_t) bitext_u((unsigned int) cur_chans, ${dw_in}, ${cur_mask_shift});
                         % endfor
                     }
                 }
@@ -137,24 +154,40 @@ cur_mask_str = f"0x{base_mask << cur_mask_shift:02x}"
                   % for c in range(els_per_byte_in):
                   out_large = (sum[${c}] * lambda + out_add) >> out_shift;
                   % if not wr_not_in_every_iter:
-                  out_el ${"|" if els_per_byte_out != 1 else ""}= (clip${config.kernel.out_data_t}(out_large)${f" << {(c % els_per_byte_out) * config.kernel.out_data_t}" if els_per_byte_out != 1 else ""});
+                    % if els_per_byte_out == 1:
+                  out_el = clip${dw_out}(out_large);
+                    % else:
+                      % if c==0 and not wr_not_in_every_iter:
+                  out_el = clip${dw_out}(out_large);
+                      % else:
+                  out_el = bitins(out_el, (int8_t) ${out_mask_n_strings[c % els_per_byte_out]}, (uint8_t) clip${dw_out}(out_large), (int8_t) ${out_mask_strings[c % els_per_byte_out]}, ${(c % els_per_byte_out) * dw_out});
+                      % endif
+                    % endif
                     % if (c % els_per_byte_out) == els_per_byte_out-1:
                   pDst[(ch_cnt ${">>" if byte_chan_shift_diff >= 0 else "<<"} (${byte_chan_shift_diff if byte_chan_shift_diff >= 0 else -byte_chan_shift_diff})) + ${c >> byte_chan_shift_out}] = out_el;
                     % endif
-                  % else:
-                  out_el |= (clip${config.kernel.out_data_t}(out_large) << (in_iter_cnt * ${els_per_byte_in*config.kernel.out_data_t} + ${c*config.kernel.out_data_t}));
-                  % endif
+                    % else:
+                  out_el |= (clip${config.kernel.out_data_t}(out_large) << (in_iter_cnt * ${els_per_byte_in * config.kernel.out_data_t} + ${c * config.kernel.out_data_t}));
+                    % endif
                   % endfor
                   } else {
                   % for c in range(els_per_byte_in):
                   out_large = sum[${c}] / kernel_size_tot;
                   % if not wr_not_in_every_iter:
-                  out_el ${"|" if els_per_byte_out != 1 else ""}= (clip${config.kernel.out_data_t}(out_large)${f" << {(c % els_per_byte_out) * config.kernel.out_data_t}" if els_per_byte_out != 1 else ""});
-                  % if (c % els_per_byte_out) == els_per_byte_out-1:
+                    % if els_per_byte_out == 1:
+                  out_el = clip${dw_out}(out_large);
+                    % else:
+                        % if c == 0:
+                  out_el = clip${dw_out}(out_large);
+                        % else:
+                  out_el = bitins(out_el, (int8_t) ${out_mask_n_strings[c % els_per_byte_out]}, (uint8_t) clip${dw_out}(out_large), (int8_t) ${out_mask_strings[c % els_per_byte_out]}, ${(c % els_per_byte_out) * dw_out});
+                        % endif
+                    % endif
+                    % if (c % els_per_byte_out) == els_per_byte_out-1:
                   pDst[(ch_cnt ${">>" if byte_chan_shift_diff>=0 else "<<"} (${byte_chan_shift_diff if byte_chan_shift_diff>=0 else -byte_chan_shift_diff})) + ${c >> byte_chan_shift_out}] = out_el;
-                  % endif
-                  % else:
-                  out_el |= (clip${config.kernel.out_data_t}(out_large) << (in_iter_cnt * ${els_per_byte_in*config.kernel.out_data_t} + ${c*config.kernel.out_data_t}));
+                    % endif
+                  % else :
+                  out_el |= (clip${config.kernel.out_data_t}(out_large) << (in_iter_cnt * ${els_per_byte_in * config.kernel.out_data_t} + ${c * config.kernel.out_data_t}));
                   % endif
                   % endfor
                 }
