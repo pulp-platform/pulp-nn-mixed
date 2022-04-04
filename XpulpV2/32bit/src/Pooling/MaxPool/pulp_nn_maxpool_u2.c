@@ -37,8 +37,7 @@ void __attribute__ ((noinline))  pulp_nn_maxpool_u2(
     uint16_t  stride_y,
     uint16_t  dim_im_out_x,
     uint16_t  dim_im_out_y,
-    uint8_t * Im_out,
-    unsigned int * memory_chan
+    uint8_t * Im_out
 ) {
     int core_id = pi_core_id();
     int n_cores = NUM_CORES;
