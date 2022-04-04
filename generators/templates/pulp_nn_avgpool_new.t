@@ -49,8 +49,7 @@ void __attribute__ ((noinline))  ${config.fn_name}(
   uint32_t out_add,
   uint32_t lambda,
   uint8_t * Im_out,
-  int flag_requant,
-  unsigned int * memory_chan
+  int flag_requant
 )
 {
   /* parallelization */
@@ -177,7 +176,7 @@ cur_mask_shift = c * dw_in
                     % if els_per_byte_out == 1:
                   out_el = clip${dw_out}(out_large);
                     % else:
-                        % if c == 0:
+                        % if c % els_per_byte_out == 0:
                   out_el = clip${dw_out}(out_large);
                         % else:
                   out_el = bitins(out_el, (int8_t) ${out_mask_n_strings[c % els_per_byte_out]}, (uint8_t) clip${dw_out}(out_large), (int8_t) ${out_mask_strings[c % els_per_byte_out]}, ${(c % els_per_byte_out) * dw_out});

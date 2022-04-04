@@ -47,8 +47,7 @@ void __attribute__ ((noinline))  pulp_nn_avgpool_u2_u2(
   uint32_t out_add,
   uint32_t lambda,
   uint8_t * Im_out,
-  int flag_requant,
-  unsigned int * memory_chan
+  int flag_requant
 )
 {
   /* parallelization */

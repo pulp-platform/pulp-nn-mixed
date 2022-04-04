@@ -47,8 +47,7 @@ void __attribute__ ((noinline))  pulp_nn_avgpool_u2_u4(
   uint32_t out_add,
   uint32_t lambda,
   uint8_t * Im_out,
-  int flag_requant,
-  unsigned int * memory_chan
+  int flag_requant
 )
 {
   /* parallelization */
@@ -134,7 +133,7 @@ void __attribute__ ((noinline))  pulp_nn_avgpool_u2_u4(
                   out_el = bitins(out_el, (int8_t) 0x0f, (uint8_t) clip4(out_large), (int8_t) 0xf0, 4);
                   pDst[(ch_cnt << (1)) + 0] = out_el;
                   out_large = sum[2] / kernel_size_tot;
-                  out_el = bitins(out_el, (int8_t) 0xf0, (uint8_t) clip4(out_large), (int8_t) 0x0f, 0);
+                  out_el = clip4(out_large);
                   out_large = sum[3] / kernel_size_tot;
                   out_el = bitins(out_el, (int8_t) 0x0f, (uint8_t) clip4(out_large), (int8_t) 0xf0, 4);
                   pDst[(ch_cnt << (1)) + 1] = out_el;
