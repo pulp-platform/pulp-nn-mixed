@@ -3391,8 +3391,7 @@ void pulp_nn_maxpool_u8(
     uint16_t  stride_y,
     uint16_t  dim_im_out_x,
     uint16_t  dim_im_out_y,
-    uint8_t * Im_out,
-    unsigned int * memory_chan);
+    uint8_t * Im_out);
 
 void pulp_nn_maxpool_u4(
     uint8_t * Im_in,
@@ -3408,8 +3407,7 @@ void pulp_nn_maxpool_u4(
     uint16_t  stride_y,
     uint16_t  dim_im_out_x,
     uint16_t  dim_im_out_y,
-    uint8_t * Im_out,
-    unsigned int * memory_chan);
+    uint8_t * Im_out);
 
 void pulp_nn_maxpool_u2(
     uint8_t * Im_in,
@@ -3425,8 +3423,7 @@ void pulp_nn_maxpool_u2(
     uint16_t  stride_y,
     uint16_t  dim_im_out_x,
     uint16_t  dim_im_out_y,
-    uint8_t * Im_out,
-    unsigned int * memory_chan);
+    uint8_t * Im_out);
 
 void pulp_nn_avgpool_u8(
     uint8_t * Im_in,
@@ -3480,8 +3477,7 @@ void pulp_nn_avgpool_u8_u8(
     uint32_t out_add,
     uint32_t lambda,
     uint8_t * Im_out,
-    int flag_requant,
-    unsigned int * memory_chan
+    int flag_requant
 );
 
 void pulp_nn_avgpool_u8_u4(
@@ -3503,8 +3499,7 @@ void pulp_nn_avgpool_u8_u4(
     uint32_t out_add,
     uint32_t lambda,
     uint8_t * Im_out,
-    int flag_requant,
-    unsigned int * memory_chan
+    int flag_requant
 );
 
 void pulp_nn_avgpool_u8_u2(
@@ -3526,8 +3521,7 @@ void pulp_nn_avgpool_u8_u2(
     uint32_t out_add,
     uint32_t lambda,
     uint8_t * Im_out,
-    int flag_requant,
-    unsigned int * memory_chan
+    int flag_requant
 );
 
 void pulp_nn_avgpool_u4_u8(
@@ -3549,8 +3543,7 @@ void pulp_nn_avgpool_u4_u8(
     uint32_t out_add,
     uint32_t lambda,
     uint8_t * Im_out,
-    int flag_requant,
-    unsigned int * memory_chan
+    int flag_requant
 );
 
 void pulp_nn_avgpool_u4_u4(
@@ -3572,8 +3565,7 @@ void pulp_nn_avgpool_u4_u4(
     uint32_t out_add,
     uint32_t lambda,
     uint8_t * Im_out,
-    int flag_requant,
-    unsigned int * memory_chan
+    int flag_requant
 );
 
 void pulp_nn_avgpool_u4_u2(
@@ -3595,8 +3587,7 @@ void pulp_nn_avgpool_u4_u2(
     uint32_t out_add,
     uint32_t lambda,
     uint8_t * Im_out,
-    int flag_requant,
-    unsigned int * memory_chan
+    int flag_requant
 );
 
 void pulp_nn_avgpool_u2_u8(
@@ -3618,8 +3609,7 @@ void pulp_nn_avgpool_u2_u8(
     uint32_t out_add,
     uint32_t lambda,
     uint8_t * Im_out,
-    int flag_requant,
-    unsigned int * memory_chan
+    int flag_requant
 );
 
 void pulp_nn_avgpool_u2_u4(
@@ -3641,8 +3631,7 @@ void pulp_nn_avgpool_u2_u4(
     uint32_t out_add,
     uint32_t lambda,
     uint8_t * Im_out,
-    int flag_requant,
-    unsigned int * memory_chan
+    int flag_requant
 );
 
 void pulp_nn_avgpool_u2_u2(
@@ -3664,8 +3653,7 @@ void pulp_nn_avgpool_u2_u2(
     uint32_t out_add,
     uint32_t lambda,
     uint8_t * Im_out,
-    int flag_requant,
-    unsigned int * memory_chan
+    int flag_requant
 );
 
 void pulp_nn_add_u8_u8(

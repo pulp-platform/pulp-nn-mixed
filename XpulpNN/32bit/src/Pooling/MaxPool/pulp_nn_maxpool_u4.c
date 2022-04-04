@@ -71,7 +71,7 @@ void __attribute__ ((noinline))  pulp_nn_maxpool_u4(
                 win_start = Im_in + (i_y * dim_im_in_x + i_x * stride_x - padding_l) * ch_im_in_r;//to test: prob dim_im_in_x
             }
 
-            if (i_x * stride - padding_l + dim_kernel >= dim_im_in_x)
+            if (i_x * stride_x - padding_l + dim_kernel >= dim_im_in_x)
             {
                 win_stop = Im_in + (i_y * dim_im_in_x + dim_im_in_x) * ch_im_in_r;//to test: prob dim_im_in_x
             }

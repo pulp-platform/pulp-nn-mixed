@@ -166,8 +166,7 @@ void ${config.fn_name}(
     uint16_t  stride_y,
     uint16_t  dim_im_out_x,
     uint16_t  dim_im_out_y,
-    uint8_t * Im_out,
-    unsigned int * memory_chan);
+    uint8_t * Im_out);
 %elif config.api=="PULPNNAvgPool":
 void ${config.fn_name}(
     uint8_t * Im_in,
@@ -211,7 +210,6 @@ void ${config.fn_name}(
     uint32_t out_add,
     uint32_t lambda,
     uint8_t * Im_out,
-    int flag_requant,
-    unsigned int * memory_chan
+    int flag_requant
 );
 %endif
