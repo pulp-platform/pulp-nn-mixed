@@ -1,9 +1,7 @@
 /*
  * ${config.filename}
- * Nazareno Bruschi <nazareno.bruschi@unibo.it>
- * Angelo Garofalo <angelo.garofalo@unibo.it>
+ * Georg Rutishauser <georgr@iis.ee.ethz.ch>
  *
- * Copyright (C) 2018-2020 University of Bologna
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +22,8 @@
 
 <%
 import numpy as np
+act_prec = int(config.kernel.act_prec[0:2])
+act_t = f"int{act_prec}_t"
 %>
 
 
@@ -46,8 +46,8 @@ void __attribute__ ((noinline))  ${config.fn_name}(
   uint16_t dim_im_out_x,
   uint16_t dim_im_out_y,
   uint16_t out_shift,
-  uint32_t out_add,
-  uint32_t lambda,
+  ${act_t} out_add,
+  ${act_t} lambda,
   uint8_t * Im_out,
   int flag_requant
 )
@@ -148,7 +148,7 @@ cur_mask_shift = c * dw_in
                         % endfor
                     }
                 }
-                uint32_t out_large;
+                ${act_t} out_large;
                 if (flag_requant) {
                   % for c in range(els_per_byte_in):
                   out_large = (sum[${c}] * lambda + out_add) >> out_shift;

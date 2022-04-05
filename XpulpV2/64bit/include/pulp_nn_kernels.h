@@ -3204,8 +3204,8 @@ void pulp_nn_avgpool_u8_u8(
     uint16_t dim_im_out_x,
     uint16_t dim_im_out_y,
     uint16_t out_shift,
-    uint32_t out_add,
-    uint32_t lambda,
+    int64_t out_add,
+    int64_t lambda,
     uint8_t * Im_out,
     int flag_requant
 );
@@ -3226,8 +3226,8 @@ void pulp_nn_avgpool_u8_u4(
     uint16_t dim_im_out_x,
     uint16_t dim_im_out_y,
     uint16_t out_shift,
-    uint32_t out_add,
-    uint32_t lambda,
+    int64_t out_add,
+    int64_t lambda,
     uint8_t * Im_out,
     int flag_requant
 );
@@ -3248,8 +3248,8 @@ void pulp_nn_avgpool_u8_u2(
     uint16_t dim_im_out_x,
     uint16_t dim_im_out_y,
     uint16_t out_shift,
-    uint32_t out_add,
-    uint32_t lambda,
+    int64_t out_add,
+    int64_t lambda,
     uint8_t * Im_out,
     int flag_requant
 );
@@ -3270,8 +3270,8 @@ void pulp_nn_avgpool_u4_u8(
     uint16_t dim_im_out_x,
     uint16_t dim_im_out_y,
     uint16_t out_shift,
-    uint32_t out_add,
-    uint32_t lambda,
+    int64_t out_add,
+    int64_t lambda,
     uint8_t * Im_out,
     int flag_requant
 );
@@ -3292,8 +3292,8 @@ void pulp_nn_avgpool_u4_u4(
     uint16_t dim_im_out_x,
     uint16_t dim_im_out_y,
     uint16_t out_shift,
-    uint32_t out_add,
-    uint32_t lambda,
+    int64_t out_add,
+    int64_t lambda,
     uint8_t * Im_out,
     int flag_requant
 );
@@ -3314,8 +3314,8 @@ void pulp_nn_avgpool_u4_u2(
     uint16_t dim_im_out_x,
     uint16_t dim_im_out_y,
     uint16_t out_shift,
-    uint32_t out_add,
-    uint32_t lambda,
+    int64_t out_add,
+    int64_t lambda,
     uint8_t * Im_out,
     int flag_requant
 );
@@ -3336,8 +3336,8 @@ void pulp_nn_avgpool_u2_u8(
     uint16_t dim_im_out_x,
     uint16_t dim_im_out_y,
     uint16_t out_shift,
-    uint32_t out_add,
-    uint32_t lambda,
+    int64_t out_add,
+    int64_t lambda,
     uint8_t * Im_out,
     int flag_requant
 );
@@ -3358,8 +3358,8 @@ void pulp_nn_avgpool_u2_u4(
     uint16_t dim_im_out_x,
     uint16_t dim_im_out_y,
     uint16_t out_shift,
-    uint32_t out_add,
-    uint32_t lambda,
+    int64_t out_add,
+    int64_t lambda,
     uint8_t * Im_out,
     int flag_requant
 );
@@ -3380,8 +3380,8 @@ void pulp_nn_avgpool_u2_u2(
     uint16_t dim_im_out_x,
     uint16_t dim_im_out_y,
     uint16_t out_shift,
-    uint32_t out_add,
-    uint32_t lambda,
+    int64_t out_add,
+    int64_t lambda,
     uint8_t * Im_out,
     int flag_requant
 );

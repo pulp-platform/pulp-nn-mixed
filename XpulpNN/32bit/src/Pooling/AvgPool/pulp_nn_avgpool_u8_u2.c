@@ -1,9 +1,7 @@
 /*
  * pulp_nn_avgpool_u8_u2.c
- * Nazareno Bruschi <nazareno.bruschi@unibo.it>
- * Angelo Garofalo <angelo.garofalo@unibo.it>
+ * Georg Rutishauser <georgr@iis.ee.ethz.ch>
  *
- * Copyright (C) 2018-2020 University of Bologna
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,8 +42,8 @@ void __attribute__ ((noinline))  pulp_nn_avgpool_u8_u2(
   uint16_t dim_im_out_x,
   uint16_t dim_im_out_y,
   uint16_t out_shift,
-  uint32_t out_add,
-  uint32_t lambda,
+  int32_t out_add,
+  int32_t lambda,
   uint8_t * Im_out,
   int flag_requant
 )
@@ -110,7 +108,7 @@ void __attribute__ ((noinline))  pulp_nn_avgpool_u8_u2(
                         sum[0] += (uint32_t) bitext_u((unsigned int) cur_chans, 8, 0);
                     }
                 }
-                uint32_t out_large;
+                int32_t out_large;
                 if (flag_requant) {
                   out_large = (sum[0] * lambda + out_add) >> out_shift;
                   out_el |= (clip2(out_large) << (in_iter_cnt * 2 + 0));

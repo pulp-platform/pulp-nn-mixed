@@ -1,3 +1,7 @@
+<%
+act_prec = int(config.kernel.act_prec[0:2])
+act_t = f"int{act_prec}_t"
+%>\
 %if config.api == "PULPNNConvolve":
 void ${config.fn_name}(
     const uint8_t *pInBuffer,
@@ -21,12 +25,9 @@ void ${config.fn_name}(
     uint8_t *pOutBuffer,
     const uint16_t dim_out_x,
     const uint16_t dim_out_y,
-%if config.kernel.quantization == 'shift_clip' and config.kernel.act_prec == '32bit':
-    int32_t *k,
-    int32_t *lambda,
-%elif config.kernel.quantization == 'shift_clip' and config.kernel.act_prec == '64bit':
-    int64_t *k,
-    int64_t *lambda,
+%if config.kernel.quantization == 'shift_clip':
+    ${act_t} *k,
+    ${act_t} *lambda,
 %else:
     int16_t *pThr,
 %endif
@@ -57,12 +58,9 @@ void ${config.fn_name}(
     uint8_t *pOutBuffer,
     const uint16_t dim_out_x,
     const uint16_t dim_out_y,
-%if config.kernel.quantization == 'shift_clip' and config.kernel.act_prec == '32bit':
-    int32_t *k,
-    int32_t *lambda,
-%elif config.kernel.quantization == 'shift_clip' and config.kernel.act_prec == '64bit':
-    int64_t *k,
-    int64_t *lambda,
+%if config.kernel.quantization == 'shift_clip':
+    ${act_t} *k,
+    ${act_t} *lambda,
 %else:
     int16_t *pThr,
 %endif
@@ -79,12 +77,9 @@ uint8_t *${config.fn_name}(
     uint16_t bias_shift,
     int8_t out_shift,
     uint16_t out_mult,
-%if config.kernel.quantization == 'shift_clip' and config.kernel.act_prec == '32bit':
-    int32_t *k,
-    int32_t *lambda,
-%elif config.kernel.quantization == 'shift_clip' and config.kernel.act_prec == '64bit':
-    int64_t *k,
-    int64_t *lambda,
+%if config.kernel.quantization == 'shift_clip':
+    ${act_t} *k,
+    ${act_t} *lambda,
 %else:
     int16_t *pThr,
 %endif
@@ -115,12 +110,9 @@ void ${config.fn_name}(
     uint8_t * pOutBuffer,
     const uint16_t dim_out_x,
     const uint16_t dim_out_y,
-%if config.kernel.quantization == 'shift_clip' and config.kernel.act_prec == '32bit':
-    int32_t *k,
-    int32_t *lambda,
-%elif config.kernel.quantization == 'shift_clip' and config.kernel.act_prec == '64bit':
-    int64_t *k,
-    int64_t *lambda,
+%if config.kernel.quantization == 'shift_clip':
+    ${act_t} *k,
+    ${act_t} *lambda,
 %endif
     uint8_t * pIm2ColBuffer,
     int8_t * pWtBuffer,
@@ -137,13 +129,8 @@ void ${config.fn_name}(
     uint16_t bias_shift,
     int8_t out_shift,
     uint16_t out_mult,
-%if config.kernel.act_prec == '32bit':
-    int32_t *k,
-    int32_t *lambda,
-%elif config.kernel.act_prec == '64bit':
-    int64_t *k,
-    int64_t *lambda,
-%endif
+    ${act_t} *k,
+    ${act_t} *lambda,
 %if config.kernel.quantization == 'thresholds':
     int16_t *pThr,
 %endif
@@ -207,8 +194,8 @@ void ${config.fn_name}(
     uint16_t dim_im_out_x,
     uint16_t dim_im_out_y,
     uint16_t out_shift,
-    uint32_t out_add,
-    uint32_t lambda,
+    ${act_t} out_add,
+    ${act_t} lambda,
     uint8_t * Im_out,
     int flag_requant
 );
