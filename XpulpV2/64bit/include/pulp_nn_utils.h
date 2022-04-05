@@ -33,7 +33,7 @@
 #define max8(a,b)                                            __builtin_pulp_maxu8(a,b)
 #define max16(a,b)                                           __builtin_pulp_maxu16(a,b)
 #define max32(a,b)                                           __builtin_pulp_maxusi(a,b)
-#define maxs32(a,b)                                           __builtin_pulp_maxsi(a,b)
+#define maxs32(a,b)                                          __builtin_pulp_maxsi(a,b)
 #define min32(a,b)                                           __builtin_pulp_minusi(a,b)
 #define mins32(a,b)                                          __builtin_pulp_minsi(a,b)
 #define min4(a,b)                                            __builtin_pulp_minu4(a,b)
