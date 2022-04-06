@@ -1,7 +1,7 @@
 /*
  * ${config.filename}
  * Georg Rutishauser <georgr@iis.ee.ethz.ch>
- *
+ * Inspired by CMSIS-NN AvgPool at https://github.com/ARM-software/CMSIS_5/blob/develop/CMSIS/NN/Source/PoolingFunctions/arm_avgpool_s8.c
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,16 @@ act_t = f"int{act_prec}_t"
 #define bitext_u(x,size,off) __builtin_pulp_bextractu(x,size,off)
 
 void __attribute__ ((noinline))  ${config.fn_name}(
-  uint8_t * Im_in,
+  uint8_t * pIn,
+  uint8_t * pOut,
+  ${act_t} lambda,
+  uint16_t out_shift,
+  ${act_t} out_add,
   uint16_t dim_im_in_x,
   uint16_t dim_im_in_y,
   uint16_t ch_im_in,
+  uint16_t dim_im_out_x,
+  uint16_t dim_im_out_y,
   uint16_t dim_kernel_x,
   uint16_t dim_kernel_y,
   uint16_t padding_t,
@@ -43,12 +49,6 @@ void __attribute__ ((noinline))  ${config.fn_name}(
   uint16_t padding_r,
   uint16_t stride_x,
   uint16_t stride_y,
-  uint16_t dim_im_out_x,
-  uint16_t dim_im_out_y,
-  uint16_t out_shift,
-  ${act_t} out_add,
-  ${act_t} lambda,
-  uint8_t * Im_out,
   int flag_requant
 )
 {
@@ -93,7 +93,6 @@ byte_chan_shift_diff = byte_chan_shift_out - byte_chan_shift_in
   uint32_t kernel_size_tot = dim_kernel_x * dim_kernel_y;
   int ch_im_in_r = ch_im_in >> ${byte_chan_shift_in};
   int ch_im_out_r = ch_im_in >> ${byte_chan_shift_out};
-  int oc_slice;
   uint32_t sum[${els_per_byte_in}] = {0};
   for (i_y = start; i_y < stop; i_y++)
     {
@@ -102,7 +101,6 @@ byte_chan_shift_diff = byte_chan_shift_out - byte_chan_shift_in
             int k_y_start, k_y_end;
             int k_x_start, k_x_end;
 
-            int32_t out_ch_cnt = 0;
             const int8_t *pTmp, *pTmpInner;
             int8_t *pDst;
 % if wr_not_in_every_iter:
@@ -119,8 +117,8 @@ byte_chan_shift_diff = byte_chan_shift_out - byte_chan_shift_in
             k_x_start = maxs32(0, i_x * stride_x - padding_l);
             k_x_end = mins32(i_x * stride_x - padding_r + dim_kernel_x, dim_im_in_x);
 
-            pTmp = Im_in;
-            pDst = &Im_out[ch_im_out_r * (i_x + i_y * dim_im_out_x)];
+            pTmp = pIn;
+            pDst = &pOut[ch_im_out_r * (i_x + i_y * dim_im_out_x)];
             int k_x, k_y;
 % if wr_not_in_every_iter:
             uint8_t out_el = 0;

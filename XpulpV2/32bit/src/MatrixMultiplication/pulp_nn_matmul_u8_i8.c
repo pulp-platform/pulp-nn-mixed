@@ -19,24 +19,23 @@
 
 #include "pmsis.h"
 #include "pulp_nn_utils.h"
-#include "pulp_nn_kernels.h"
 
 
 uint8_t *pulp_nn_matmul_u8_i8(
-          const int8_t * pWeight,
-          uint8_t * pInBuffer,
-          uint16_t ch_out,
-          uint16_t num_col_im2col,
-          uint16_t bias_shift,
-          int8_t out_shift,
-          uint16_t out_mult,
-          int32_t *k,
-          int32_t *lambda,
-          const int8_t * bias,
-          uint8_t * pOut,
-          int flag_relu,
-          int flag_batch_norm
-) {
+                        uint8_t *pIn,
+                        int8_t *pBias,
+                        uint8_t *pOut,
+                        uint8_t *pOut2,
+                        int8_t *pWeight,
+                        int32_t *pKappa,
+                        int32_t *pLambda,
+                        uint16_t out_mult,
+                        uint16_t out_shift,
+                        uint16_t num_col_im2col,
+                        uint16_t ch_out,
+                        uint8_t flag_relu,
+                        uint8_t flag_batch_norm)
+{
   v4s vecA;
   v4s vecA2;
   v4s vecA3;
@@ -47,14 +46,14 @@ uint8_t *pulp_nn_matmul_u8_i8(
   uint16_t ch_out_r = ch_out;
   uint16_t num_col_im2col_w = num_col_im2col;
 
-  uint8_t *pOut2 = pOut + ch_out_r;
+  //uint8_t *pOut2 = pOut + ch_out_r;
   int8_t *pA = pWeight;
 
   uint16_t chan_left = ch_out & 0x3;
 
   for(int i=0; i < (ch_out >> 2); i++)
   {
-    uint8_t *pB =  pInBuffer;
+    uint8_t *pB =  pIn;
     uint8_t *pB2 = (pB + num_col_im2col);
     int8_t *pA2 = (pA + num_col_im2col_w);
     int8_t *pA3 = (pA2 + num_col_im2col_w);
@@ -69,12 +68,12 @@ uint8_t *pulp_nn_matmul_u8_i8(
     int sum7 = 0;
     int sum8 = 0;
 
-    if (bias != NULL)
+    if (pBias != NULL)
     {
-      sum = ((int) (*bias++));
-      sum2 = ((int) (*bias++));      
-      sum3 = ((int) (*bias++));      
-      sum4 = ((int) (*bias++));
+      sum = ((int) (*pBias++));
+      sum2 = ((int) (*pBias++));      
+      sum3 = ((int) (*pBias++));      
+      sum4 = ((int) (*pBias++));
 
       sum5 = sum;
       sum6 = sum2;
@@ -133,33 +132,33 @@ uint8_t *pulp_nn_matmul_u8_i8(
     }
     if (flag_batch_norm && flag_relu)
     {
-      *pOut = pulp_nn_bn_quant_u8(sum, *k, *lambda, out_shift);
+      *pOut = pulp_nn_bn_quant_u8(sum, *pKappa, *pLambda, out_shift);
       pOut++;
-      *pOut2 = pulp_nn_bn_quant_u8(sum5, *k, *lambda, out_shift);
+      *pOut2 = pulp_nn_bn_quant_u8(sum5, *pKappa, *pLambda, out_shift);
       pOut2++;
-      k++;
-      lambda++;
+      pKappa++;
+      pLambda++;
 
-      *pOut = pulp_nn_bn_quant_u8(sum2, *k, *lambda, out_shift);
+      *pOut = pulp_nn_bn_quant_u8(sum2, *pKappa, *pLambda, out_shift);
       pOut++;
-      *pOut2 = pulp_nn_bn_quant_u8(sum6, *k, *lambda, out_shift);
+      *pOut2 = pulp_nn_bn_quant_u8(sum6, *pKappa, *pLambda, out_shift);
       pOut2++;
-      k++;
-      lambda++;
+      pKappa++;
+      pLambda++;
 
-      *pOut = pulp_nn_bn_quant_u8(sum3, *k, *lambda, out_shift);
+      *pOut = pulp_nn_bn_quant_u8(sum3, *pKappa, *pLambda, out_shift);
       pOut++;
-      *pOut2 = pulp_nn_bn_quant_u8(sum7, *k, *lambda, out_shift);
+      *pOut2 = pulp_nn_bn_quant_u8(sum7, *pKappa, *pLambda, out_shift);
       pOut2++;
-      k++;
-      lambda++;
+      pKappa++;
+      pLambda++;
 
-      *pOut = pulp_nn_bn_quant_u8(sum4, *k, *lambda, out_shift);
+      *pOut = pulp_nn_bn_quant_u8(sum4, *pKappa, *pLambda, out_shift);
       pOut++;
-      *pOut2 = pulp_nn_bn_quant_u8(sum8, *k, *lambda, out_shift);
+      *pOut2 = pulp_nn_bn_quant_u8(sum8, *pKappa, *pLambda, out_shift);
       pOut2++;
-      k++;
-      lambda++;
+      pKappa++;
+      pLambda++;
     }
     else
     {
@@ -208,11 +207,11 @@ uint8_t *pulp_nn_matmul_u8_i8(
   }
    while(chan_left)
   {
-    uint8_t *pB = pInBuffer ;
+    uint8_t *pB = pIn;
     uint8_t *pB2 = (pB + num_col_im2col);
     int sum = 0;
-    if (bias != NULL)
-      sum = ((int) (*bias++));    
+    if (pBias != NULL)
+      sum = ((int) (*pBias++));    
     int sum2 = sum;
 
     for(int j=0; j < (num_col_im2col_w >> 2); j++)
@@ -242,12 +241,12 @@ uint8_t *pulp_nn_matmul_u8_i8(
     }
     if (flag_batch_norm && flag_relu)
     {
-      *pOut = pulp_nn_bn_quant_u8(sum, *k, *lambda, out_shift);
+      *pOut = pulp_nn_bn_quant_u8(sum, *pKappa, *pLambda, out_shift);
       pOut++;
-      *pOut2 = pulp_nn_bn_quant_u8(sum2, *k, *lambda, out_shift);
+      *pOut2 = pulp_nn_bn_quant_u8(sum2, *pKappa, *pLambda, out_shift);
       pOut2++;
-      k++;
-      lambda++;
+      pKappa++;
+      pLambda++;
     }
     else
     {
