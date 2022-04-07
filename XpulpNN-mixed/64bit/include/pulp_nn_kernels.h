@@ -2540,7 +2540,7 @@ void xpulp_nn_avgpool_u2_u2(
                        int flag_requant
 );
 
-void pulp_nn_add_u8_u8(
+void xpulp_nn_add_u8_u8(
                         uint8_t * pIn1,
                         uint8_t * pIn2,
                         uint8_t * pOut,
@@ -2551,7 +2551,7 @@ void pulp_nn_add_u8_u8(
                         uint16_t dim_im_in_y,
                         uint16_t ch_im_in);
 
-void pulp_nn_add_u8_u4(
+void xpulp_nn_add_u8_u4(
                         uint8_t * pIn1,
                         uint8_t * pIn2,
                         uint8_t * pOut,
@@ -2562,7 +2562,7 @@ void pulp_nn_add_u8_u4(
                         uint16_t dim_im_in_y,
                         uint16_t ch_im_in);
 
-void pulp_nn_add_u8_u2(
+void xpulp_nn_add_u8_u2(
                         uint8_t * pIn1,
                         uint8_t * pIn2,
                         uint8_t * pOut,
@@ -2573,7 +2573,7 @@ void pulp_nn_add_u8_u2(
                         uint16_t dim_im_in_y,
                         uint16_t ch_im_in);
 
-void pulp_nn_add_u4_u4(
+void xpulp_nn_add_u4_u4(
                         uint8_t * pIn1,
                         uint8_t * pIn2,
                         uint8_t * pOut,
@@ -2584,7 +2584,7 @@ void pulp_nn_add_u4_u4(
                         uint16_t dim_im_in_y,
                         uint16_t ch_im_in);
 
-void pulp_nn_add_u4_u2(
+void xpulp_nn_add_u4_u2(
                         uint8_t * pIn1,
                         uint8_t * pIn2,
                         uint8_t * pOut,
@@ -2595,7 +2595,7 @@ void pulp_nn_add_u4_u2(
                         uint16_t dim_im_in_y,
                         uint16_t ch_im_in);
 
-void pulp_nn_add_u2_u2(
+void xpulp_nn_add_u2_u2(
                         uint8_t * pIn1,
                         uint8_t * pIn2,
                         uint8_t * pOut,

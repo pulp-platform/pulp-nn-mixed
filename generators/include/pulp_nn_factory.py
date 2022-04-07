@@ -266,10 +266,10 @@ class PULPNNConvolveDepthwise(PULPNNFactory):
             self.fn_name = "pulp_nn_depthwise_u{0}_u{1}_i{2}{3}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
                         str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""))
         elif self.kernel.extentions == 'XpulpNN':
-            self.fn_name = "pulp_nn_depthwise_u{0}_u{1}_i{2}{3}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
+            self.fn_name = "xpulp_nn_depthwise_u{0}_u{1}_i{2}{3}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
                         str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""))
         elif self.kernel.extentions == 'XpulpNN-mixed':
-            self.fn_name = "pulp_nn_depthwise_u{0}_u{1}_i{2}{3}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
+            self.fn_name = "xpulp_nn_depthwise_u{0}_u{1}_i{2}{3}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
                         str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""))
         self.filename = self.fn_name + ".c"
         self.api = self.__class__.__name__
@@ -433,7 +433,7 @@ class PULPNNAvgPoolNew(PULPNNFactory):
     def __init__(self, kernel, layer):
         super().__init__(kernel, layer)
         self.fn_name = "pulp_nn_avgpool_u{}_u{}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t))
-        if 'Xpulp' in self.kernel.extentions:
+        if 'XpulpNN' in self.kernel.extentions:
             self.fn_name = "x"+self.fn_name
         self.filename = self.fn_name + ".c"
         self.api = self.__class__.__name__
@@ -448,6 +448,8 @@ class PULPNNAdd(PULPNNFactory):
         self.in1_data_t = kernel.in_data_t
         self.in2_data_t = kernel.out_data_t
         self.fn_name = "pulp_nn_add_u{0}_u{1}".format(str(self.in1_data_t), str(self.in2_data_t))
+        if "XpulpNN" in self.kernel.extentions:
+            self.fn_name = "x" + self.fn_name
         self.filename = self.fn_name + ".c"
         self.api = self.__class__.__name__
         self.unpack_in1_fn = "pulp_nn_u{0}_to_u{1}_r".format(str(self.in1_data_t), '8')

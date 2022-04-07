@@ -112,7 +112,8 @@ def main():
                             	pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='linear_q', comp=lin_q, api=pulp_nn_init.PULPNNAPI)
 
             for i in pulp_nn_init.PULPNNDataPrecisions:
-                if (i < 8 and e == 'XpulpNN') or e == 'XpulpV2':
+                # TODO: what about XpulpNN-mixed?
+                if e in ['XpulpNN', 'XpulpV2']:
                     kernel_to_test = pulp_nn_factory.PULPNNKernel(name='maxpool', inp=i, out=None, wt=None, quant=None, act_prec=a, ext=e, mm_fmt='')
                     maxp=pulp_nn_factory.PULPNNMaxPool(kernel=kernel_to_test, layer=None)
                     pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='maxpool', comp=maxp, api=pulp_nn_init.PULPNNAPI)

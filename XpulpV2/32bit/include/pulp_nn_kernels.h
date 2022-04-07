@@ -3650,7 +3650,7 @@ void pulp_nn_avgpool_u2(
                         uint16_t  stride_x,
                         uint16_t  stride_y);
 
-void xpulp_nn_avgpool_u8_u8(
+void pulp_nn_avgpool_u8_u8(
                        uint8_t * pIn,
                        uint8_t * pOut,
                        int32_t lambda,
@@ -3672,7 +3672,7 @@ void xpulp_nn_avgpool_u8_u8(
                        int flag_requant
 );
 
-void xpulp_nn_avgpool_u8_u4(
+void pulp_nn_avgpool_u8_u4(
                        uint8_t * pIn,
                        uint8_t * pOut,
                        int32_t lambda,
@@ -3694,7 +3694,7 @@ void xpulp_nn_avgpool_u8_u4(
                        int flag_requant
 );
 
-void xpulp_nn_avgpool_u8_u2(
+void pulp_nn_avgpool_u8_u2(
                        uint8_t * pIn,
                        uint8_t * pOut,
                        int32_t lambda,
@@ -3716,7 +3716,7 @@ void xpulp_nn_avgpool_u8_u2(
                        int flag_requant
 );
 
-void xpulp_nn_avgpool_u4_u8(
+void pulp_nn_avgpool_u4_u8(
                        uint8_t * pIn,
                        uint8_t * pOut,
                        int32_t lambda,
@@ -3738,7 +3738,7 @@ void xpulp_nn_avgpool_u4_u8(
                        int flag_requant
 );
 
-void xpulp_nn_avgpool_u4_u4(
+void pulp_nn_avgpool_u4_u4(
                        uint8_t * pIn,
                        uint8_t * pOut,
                        int32_t lambda,
@@ -3760,7 +3760,7 @@ void xpulp_nn_avgpool_u4_u4(
                        int flag_requant
 );
 
-void xpulp_nn_avgpool_u4_u2(
+void pulp_nn_avgpool_u4_u2(
                        uint8_t * pIn,
                        uint8_t * pOut,
                        int32_t lambda,
@@ -3782,7 +3782,7 @@ void xpulp_nn_avgpool_u4_u2(
                        int flag_requant
 );
 
-void xpulp_nn_avgpool_u2_u8(
+void pulp_nn_avgpool_u2_u8(
                        uint8_t * pIn,
                        uint8_t * pOut,
                        int32_t lambda,
@@ -3804,7 +3804,7 @@ void xpulp_nn_avgpool_u2_u8(
                        int flag_requant
 );
 
-void xpulp_nn_avgpool_u2_u4(
+void pulp_nn_avgpool_u2_u4(
                        uint8_t * pIn,
                        uint8_t * pOut,
                        int32_t lambda,
@@ -3826,7 +3826,7 @@ void xpulp_nn_avgpool_u2_u4(
                        int flag_requant
 );
 
-void xpulp_nn_avgpool_u2_u2(
+void pulp_nn_avgpool_u2_u2(
                        uint8_t * pIn,
                        uint8_t * pOut,
                        int32_t lambda,

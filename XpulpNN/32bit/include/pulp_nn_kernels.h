@@ -3071,7 +3071,7 @@ uint8_t *xpulp_nn_matmul_u2_u2_i2_4x4(
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
 
-void pulp_nn_depthwise_u8_u8_i8(
+void xpulp_nn_depthwise_u8_u8_i8(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -3099,7 +3099,7 @@ void pulp_nn_depthwise_u8_u8_i8(
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
 
-void pulp_nn_depthwise_u8_u8_i4(
+void xpulp_nn_depthwise_u8_u8_i4(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -3127,7 +3127,7 @@ void pulp_nn_depthwise_u8_u8_i4(
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
 
-void pulp_nn_depthwise_u8_u8_i2(
+void xpulp_nn_depthwise_u8_u8_i2(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -3155,7 +3155,7 @@ void pulp_nn_depthwise_u8_u8_i2(
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
 
-void pulp_nn_depthwise_u8_u4_i8(
+void xpulp_nn_depthwise_u8_u4_i8(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -3183,7 +3183,7 @@ void pulp_nn_depthwise_u8_u4_i8(
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
 
-void pulp_nn_depthwise_u8_u4_i4(
+void xpulp_nn_depthwise_u8_u4_i4(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -3211,7 +3211,7 @@ void pulp_nn_depthwise_u8_u4_i4(
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
 
-void pulp_nn_depthwise_u8_u4_i2(
+void xpulp_nn_depthwise_u8_u4_i2(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -3239,7 +3239,7 @@ void pulp_nn_depthwise_u8_u4_i2(
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
 
-void pulp_nn_depthwise_u8_u2_i8(
+void xpulp_nn_depthwise_u8_u2_i8(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -3267,7 +3267,7 @@ void pulp_nn_depthwise_u8_u2_i8(
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
 
-void pulp_nn_depthwise_u8_u2_i4(
+void xpulp_nn_depthwise_u8_u2_i4(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -3295,7 +3295,7 @@ void pulp_nn_depthwise_u8_u2_i4(
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
 
-void pulp_nn_depthwise_u8_u2_i2(
+void xpulp_nn_depthwise_u8_u2_i2(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -3323,7 +3323,7 @@ void pulp_nn_depthwise_u8_u2_i2(
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
 
-void pulp_nn_depthwise_u4_u8_i8(
+void xpulp_nn_depthwise_u4_u8_i8(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -3351,7 +3351,7 @@ void pulp_nn_depthwise_u4_u8_i8(
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
 
-void pulp_nn_depthwise_u4_u8_i4(
+void xpulp_nn_depthwise_u4_u8_i4(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -3379,7 +3379,7 @@ void pulp_nn_depthwise_u4_u8_i4(
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
 
-void pulp_nn_depthwise_u4_u8_i2(
+void xpulp_nn_depthwise_u4_u8_i2(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -3407,7 +3407,7 @@ void pulp_nn_depthwise_u4_u8_i2(
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
 
-void pulp_nn_depthwise_u4_u4_i8(
+void xpulp_nn_depthwise_u4_u4_i8(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -3435,7 +3435,7 @@ void pulp_nn_depthwise_u4_u4_i8(
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
 
-void pulp_nn_depthwise_u4_u4_i4(
+void xpulp_nn_depthwise_u4_u4_i4(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -3463,7 +3463,7 @@ void pulp_nn_depthwise_u4_u4_i4(
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
 
-void pulp_nn_depthwise_u4_u4_i2(
+void xpulp_nn_depthwise_u4_u4_i2(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -3491,7 +3491,7 @@ void pulp_nn_depthwise_u4_u4_i2(
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
 
-void pulp_nn_depthwise_u4_u2_i8(
+void xpulp_nn_depthwise_u4_u2_i8(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -3519,7 +3519,7 @@ void pulp_nn_depthwise_u4_u2_i8(
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
 
-void pulp_nn_depthwise_u4_u2_i4(
+void xpulp_nn_depthwise_u4_u2_i4(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -3547,7 +3547,7 @@ void pulp_nn_depthwise_u4_u2_i4(
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
 
-void pulp_nn_depthwise_u4_u2_i2(
+void xpulp_nn_depthwise_u4_u2_i2(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -3575,7 +3575,7 @@ void pulp_nn_depthwise_u4_u2_i2(
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
 
-void pulp_nn_depthwise_u2_u8_i8(
+void xpulp_nn_depthwise_u2_u8_i8(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -3603,7 +3603,7 @@ void pulp_nn_depthwise_u2_u8_i8(
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
 
-void pulp_nn_depthwise_u2_u8_i4(
+void xpulp_nn_depthwise_u2_u8_i4(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -3631,7 +3631,7 @@ void pulp_nn_depthwise_u2_u8_i4(
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
 
-void pulp_nn_depthwise_u2_u8_i2(
+void xpulp_nn_depthwise_u2_u8_i2(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -3659,7 +3659,7 @@ void pulp_nn_depthwise_u2_u8_i2(
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
 
-void pulp_nn_depthwise_u2_u4_i8(
+void xpulp_nn_depthwise_u2_u4_i8(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -3687,7 +3687,7 @@ void pulp_nn_depthwise_u2_u4_i8(
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
 
-void pulp_nn_depthwise_u2_u4_i4(
+void xpulp_nn_depthwise_u2_u4_i4(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -3715,7 +3715,7 @@ void pulp_nn_depthwise_u2_u4_i4(
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
 
-void pulp_nn_depthwise_u2_u4_i2(
+void xpulp_nn_depthwise_u2_u4_i2(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -3743,7 +3743,7 @@ void pulp_nn_depthwise_u2_u4_i2(
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
 
-void pulp_nn_depthwise_u2_u2_i8(
+void xpulp_nn_depthwise_u2_u2_i8(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -3771,7 +3771,7 @@ void pulp_nn_depthwise_u2_u2_i8(
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
 
-void pulp_nn_depthwise_u2_u2_i4(
+void xpulp_nn_depthwise_u2_u2_i4(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -3799,7 +3799,7 @@ void pulp_nn_depthwise_u2_u2_i4(
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
 
-void pulp_nn_depthwise_u2_u2_i2(
+void xpulp_nn_depthwise_u2_u2_i2(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -4277,6 +4277,23 @@ void xpulp_nn_linear_u2_u2_i2(
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
 
+void xpulp_nn_maxpool_u8(
+                        uint8_t * pIn,
+                        uint8_t * pOut,
+                        uint16_t  dim_im_in_x,
+                        uint16_t  dim_im_in_y,
+                        uint16_t  ch_im_in,
+                        uint16_t  dim_im_out_x,
+                        uint16_t  dim_im_out_y,
+                        uint16_t  dim_kernel_x,
+                        uint16_t  dim_kernel_y,
+                        uint16_t  padding_t,
+                        uint16_t  padding_b,
+                        uint16_t  padding_l,
+                        uint16_t  padding_r,
+                        uint16_t  stride_x,
+                        uint16_t  stride_y);
+
 void xpulp_nn_maxpool_u4(
                         uint8_t * pIn,
                         uint8_t * pOut,
@@ -4543,7 +4560,7 @@ void xpulp_nn_avgpool_u2_u2(
                        int flag_requant
 );
 
-void pulp_nn_add_u8_u8(
+void xpulp_nn_add_u8_u8(
                         uint8_t * pIn1,
                         uint8_t * pIn2,
                         uint8_t * pOut,
@@ -4554,7 +4571,7 @@ void pulp_nn_add_u8_u8(
                         uint16_t dim_im_in_y,
                         uint16_t ch_im_in);
 
-void pulp_nn_add_u8_u4(
+void xpulp_nn_add_u8_u4(
                         uint8_t * pIn1,
                         uint8_t * pIn2,
                         uint8_t * pOut,
@@ -4565,7 +4582,7 @@ void pulp_nn_add_u8_u4(
                         uint16_t dim_im_in_y,
                         uint16_t ch_im_in);
 
-void pulp_nn_add_u8_u2(
+void xpulp_nn_add_u8_u2(
                         uint8_t * pIn1,
                         uint8_t * pIn2,
                         uint8_t * pOut,
@@ -4576,7 +4593,7 @@ void pulp_nn_add_u8_u2(
                         uint16_t dim_im_in_y,
                         uint16_t ch_im_in);
 
-void pulp_nn_add_u4_u4(
+void xpulp_nn_add_u4_u4(
                         uint8_t * pIn1,
                         uint8_t * pIn2,
                         uint8_t * pOut,
@@ -4587,7 +4604,7 @@ void pulp_nn_add_u4_u4(
                         uint16_t dim_im_in_y,
                         uint16_t ch_im_in);
 
-void pulp_nn_add_u4_u2(
+void xpulp_nn_add_u4_u2(
                         uint8_t * pIn1,
                         uint8_t * pIn2,
                         uint8_t * pOut,
@@ -4598,7 +4615,7 @@ void pulp_nn_add_u4_u2(
                         uint16_t dim_im_in_y,
                         uint16_t ch_im_in);
 
-void pulp_nn_add_u2_u2(
+void xpulp_nn_add_u2_u2(
                         uint8_t * pIn1,
                         uint8_t * pIn2,
                         uint8_t * pOut,
