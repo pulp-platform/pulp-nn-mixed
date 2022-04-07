@@ -51,9 +51,9 @@ void __attribute__ ((noinline))  pulp_nn_avgpool_u2_u8(
   /* parallelization */
   int core_id = pi_core_id();
   int n_cores = NUM_CORES;
-  if (dim_im_in_y < NUM_CORES)
+  if (dim_im_out_y < NUM_CORES)
   {
-    n_cores = dim_im_in_y;
+    n_cores = dim_im_out_y;
   }
   int Log2Core = log2(n_cores);
   int chunck = (dim_im_out_y >> Log2Core) + ((dim_im_out_y & (n_cores -1))!=0);
