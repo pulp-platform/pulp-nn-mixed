@@ -23,15 +23,20 @@ SINGLE_KERNEL		= 0
 
 # Select from the supported ones:
 
-# -> XpulpV2, XpulpNN
+# -> XpulpV2, XpulpNN, XpulpNN-mixed
 
-ISA 				= 'XpulpV2'
+ISA 				= 'XpulpNN'
 
 # Select from the supported ones:
 
-# -> matmul, convolution, pointwise, depthwise, linear_no_quant, linear_quant, maxpool, avgpool, add
+# -> 4x2, 4x4
+MATMUL_FMT			= '4x4'
 
-TYPE_OF_KERNEL 		= 'linear_quant'
+# Select from the supported ones:
+
+# -> convolution, pointwise, depthwise, linear_no_quant, linear_quant, maxpool, avgpool, add
+
+TYPE_OF_KERNEL 		= 'convolution'
 
 # If SINGLE_KERNEL = 0 these will be ignored. Otherwise, select the possibilities from the supported ones
 #
@@ -66,11 +71,11 @@ quantization_type 	= 'shift_clip'
 # if depthwise CH_IM_IN must be equal to CH_IM_OUT
 DIM_IM_IN_X 		= 8
 DIM_IM_IN_Y 		= 8
-CH_IM_IN 			= 8
+CH_IM_IN 			= 16
 # if pooling, output dimensions must be relative to kernel and stride sizes
 DIM_IM_OUT_X 		= 8
 DIM_IM_OUT_Y 		= 8
-CH_IM_OUT 			= 8
+CH_IM_OUT 			= 16
 # if is not linear
 DIM_KERNEL_X 		= 3 # 1 if is pointwise, free otherwise
 DIM_KERNEL_Y 		= 3 # 1 if is pointwise, free otherwise

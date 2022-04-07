@@ -21,10 +21,6 @@
 #include "pulp_nn_utils.h"
 #include "pulp_nn_kernels.h"
 
-#define bitins(dst,not_mask_imm,src,mask_imm,off) __builtin_pulp_binsert(dst,not_mask_imm,src,mask_imm,off)
-%if config.kernel.type == 'avgpool':
-#define bitextu(x,size,off) __builtin_pulp_bextractu(x,size,off)
-%endif
 
 #define CHECK
 

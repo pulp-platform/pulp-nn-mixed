@@ -129,7 +129,49 @@ PI_L1 int8_t WEIGHT_INT8_L1[(DIM_KERNEL_X * DIM_KERNEL_Y * CH_IM_IN * CH_IM_OUT)
 PI_L2 int8_t WEIGHT_INT8_L2[(DIM_KERNEL_X * DIM_KERNEL_Y * CH_IM_IN * CH_IM_OUT)] = WEIGHT_INT8;
 PI_L1 int8_t WEIGHT_INT8_L1[(DIM_KERNEL_X * DIM_KERNEL_Y * CH_IM_IN * CH_IM_OUT)];
 %endif
+%if config.kernel.extentions == 'XpulpV2':
 PI_L1 uint8_t IM2COL_L1[((CH_IM_IN * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) * NUM_CORES];
+%elif config.kernel.extentions == 'XpulpNN':
+%if max(config.kernel.in_data_t, config.kernel.wt_data_t) == 8:
+%if config.kernel.matmul_fmt == '4x2':
+PI_L1 uint8_t IM2COL_L1[((CH_IM_IN * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) * NUM_CORES];
+%elif config.kernel.matmul_fmt == '4x4':
+PI_L1 uint8_t IM2COL_L1[((CH_IM_IN * DIM_KERNEL_X * DIM_KERNEL_Y) << 2) * NUM_CORES];
+%endif
+%elif max(config.kernel.in_data_t, config.kernel.wt_data_t) == 4:
+%if config.kernel.matmul_fmt == '4x2':
+PI_L1 uint8_t IM2COL_L1[(((CH_IM_IN >> 1) * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) * NUM_CORES];
+%elif config.kernel.matmul_fmt == '4x4':
+PI_L1 uint8_t IM2COL_L1[(((CH_IM_IN >> 1) * DIM_KERNEL_X * DIM_KERNEL_Y) << 2) * NUM_CORES];
+%endif
+%elif max(config.kernel.in_data_t, config.kernel.wt_data_t) == 2:
+%if config.kernel.matmul_fmt == '4x2':
+PI_L1 uint8_t IM2COL_L1[(((CH_IM_IN >> 2) * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) * NUM_CORES];
+%elif config.kernel.matmul_fmt == '4x4':
+PI_L1 uint8_t IM2COL_L1[(((CH_IM_IN >> 2) * DIM_KERNEL_X * DIM_KERNEL_Y) << 2) * NUM_CORES];
+%endif
+%endif
+%elif config.kernel.extentions == 'XpulpNN-mixed':
+%if max(config.kernel.in_data_t, config.kernel.wt_data_t) == 8:
+%if config.kernel.matmul_fmt == '4x2':
+PI_L1 uint8_t IM2COL_L1[((CH_IM_IN * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) * NUM_CORES];
+%elif config.kernel.matmul_fmt == '4x4':
+PI_L1 uint8_t IM2COL_L1[((CH_IM_IN * DIM_KERNEL_X * DIM_KERNEL_Y) << 2) * NUM_CORES];
+%endif
+%elif max(config.kernel.in_data_t, config.kernel.wt_data_t) == 4:
+%if config.kernel.matmul_fmt == '4x2':
+PI_L1 uint8_t IM2COL_L1[(((CH_IM_IN >> 1) * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) * NUM_CORES];
+%elif config.kernel.matmul_fmt == '4x4':
+PI_L1 uint8_t IM2COL_L1[(((CH_IM_IN >> 1) * DIM_KERNEL_X * DIM_KERNEL_Y) << 2) * NUM_CORES];
+%endif
+%elif max(config.kernel.in_data_t, config.kernel.wt_data_t) == 2:
+%if config.kernel.matmul_fmt == '4x2':
+PI_L1 uint8_t IM2COL_L1[(((CH_IM_IN >> 2) * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) * NUM_CORES];
+%elif config.kernel.matmul_fmt == '4x4':
+PI_L1 uint8_t IM2COL_L1[(((CH_IM_IN >> 2) * DIM_KERNEL_X * DIM_KERNEL_Y) << 2) * NUM_CORES];
+%endif
+%endif
+%endif
 %if config.layer.bias == True:
 PI_L1 int8_t BIAS_L1[CH_IM_OUT] = BIAS;
 %else:
