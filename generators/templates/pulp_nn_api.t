@@ -170,6 +170,24 @@ void ${config.fn_name}(
                         uint16_t dim_im_in_x,
                         uint16_t dim_im_in_y,
                         uint16_t ch_im_in);
+%elif config.api=="PULPNNQuantAdd":
+void ${config.fn_name}(
+                       uint8_t * pIn1,
+                       uint8_t * pIn2,
+                       uint8_t * pOut,
+                       ${act_t} in_mult1,
+                       ${act_t} in_add1,
+                       uint16_t in_shift1,
+                       ${act_t} in_mult2,
+                       ${act_t} in_add2,
+                       uint16_t in_shift2,
+                       ${act_t} out_mult,
+                       ${act_t} out_add,
+                       uint16_t out_shift,
+                       uint16_t dim_im_in_x,
+                       uint16_t dim_im_in_y,
+                       uint16_t ch_im_in,
+                       int      out_requant_flag);
 %elif config.api=="PULPNNAvgPoolNew":
 void ${config.fn_name}(
                        uint8_t * pIn,

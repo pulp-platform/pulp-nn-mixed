@@ -3859,6 +3859,60 @@ void pulp_nn_add_u8_u8(
                         uint16_t dim_im_in_y,
                         uint16_t ch_im_in);
 
+void pulp_nn_add_u8_u8_u8(
+                       uint8_t * pIn1,
+                       uint8_t * pIn2,
+                       uint8_t * pOut,
+                       int32_t in_mult1,
+                       int32_t in_add1,
+                       uint16_t in_shift1,
+                       int32_t in_mult2,
+                       int32_t in_add2,
+                       uint16_t in_shift2,
+                       int32_t out_mult,
+                       int32_t out_add,
+                       uint16_t out_shift,
+                       uint16_t dim_im_in_x,
+                       uint16_t dim_im_in_y,
+                       uint16_t ch_im_in,
+                       int      out_requant_flag);
+
+void pulp_nn_add_u8_u8_u4(
+                       uint8_t * pIn1,
+                       uint8_t * pIn2,
+                       uint8_t * pOut,
+                       int32_t in_mult1,
+                       int32_t in_add1,
+                       uint16_t in_shift1,
+                       int32_t in_mult2,
+                       int32_t in_add2,
+                       uint16_t in_shift2,
+                       int32_t out_mult,
+                       int32_t out_add,
+                       uint16_t out_shift,
+                       uint16_t dim_im_in_x,
+                       uint16_t dim_im_in_y,
+                       uint16_t ch_im_in,
+                       int      out_requant_flag);
+
+void pulp_nn_add_u8_u8_u2(
+                       uint8_t * pIn1,
+                       uint8_t * pIn2,
+                       uint8_t * pOut,
+                       int32_t in_mult1,
+                       int32_t in_add1,
+                       uint16_t in_shift1,
+                       int32_t in_mult2,
+                       int32_t in_add2,
+                       uint16_t in_shift2,
+                       int32_t out_mult,
+                       int32_t out_add,
+                       uint16_t out_shift,
+                       uint16_t dim_im_in_x,
+                       uint16_t dim_im_in_y,
+                       uint16_t ch_im_in,
+                       int      out_requant_flag);
+
 void pulp_nn_add_u8_u4(
                         uint8_t * pIn1,
                         uint8_t * pIn2,
@@ -3869,6 +3923,60 @@ void pulp_nn_add_u8_u4(
                         uint16_t dim_im_in_x,
                         uint16_t dim_im_in_y,
                         uint16_t ch_im_in);
+
+void pulp_nn_add_u8_u4_u8(
+                       uint8_t * pIn1,
+                       uint8_t * pIn2,
+                       uint8_t * pOut,
+                       int32_t in_mult1,
+                       int32_t in_add1,
+                       uint16_t in_shift1,
+                       int32_t in_mult2,
+                       int32_t in_add2,
+                       uint16_t in_shift2,
+                       int32_t out_mult,
+                       int32_t out_add,
+                       uint16_t out_shift,
+                       uint16_t dim_im_in_x,
+                       uint16_t dim_im_in_y,
+                       uint16_t ch_im_in,
+                       int      out_requant_flag);
+
+void pulp_nn_add_u8_u4_u4(
+                       uint8_t * pIn1,
+                       uint8_t * pIn2,
+                       uint8_t * pOut,
+                       int32_t in_mult1,
+                       int32_t in_add1,
+                       uint16_t in_shift1,
+                       int32_t in_mult2,
+                       int32_t in_add2,
+                       uint16_t in_shift2,
+                       int32_t out_mult,
+                       int32_t out_add,
+                       uint16_t out_shift,
+                       uint16_t dim_im_in_x,
+                       uint16_t dim_im_in_y,
+                       uint16_t ch_im_in,
+                       int      out_requant_flag);
+
+void pulp_nn_add_u8_u4_u2(
+                       uint8_t * pIn1,
+                       uint8_t * pIn2,
+                       uint8_t * pOut,
+                       int32_t in_mult1,
+                       int32_t in_add1,
+                       uint16_t in_shift1,
+                       int32_t in_mult2,
+                       int32_t in_add2,
+                       uint16_t in_shift2,
+                       int32_t out_mult,
+                       int32_t out_add,
+                       uint16_t out_shift,
+                       uint16_t dim_im_in_x,
+                       uint16_t dim_im_in_y,
+                       uint16_t ch_im_in,
+                       int      out_requant_flag);
 
 void pulp_nn_add_u8_u2(
                         uint8_t * pIn1,
@@ -3881,6 +3989,114 @@ void pulp_nn_add_u8_u2(
                         uint16_t dim_im_in_y,
                         uint16_t ch_im_in);
 
+void pulp_nn_add_u8_u2_u8(
+                       uint8_t * pIn1,
+                       uint8_t * pIn2,
+                       uint8_t * pOut,
+                       int32_t in_mult1,
+                       int32_t in_add1,
+                       uint16_t in_shift1,
+                       int32_t in_mult2,
+                       int32_t in_add2,
+                       uint16_t in_shift2,
+                       int32_t out_mult,
+                       int32_t out_add,
+                       uint16_t out_shift,
+                       uint16_t dim_im_in_x,
+                       uint16_t dim_im_in_y,
+                       uint16_t ch_im_in,
+                       int      out_requant_flag);
+
+void pulp_nn_add_u8_u2_u4(
+                       uint8_t * pIn1,
+                       uint8_t * pIn2,
+                       uint8_t * pOut,
+                       int32_t in_mult1,
+                       int32_t in_add1,
+                       uint16_t in_shift1,
+                       int32_t in_mult2,
+                       int32_t in_add2,
+                       uint16_t in_shift2,
+                       int32_t out_mult,
+                       int32_t out_add,
+                       uint16_t out_shift,
+                       uint16_t dim_im_in_x,
+                       uint16_t dim_im_in_y,
+                       uint16_t ch_im_in,
+                       int      out_requant_flag);
+
+void pulp_nn_add_u8_u2_u2(
+                       uint8_t * pIn1,
+                       uint8_t * pIn2,
+                       uint8_t * pOut,
+                       int32_t in_mult1,
+                       int32_t in_add1,
+                       uint16_t in_shift1,
+                       int32_t in_mult2,
+                       int32_t in_add2,
+                       uint16_t in_shift2,
+                       int32_t out_mult,
+                       int32_t out_add,
+                       uint16_t out_shift,
+                       uint16_t dim_im_in_x,
+                       uint16_t dim_im_in_y,
+                       uint16_t ch_im_in,
+                       int      out_requant_flag);
+
+void pulp_nn_add_u4_u8_u8(
+                       uint8_t * pIn1,
+                       uint8_t * pIn2,
+                       uint8_t * pOut,
+                       int32_t in_mult1,
+                       int32_t in_add1,
+                       uint16_t in_shift1,
+                       int32_t in_mult2,
+                       int32_t in_add2,
+                       uint16_t in_shift2,
+                       int32_t out_mult,
+                       int32_t out_add,
+                       uint16_t out_shift,
+                       uint16_t dim_im_in_x,
+                       uint16_t dim_im_in_y,
+                       uint16_t ch_im_in,
+                       int      out_requant_flag);
+
+void pulp_nn_add_u4_u8_u4(
+                       uint8_t * pIn1,
+                       uint8_t * pIn2,
+                       uint8_t * pOut,
+                       int32_t in_mult1,
+                       int32_t in_add1,
+                       uint16_t in_shift1,
+                       int32_t in_mult2,
+                       int32_t in_add2,
+                       uint16_t in_shift2,
+                       int32_t out_mult,
+                       int32_t out_add,
+                       uint16_t out_shift,
+                       uint16_t dim_im_in_x,
+                       uint16_t dim_im_in_y,
+                       uint16_t ch_im_in,
+                       int      out_requant_flag);
+
+void pulp_nn_add_u4_u8_u2(
+                       uint8_t * pIn1,
+                       uint8_t * pIn2,
+                       uint8_t * pOut,
+                       int32_t in_mult1,
+                       int32_t in_add1,
+                       uint16_t in_shift1,
+                       int32_t in_mult2,
+                       int32_t in_add2,
+                       uint16_t in_shift2,
+                       int32_t out_mult,
+                       int32_t out_add,
+                       uint16_t out_shift,
+                       uint16_t dim_im_in_x,
+                       uint16_t dim_im_in_y,
+                       uint16_t ch_im_in,
+                       int      out_requant_flag);
+
 void pulp_nn_add_u4_u4(
                         uint8_t * pIn1,
                         uint8_t * pIn2,
@@ -3891,6 +4107,60 @@ void pulp_nn_add_u4_u4(
                         uint16_t dim_im_in_x,
                         uint16_t dim_im_in_y,
                         uint16_t ch_im_in);
+
+void pulp_nn_add_u4_u4_u8(
+                       uint8_t * pIn1,
+                       uint8_t * pIn2,
+                       uint8_t * pOut,
+                       int32_t in_mult1,
+                       int32_t in_add1,
+                       uint16_t in_shift1,
+                       int32_t in_mult2,
+                       int32_t in_add2,
+                       uint16_t in_shift2,
+                       int32_t out_mult,
+                       int32_t out_add,
+                       uint16_t out_shift,
+                       uint16_t dim_im_in_x,
+                       uint16_t dim_im_in_y,
+                       uint16_t ch_im_in,
+                       int      out_requant_flag);
+
+void pulp_nn_add_u4_u4_u4(
+                       uint8_t * pIn1,
+                       uint8_t * pIn2,
+                       uint8_t * pOut,
+                       int32_t in_mult1,
+                       int32_t in_add1,
+                       uint16_t in_shift1,
+                       int32_t in_mult2,
+                       int32_t in_add2,
+                       uint16_t in_shift2,
+                       int32_t out_mult,
+                       int32_t out_add,
+                       uint16_t out_shift,
+                       uint16_t dim_im_in_x,
+                       uint16_t dim_im_in_y,
+                       uint16_t ch_im_in,
+                       int      out_requant_flag);
+
+void pulp_nn_add_u4_u4_u2(
+                       uint8_t * pIn1,
+                       uint8_t * pIn2,
+                       uint8_t * pOut,
+                       int32_t in_mult1,
+                       int32_t in_add1,
+                       uint16_t in_shift1,
+                       int32_t in_mult2,
+                       int32_t in_add2,
+                       uint16_t in_shift2,
+                       int32_t out_mult,
+                       int32_t out_add,
+                       uint16_t out_shift,
+                       uint16_t dim_im_in_x,
+                       uint16_t dim_im_in_y,
+                       uint16_t ch_im_in,
+                       int      out_requant_flag);
 
 void pulp_nn_add_u4_u2(
                         uint8_t * pIn1,
@@ -3903,6 +4173,168 @@ void pulp_nn_add_u4_u2(
                         uint16_t dim_im_in_y,
                         uint16_t ch_im_in);
 
+void pulp_nn_add_u4_u2_u8(
+                       uint8_t * pIn1,
+                       uint8_t * pIn2,
+                       uint8_t * pOut,
+                       int32_t in_mult1,
+                       int32_t in_add1,
+                       uint16_t in_shift1,
+                       int32_t in_mult2,
+                       int32_t in_add2,
+                       uint16_t in_shift2,
+                       int32_t out_mult,
+                       int32_t out_add,
+                       uint16_t out_shift,
+                       uint16_t dim_im_in_x,
+                       uint16_t dim_im_in_y,
+                       uint16_t ch_im_in,
+                       int      out_requant_flag);
+
+void pulp_nn_add_u4_u2_u4(
+                       uint8_t * pIn1,
+                       uint8_t * pIn2,
+                       uint8_t * pOut,
+                       int32_t in_mult1,
+                       int32_t in_add1,
+                       uint16_t in_shift1,
+                       int32_t in_mult2,
+                       int32_t in_add2,
+                       uint16_t in_shift2,
+                       int32_t out_mult,
+                       int32_t out_add,
+                       uint16_t out_shift,
+                       uint16_t dim_im_in_x,
+                       uint16_t dim_im_in_y,
+                       uint16_t ch_im_in,
+                       int      out_requant_flag);
+
+void pulp_nn_add_u4_u2_u2(
+                       uint8_t * pIn1,
+                       uint8_t * pIn2,
+                       uint8_t * pOut,
+                       int32_t in_mult1,
+                       int32_t in_add1,
+                       uint16_t in_shift1,
+                       int32_t in_mult2,
+                       int32_t in_add2,
+                       uint16_t in_shift2,
+                       int32_t out_mult,
+                       int32_t out_add,
+                       uint16_t out_shift,
+                       uint16_t dim_im_in_x,
+                       uint16_t dim_im_in_y,
+                       uint16_t ch_im_in,
+                       int      out_requant_flag);
+
+void pulp_nn_add_u2_u8_u8(
+                       uint8_t * pIn1,
+                       uint8_t * pIn2,
+                       uint8_t * pOut,
+                       int32_t in_mult1,
+                       int32_t in_add1,
+                       uint16_t in_shift1,
+                       int32_t in_mult2,
+                       int32_t in_add2,
+                       uint16_t in_shift2,
+                       int32_t out_mult,
+                       int32_t out_add,
+                       uint16_t out_shift,
+                       uint16_t dim_im_in_x,
+                       uint16_t dim_im_in_y,
+                       uint16_t ch_im_in,
+                       int      out_requant_flag);
+
+void pulp_nn_add_u2_u8_u4(
+                       uint8_t * pIn1,
+                       uint8_t * pIn2,
+                       uint8_t * pOut,
+                       int32_t in_mult1,
+                       int32_t in_add1,
+                       uint16_t in_shift1,
+                       int32_t in_mult2,
+                       int32_t in_add2,
+                       uint16_t in_shift2,
+                       int32_t out_mult,
+                       int32_t out_add,
+                       uint16_t out_shift,
+                       uint16_t dim_im_in_x,
+                       uint16_t dim_im_in_y,
+                       uint16_t ch_im_in,
+                       int      out_requant_flag);
+
+void pulp_nn_add_u2_u8_u2(
+                       uint8_t * pIn1,
+                       uint8_t * pIn2,
+                       uint8_t * pOut,
+                       int32_t in_mult1,
+                       int32_t in_add1,
+                       uint16_t in_shift1,
+                       int32_t in_mult2,
+                       int32_t in_add2,
+                       uint16_t in_shift2,
+                       int32_t out_mult,
+                       int32_t out_add,
+                       uint16_t out_shift,
+                       uint16_t dim_im_in_x,
+                       uint16_t dim_im_in_y,
+                       uint16_t ch_im_in,
+                       int      out_requant_flag);
+
+void pulp_nn_add_u2_u4_u8(
+                       uint8_t * pIn1,
+                       uint8_t * pIn2,
+                       uint8_t * pOut,
+                       int32_t in_mult1,
+                       int32_t in_add1,
+                       uint16_t in_shift1,
+                       int32_t in_mult2,
+                       int32_t in_add2,
+                       uint16_t in_shift2,
+                       int32_t out_mult,
+                       int32_t out_add,
+                       uint16_t out_shift,
+                       uint16_t dim_im_in_x,
+                       uint16_t dim_im_in_y,
+                       uint16_t ch_im_in,
+                       int      out_requant_flag);
+
+void pulp_nn_add_u2_u4_u4(
+                       uint8_t * pIn1,
+                       uint8_t * pIn2,
+                       uint8_t * pOut,
+                       int32_t in_mult1,
+                       int32_t in_add1,
+                       uint16_t in_shift1,
+                       int32_t in_mult2,
+                       int32_t in_add2,
+                       uint16_t in_shift2,
+                       int32_t out_mult,
+                       int32_t out_add,
+                       uint16_t out_shift,
+                       uint16_t dim_im_in_x,
+                       uint16_t dim_im_in_y,
+                       uint16_t ch_im_in,
+                       int      out_requant_flag);
+
+void pulp_nn_add_u2_u4_u2(
+                       uint8_t * pIn1,
+                       uint8_t * pIn2,
+                       uint8_t * pOut,
+                       int32_t in_mult1,
+                       int32_t in_add1,
+                       uint16_t in_shift1,
+                       int32_t in_mult2,
+                       int32_t in_add2,
+                       uint16_t in_shift2,
+                       int32_t out_mult,
+                       int32_t out_add,
+                       uint16_t out_shift,
+                       uint16_t dim_im_in_x,
+                       uint16_t dim_im_in_y,
+                       uint16_t ch_im_in,
+                       int      out_requant_flag);
+
 void pulp_nn_add_u2_u2(
                         uint8_t * pIn1,
                         uint8_t * pIn2,
@@ -3913,6 +4345,60 @@ void pulp_nn_add_u2_u2(
                         uint16_t dim_im_in_x,
                         uint16_t dim_im_in_y,
                         uint16_t ch_im_in);
+
+void pulp_nn_add_u2_u2_u8(
+                       uint8_t * pIn1,
+                       uint8_t * pIn2,
+                       uint8_t * pOut,
+                       int32_t in_mult1,
+                       int32_t in_add1,
+                       uint16_t in_shift1,
+                       int32_t in_mult2,
+                       int32_t in_add2,
+                       uint16_t in_shift2,
+                       int32_t out_mult,
+                       int32_t out_add,
+                       uint16_t out_shift,
+                       uint16_t dim_im_in_x,
+                       uint16_t dim_im_in_y,
+                       uint16_t ch_im_in,
+                       int      out_requant_flag);
+
+void pulp_nn_add_u2_u2_u4(
+                       uint8_t * pIn1,
+                       uint8_t * pIn2,
+                       uint8_t * pOut,
+                       int32_t in_mult1,
+                       int32_t in_add1,
+                       uint16_t in_shift1,
+                       int32_t in_mult2,
+                       int32_t in_add2,
+                       uint16_t in_shift2,
+                       int32_t out_mult,
+                       int32_t out_add,
+                       uint16_t out_shift,
+                       uint16_t dim_im_in_x,
+                       uint16_t dim_im_in_y,
+                       uint16_t ch_im_in,
+                       int      out_requant_flag);
+
+void pulp_nn_add_u2_u2_u2(
+                       uint8_t * pIn1,
+                       uint8_t * pIn2,
+                       uint8_t * pOut,
+                       int32_t in_mult1,
+                       int32_t in_add1,
+                       uint16_t in_shift1,
+                       int32_t in_mult2,
+                       int32_t in_add2,
+                       uint16_t in_shift2,
+                       int32_t out_mult,
+                       int32_t out_add,
+                       uint16_t out_shift,
+                       uint16_t dim_im_in_x,
+                       uint16_t dim_im_in_y,
+                       uint16_t ch_im_in,
+                       int      out_requant_flag);
 
 
 

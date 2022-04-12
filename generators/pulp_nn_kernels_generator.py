@@ -135,6 +135,10 @@ def main():
                         kernel_to_test = pulp_nn_factory.PULPNNKernel(name='add', inp=i, out=j, wt=None, quant=None, act_prec=a, ext=e, mm_fmt='')
                         add=pulp_nn_factory.PULPNNAdd(kernel=kernel_to_test, layer=None)
                         pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='add', comp=add, api=pulp_nn_init.PULPNNAPI)
+                    for k in pulp_nn_init.PULPNNDataPrecisions:
+                        kernel_to_test = pulp_nn_factory.PULPNNKernel(name='add', inp=[i, j], out=k, wt=None, quant=None, act_prec=a, ext=e, mm_fmt='')
+                        add = pulp_nn_factory.PULPNNQuantAdd(kernel=kernel_to_test, layer = None)
+                        pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='add', comp=add, api=pulp_nn_init.PULPNNAPI)
 
             pulp_nn_factory.header(act_prec=a, ext=e, api=pulp_nn_init.PULPNNAPI)
             pulp_nn_init.PULPNNAPI = ""

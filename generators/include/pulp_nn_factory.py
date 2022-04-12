@@ -460,6 +460,26 @@ class PULPNNAdd(PULPNNFactory):
     def generate_code(self):
         return Template(filename="templates/pulp_nn_add_x_y.t").render(config=self)
 
+
+class PULPNNQuantAdd(PULPNNFactory):
+    def __init__(self, kernel, layer):
+        super().__init__(kernel, layer)
+        self.in1_data_t = kernel.in_data_t[0]
+        self.in2_data_t = kernel.in_data_t[1]
+        self.out_data_t = kernel.out_data_t
+        self.fn_name = "pulp_nn_add_u{0}_u{1}_u{2}".format(str(self.in1_data_t), str(self.in2_data_t), str(self.out_data_t))
+        if "XpulpNN" in self.kernel.extentions:
+            self.fn_name = "x" + self.fn_name
+        self.filename = self.fn_name + ".c"
+        self.api = self.__class__.__name__
+        self.unpack_in1_fn = "pulp_nn_u{0}_to_u8_r".format(str(self.in1_data_t))
+        self.unpack_in2_fn = "pulp_nn_u{0}_to_u8_r".format(str(self.in2_data_t))
+        self.max_precision = max([self.in1_data_t, self.in2_data_t])
+        self.add_fn = "pulp_nn_add_quant_u{0}".format(str(self.max_precision))
+
+    def generate_code(self):
+        return Template(filename="templates/pulp_nn_add_ql_x_y_z.t", strict_undefined=True).render(config=self)
+
 ###################################################################################### Model Factory ################################################
 
 class PULPNNBatchNorm(nn.Module):
