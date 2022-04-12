@@ -87,7 +87,7 @@ void __attribute__ ((noinline)) xpulp_nn_maxpool_u8(
       win_start += ch_im_in_r;
       for (; win_start < win_stop; win_start += ch_im_in_r)
       {
-        xpulp_nn_compare_and_replace_if_larger_u8(target, win_start, ch_im_in_r);
+        pulp_nn_compare_and_replace_if_larger_u8(target, win_start, ch_im_in_r);
       }
     }
   }
@@ -121,7 +121,7 @@ void __attribute__ ((noinline)) xpulp_nn_maxpool_u8(
     /* setting the stopping row */
     if (i_y * stride_y - padding_t + dim_kernel_y >= dim_im_in_y)
     {
-      row_end = pIn + dim_im_in_x * dim_im_in_x * ch_im_in_r;
+      row_end = pIn + dim_im_in_y * dim_im_in_x * ch_im_in_r;
     }
     else
     {
@@ -138,7 +138,7 @@ void __attribute__ ((noinline)) xpulp_nn_maxpool_u8(
 
     for (; row_start < row_end; row_start += dim_im_in_x * ch_im_in_r)
     {
-      xpulp_nn_compare_and_replace_if_larger_u8(target, row_start, dim_im_out_x * ch_im_in_r);
+      pulp_nn_compare_and_replace_if_larger_u8(target, row_start, dim_im_out_x * ch_im_in_r);
     }
   }
   pi_cl_team_barrier(0);

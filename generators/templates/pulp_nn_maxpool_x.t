@@ -127,7 +127,7 @@ void __attribute__ ((noinline)) ${config.fn_name}(
     /* setting the stopping row */
     if (i_y * stride_y - padding_t + dim_kernel_y >= dim_im_in_y)
     {
-      row_end = pIn + dim_im_in_x * dim_im_in_x * ch_im_in_r;
+      row_end = pIn + dim_im_in_y * dim_im_in_x * ch_im_in_r;
     }
     else
     {
