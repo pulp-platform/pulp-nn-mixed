@@ -398,9 +398,13 @@ class PULPNNMaxPool(PULPNNFactory):
         elif self.kernel.extentions == 'XpulpNN':
             self.fn_name = "xpulp_nn_maxpool_u{0}".format(str(self.kernel.in_data_t))
             self.comp_and_replace_fn = "xpulp_nn_compare_and_replace_if_larger_u{0}".format(str(self.kernel.in_data_t))
+            if self.kernel.in_data_t == 8:
+                self.comp_and_replace_fn = self.comp_and_replace_fn[1:]
         elif self.kernel.extentions == 'XpulpNN-mixed':
             self.fn_name = "xpulp_nn_maxpool_u{0}".format(str(self.kernel.in_data_t))
             self.comp_and_replace_fn = "xpulp_nn_compare_and_replace_if_larger_u{0}".format(str(self.kernel.in_data_t))
+            if self.kernel.in_data_t == 8:
+                self.comp_and_replace_fn = self.comp_and_replace_fn[1:]
 
         self.filename = self.fn_name + ".c"
         self.api = self.__class__.__name__
