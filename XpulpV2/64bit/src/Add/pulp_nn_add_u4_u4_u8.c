@@ -1,7 +1,6 @@
 /*
  * pulp_nn_add_u4_u4_u8.c
- * Nazareno Bruschi <nazareno.bruschi@unibo.it>
- * Angelo Garofalo <angelo.garofalo@unibo.it>
+ * Georg Rutishauser <georgr@iis.ee.ethz.ch>
  *
  * Copyright (C) 2018-2020 University of Bologna
  *
@@ -27,13 +26,13 @@ void __attribute__ ((noinline)) pulp_nn_add_u4_u4_u8(
     uint8_t * pIn1,
     uint8_t * pIn2,
     uint8_t * pOut,
-    uint64_t in_mult1,
-    uint64_t in_add1,
-    uint16_t in_shift1,
-    uint64_t in_mult2,
-    uint64_t in_add2,
-    uint16_t in_shift2,
-    uint64_t out_mult,
+    uint64_t in1_mul,
+    uint64_t in1_add,
+    uint16_t in1_shift,
+    uint64_t in2_mul,
+    uint64_t in2_add,
+    uint16_t in2_shift,
+    uint64_t out_mul,
     uint64_t out_add,
     uint16_t out_shift,
     uint16_t dim_im_in_x,
@@ -52,19 +51,25 @@ void __attribute__ ((noinline)) pulp_nn_add_u4_u4_u8(
     int  Log2Core = log2(n_cores);
     int chunck = (dim_im_in_y >> Log2Core) + ((dim_im_in_y & (NUM_CORES-1))!=0);
 
+    uint64_t in1_rq1, in1_rq2, in1_rq3, in1_rq4,
+             in2_rq1, in2_rq2, in2_rq3, in2_rq4;
     uint64_t sum1, sum2, sum3, sum4;
-    uint8_t out1, out2, out3, out4;
+    uint64_t sum_out1, sum_out2, sum_out3, sum_out4;
+    int32_t out1, out2, out3, out4,
+            sum_int1, sum_int2, sum_int3, sum_int4;
 
 
 
-    int ch_im_out_r = ch_im_in << 0
+    int ch_im_in1_r = ch_im_in >> 1;
+    int ch_im_in2_r = ch_im_in >> 1;
+    int ch_im_out_r = ch_im_in >> 0;
 
     int start = min(chunck * core_id, dim_im_in_y);
     int stop = min(start + chunck, dim_im_in_y);
 
     uint8_t *target1 = pIn1 + start * ch_im_in1_r * dim_im_in_x;
     uint8_t *target2 = pIn2 + start * ch_im_in2_r * dim_im_in_x;
-    uint8_t *pOutBuffer = pOut + start * ch_im_out * dim_im_in_x;
+    uint8_t *pOutBuffer = pOut + start * ch_im_out_r * dim_im_in_x;
 
     int a = 0;
     int b = 0;
@@ -72,7 +77,7 @@ void __attribute__ ((noinline)) pulp_nn_add_u4_u4_u8(
     uint8_t *target1_ext = &a;
     uint8_t *target2_ext = &b;
 
-    for (int i=start; i<((stop * ch_im_out_r * dim_im_in_x) >> 2); i++)
+    for (int i=0; i<(((stop-start) * ch_im_out_r * dim_im_in_x) >> 2); i++)
     {
         *((v4u*)target1_ext) = pulp_nn_u4_to_u8_r(target1);
         target1+=2;
@@ -80,21 +85,89 @@ void __attribute__ ((noinline)) pulp_nn_add_u4_u4_u8(
         *((v4u*)target2_ext) = pulp_nn_u4_to_u8_r(target2);
 
         target2+=2;
-        sum1 = (((*target1_ext) * in1_mult + in1_add) >> in1_shift) + (((*target2_ext) * in2_mult + in2_add) >> in2_shift);
-        sum2 = (((*target1_ext + 1 ) * in1_mult + in1_add) >> in1_shift) + (((*target2_ext + 1 ) * in2_mult + in2_add) >> in2_shift);
-        sum3 = (((*target1_ext + 2 ) * in1_mult + in1_add) >> in1_shift) + (((*target2_ext + 2 ) * in2_mult + in2_add) >> in2_shift);
-        sum4 = (((*target1_ext + 3 ) * in1_mult + in1_add) >> in1_shift) + (((*target2_ext + 3 ) * in2_mult + in2_add) >> in2_shift);
+#ifdef ADD_VERBOSE
+        printf("core %d - in1 it0 before requant: %d\n", core_id, *(target1_ext));
+        printf("core %d - in2 it0 before requant: %d\n", core_id, *(target2_ext));
+#endif
+        in1_rq1 = ((*(target1_ext)) * in1_mul + in1_add) >> in1_shift;
+        in2_rq1 = ((*(target2_ext)) * in2_mul + in2_add) >> in2_shift;
+        sum1 = clip8(in1_rq1) + clip8(in2_rq1);
+#ifdef ADD_VERBOSE
+        printf("core %d - in1_rq1 it0 after requant: %d\nclipped in1_rq1: %d\n", core_id, in1_rq1, clip8(in1_rq1));
+        printf("core %d - in2_rq1 it0 after requant: %d\nclipped in2_rq1: %d\n", core_id, in2_rq1), clip8(in2_rq1);
+        printf("core %d - sum1: %d\n", core_id, sum1);
+#endif
+#ifdef ADD_VERBOSE
+        printf("core %d - in1 it1 before requant: %d\n", core_id, *(target1_ext + 1 ));
+        printf("core %d - in2 it1 before requant: %d\n", core_id, *(target2_ext + 1 ));
+#endif
+        in1_rq2 = ((*(target1_ext + 1 )) * in1_mul + in1_add) >> in1_shift;
+        in2_rq2 = ((*(target2_ext + 1 )) * in2_mul + in2_add) >> in2_shift;
+        sum2 = clip8(in1_rq2) + clip8(in2_rq2);
+#ifdef ADD_VERBOSE
+        printf("core %d - in1_rq2 it1 after requant: %d\nclipped in1_rq2: %d\n", core_id, in1_rq2, clip8(in1_rq2));
+        printf("core %d - in2_rq2 it1 after requant: %d\nclipped in2_rq2: %d\n", core_id, in2_rq2), clip8(in2_rq2);
+        printf("core %d - sum2: %d\n", core_id, sum2);
+#endif
+#ifdef ADD_VERBOSE
+        printf("core %d - in1 it2 before requant: %d\n", core_id, *(target1_ext + 2 ));
+        printf("core %d - in2 it2 before requant: %d\n", core_id, *(target2_ext + 2 ));
+#endif
+        in1_rq3 = ((*(target1_ext + 2 )) * in1_mul + in1_add) >> in1_shift;
+        in2_rq3 = ((*(target2_ext + 2 )) * in2_mul + in2_add) >> in2_shift;
+        sum3 = clip8(in1_rq3) + clip8(in2_rq3);
+#ifdef ADD_VERBOSE
+        printf("core %d - in1_rq3 it2 after requant: %d\nclipped in1_rq3: %d\n", core_id, in1_rq3, clip8(in1_rq3));
+        printf("core %d - in2_rq3 it2 after requant: %d\nclipped in2_rq3: %d\n", core_id, in2_rq3), clip8(in2_rq3);
+        printf("core %d - sum3: %d\n", core_id, sum3);
+#endif
+#ifdef ADD_VERBOSE
+        printf("core %d - in1 it3 before requant: %d\n", core_id, *(target1_ext + 3 ));
+        printf("core %d - in2 it3 before requant: %d\n", core_id, *(target2_ext + 3 ));
+#endif
+        in1_rq4 = ((*(target1_ext + 3 )) * in1_mul + in1_add) >> in1_shift;
+        in2_rq4 = ((*(target2_ext + 3 )) * in2_mul + in2_add) >> in2_shift;
+        sum4 = clip8(in1_rq4) + clip8(in2_rq4);
+#ifdef ADD_VERBOSE
+        printf("core %d - in1_rq4 it3 after requant: %d\nclipped in1_rq4: %d\n", core_id, in1_rq4, clip8(in1_rq4));
+        printf("core %d - in2_rq4 it3 after requant: %d\nclipped in2_rq4: %d\n", core_id, in2_rq4), clip8(in2_rq4);
+        printf("core %d - sum4: %d\n", core_id, sum4);
+#endif
 
         if (out_requant_flag) {
-          out1 = (out1 * out_mult + out_add) >> out_shift;
-          out2 = (out2 * out_mult + out_add) >> out_shift;
-          out3 = (out3 * out_mult + out_add) >> out_shift;
-          out4 = (out4 * out_mult + out_add) >> out_shift;
+          sum1 = (sum1 * out_mul + out_add) >> out_shift;
+#ifdef ADD_VERBOSE
+          printf("core %d - requantized sum1: %d\n", core_id, sum1);
+#endif
+          sum2 = (sum2 * out_mul + out_add) >> out_shift;
+#ifdef ADD_VERBOSE
+          printf("core %d - requantized sum2: %d\n", core_id, sum2);
+#endif
+          sum3 = (sum3 * out_mul + out_add) >> out_shift;
+#ifdef ADD_VERBOSE
+          printf("core %d - requantized sum3: %d\n", core_id, sum3);
+#endif
+          sum4 = (sum4 * out_mul + out_add) >> out_shift;
+#ifdef ADD_VERBOSE
+          printf("core %d - requantized sum4: %d\n", core_id, sum4);
+#endif
         }
-        out1 = clip8(out1);
-        out2 = clip8(out2);
-        out3 = clip8(out3);
-        out4 = clip8(out4);
+        out1 = clip8(sum1);
+#ifdef ADD_VERBOSE
+        printf("core %d - out1 clipped: %d\n", core_id, out1);
+#endif
+        out2 = clip8(sum2);
+#ifdef ADD_VERBOSE
+        printf("core %d - out2 clipped: %d\n", core_id, out2);
+#endif
+        out3 = clip8(sum3);
+#ifdef ADD_VERBOSE
+        printf("core %d - out3 clipped: %d\n", core_id, out3);
+#endif
+        out4 = clip8(sum4);
+#ifdef ADD_VERBOSE
+        printf("core %d - out4 clipped: %d\n", core_id, out4);
+#endif
 
         
 
@@ -106,7 +179,6 @@ void __attribute__ ((noinline)) pulp_nn_add_u4_u4_u8(
         pOutBuffer++;
         *pOutBuffer = (uint8_t) out4;
         pOutBuffer++;
-
     }
    pi_cl_team_barrier(0);
 }

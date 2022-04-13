@@ -1,7 +1,6 @@
 /*
  * ${config.filename}
- * Nazareno Bruschi <nazareno.bruschi@unibo.it>
- * Angelo Garofalo <angelo.garofalo@unibo.it>
+ * Georg Rutishauser <georgr@iis.ee.ethz.ch>
  *
  * Copyright (C) 2018-2020 University of Bologna
  *
@@ -31,13 +30,13 @@ void __attribute__ ((noinline)) ${config.fn_name}(
     uint8_t * pIn1,
     uint8_t * pIn2,
     uint8_t * pOut,
-    ${act_t} in_mult1,
-    ${act_t} in_add1,
-    uint16_t in_shift1,
-    ${act_t} in_mult2,
-    ${act_t} in_add2,
-    uint16_t in_shift2,
-    ${act_t} out_mult,
+    ${act_t} in1_mul,
+    ${act_t} in1_add,
+    uint16_t in1_shift,
+    ${act_t} in2_mul,
+    ${act_t} in2_add,
+    uint16_t in2_shift,
+    ${act_t} out_mul,
     ${act_t} out_add,
     uint16_t out_shift,
     uint16_t dim_im_in_x,
@@ -56,9 +55,12 @@ void __attribute__ ((noinline)) ${config.fn_name}(
     int  Log2Core = log2(n_cores);
     int chunck = (dim_im_in_y >> Log2Core) + ((dim_im_in_y & (NUM_CORES-1))!=0);
 
+    ${act_t} in1_rq1, in1_rq2, in1_rq3, in1_rq4,
+             in2_rq1, in2_rq2, in2_rq3, in2_rq4;
     ${act_t} sum1, sum2, sum3, sum4;
-    int32_t sum_out1, sum_out2, sum_out3, sum_out4;
-    uint8_t out1, out2, out3, out4;
+    ${act_t} sum_out1, sum_out2, sum_out3, sum_out4;
+    int32_t out1, out2, out3, out4,
+            sum_int1, sum_int2, sum_int3, sum_int4;
 
 <%
 els_per_byte_in1 = 8//config.in1_data_t
@@ -94,14 +96,16 @@ byte_chan_shift_in2 = int(np.log2(els_per_byte_in2))
 byte_chan_shift_out = int(np.log2(els_per_byte_out))
 %>
 
-    int ch_im_out_r = ch_im_in << ${byte_chan_shift_out}
+    int ch_im_in1_r = ch_im_in >> ${byte_chan_shift_in1};
+    int ch_im_in2_r = ch_im_in >> ${byte_chan_shift_in2};
+    int ch_im_out_r = ch_im_in >> ${byte_chan_shift_out};
 
     int start = min(chunck * core_id, dim_im_in_y);
     int stop = min(start + chunck, dim_im_in_y);
 
     uint8_t *target1 = pIn1 + start * ch_im_in1_r * dim_im_in_x;
     uint8_t *target2 = pIn2 + start * ch_im_in2_r * dim_im_in_x;
-    uint8_t *pOutBuffer = pOut + start * ch_im_out * dim_im_in_x;
+    uint8_t *pOutBuffer = pOut + start * ch_im_out_r * dim_im_in_x;
 
     int a = 0;
     int b = 0;
@@ -109,11 +113,11 @@ byte_chan_shift_out = int(np.log2(els_per_byte_out))
     uint8_t *target1_ext = &a;
     uint8_t *target2_ext = &b;
 
-    for (int i=start; i<((stop * ch_im_out_r * dim_im_in_x) >> ${int(np.log2(4/els_per_byte_out))}); i++)
+    for (int i=0; i<(((stop-start) * ch_im_out_r * dim_im_in_x) >> ${int(np.log2(4/els_per_byte_out))}); i++)
     {
 %if config.in1_data_t == 8:
         target1_ext = target1;
-%elif config.in1_data_t == 4:
+%else:
         *((v4u*)target1_ext) = ${config.unpack_in1_fn}(target1);
 %endif
         target1+=${int(dw_in1/2)};
@@ -126,20 +130,33 @@ byte_chan_shift_out = int(np.log2(els_per_byte_out))
 %endif
         target2+=${int(dw_in2/2)};
         % for pp in range(4):
-        sum${pp+1} = (((*target1_ext${f" + {pp} " if pp else ""}) * in1_mult + in1_add) >> in1_shift) + (((*target2_ext${f" + {pp} " if pp else ""}) * in2_mult + in2_add) >> in2_shift);
+#ifdef ADD_VERBOSE
+        printf("core %d - in1 it${pp} before requant: %d\n", core_id, *(target1_ext${f" + {pp} " if pp else ""}));
+        printf("core %d - in2 it${pp} before requant: %d\n", core_id, *(target2_ext${f" + {pp} " if pp else ""}));
+#endif
+        in1_rq${pp+1} = ((*(target1_ext${f" + {pp} " if pp else ""})) * in1_mul + in1_add) >> in1_shift;
+        in2_rq${pp+1} = ((*(target2_ext${f" + {pp} " if pp else ""})) * in2_mul + in2_add) >> in2_shift;
+        sum${pp+1} = clip8(in1_rq${pp+1}) + clip8(in2_rq${pp+1});
+#ifdef ADD_VERBOSE
+        printf("core %d - in1_rq${pp+1} it${pp} after requant: %d\nclipped in1_rq${pp+1}: %d\n", core_id, in1_rq${pp+1}, clip8(in1_rq${pp+1}));
+        printf("core %d - in2_rq${pp+1} it${pp} after requant: %d\nclipped in2_rq${pp+1}: %d\n", core_id, in2_rq${pp+1}), clip8(in2_rq${pp+1});
+        printf("core %d - sum${pp+1}: %d\n", core_id, sum${pp+1});
+#endif
         % endfor
 
         if (out_requant_flag) {
         % for pp in range(4):
-          sum_out${pp+1} = (sum${pp+1} * out_mult + out_add) >> out_shift;
-        % endfor
-        } else {
-        % for pp in range(4):
-          sum_out${pp+1} = sum${pp+1};
+          sum${pp+1} = (sum${pp+1} * out_mul + out_add) >> out_shift;
+#ifdef ADD_VERBOSE
+          printf("core %d - requantized sum${pp+1}: %d\n", core_id, sum${pp+1});
+#endif
         % endfor
         }
         % for pp in range(4):
-        out${pp+1} = clip${config.out_data_t}(sum_out${pp+1});
+        out${pp+1} = clip${config.out_data_t}(sum${pp+1});
+#ifdef ADD_VERBOSE
+        printf("core %d - out${pp+1} clipped: %d\n", core_id, out${pp+1});
+#endif
         % endfor
 
         
@@ -150,14 +167,14 @@ byte_chan_shift_out = int(np.log2(els_per_byte_out))
         pOutBuffer++;
         % endfor
 %elif dw_out == 4:
-        *pOutBuffer = (uint8_t) bitins(out1, ${out_mask_n_strings[1]}, out2, ${out_mask_strings[1]}, 4);
+        *pOutBuffer = (uint8_t) bitins(out1, (int8_t) ${out_mask_n_strings[1]}, out2, (int8_t) ${out_mask_strings[1]}, 4);
         pOutBuffer++;
-        *pOutBuffer = (uint8_t) bitins(out3, ${out_mask_n_strings[1]}, out4, ${out_mask_strings[1]}, 4);
+        *pOutBuffer = (uint8_t) bitins(out3, (int8_t) ${out_mask_n_strings[1]}, out4, (int8_t) ${out_mask_strings[1]}, 4);
         pOutBuffer++;
 %elif dw_out == 2:
-        out1 = bitins(out1, ${out_mask_n_strings[1]}, out2, ${out_mask_strings[1]}, 2);
-        out1 = bitins(out1, ${out_mask_n_strings[2]}, out3, ${out_mask_strings[2]}, 4);
-        *pOutBuffer = bitins(out1, ${out_mask_n_strings[3]}, out4, ${out_mask_strings[3]}, 6);
+        out1 = bitins(out1, (int8_t) ${out_mask_n_strings[1]}, out2, (int8_t) ${out_mask_strings[1]}, 2);
+        out1 = bitins(out1, (int8_t) ${out_mask_n_strings[2]}, out3, (int8_t) ${out_mask_strings[2]}, 4);
+        *pOutBuffer = bitins(out1, (int8_t) ${out_mask_n_strings[3]}, out4, (int8_t) ${out_mask_strings[3]}, 6);
         pOutBuffer++;
 %endif
     }
