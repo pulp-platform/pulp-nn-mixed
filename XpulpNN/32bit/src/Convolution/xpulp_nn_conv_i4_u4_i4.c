@@ -249,10 +249,10 @@ void __attribute__((noinline)) xpulp_nn_conv_i4_u4_i4(
           do
           {
             int8_t inA1 = (int8_t) bitext((int) *pA, 4, 0);
-            int8_t inB1 = (int8_t) bitext((unsigned int) *pB, 4, 0);
+            int8_t inB1 = (int8_t) bitext((int32_t) *pB, 4, 0);
             sum += inA1 * inB1;
             inA1 = (int8_t) bitext((int) *pA, 4, 4);
-            inB1 = (int8_t) bitext((unsigned int) *pB, 4, 4);
+            inB1 = (int8_t) bitext((int32_t) *pB, 4, 4);
             sum += inA1 * inB1;
 
             pA++;

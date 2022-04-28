@@ -702,7 +702,7 @@ static void __attribute__((noinline)) xpulp_nn_im2col_${src_t}_to_${dst_t}(${pt}
   % else:
     pInput = pulp_nn_${src_t}_to_${dst_t}(pInput, pOutput);
     MemoryFence();
-    pInput += ${in_els_per_word};
+    pOutput += ${in_els_per_word//out_els_per_byte};
   % endif
   }
   while (lfover)

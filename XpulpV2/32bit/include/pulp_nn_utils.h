@@ -27,53 +27,53 @@
 #include "pulp.h"
 #endif
 
-#define bitext(x,size,off)                                   __builtin_pulp_bextract(x,size,off)
-#define bitextu(x,size,off)                                  __builtin_pulp_bextractu(x,size,off)
-#define bitins(dst,not_mask_imm,src,mask_imm,off)            __builtin_pulp_binsert(dst,not_mask_imm,src,mask_imm,off)
-#define pack(x,y,z,t)                                        __builtin_pulp_pack4(x,y,z,t)
-#define max4(a,b)                                            __builtin_pulp_maxu4(a,b)
-#define maxs4(a, b)                                          __builtin_pulp_max4(a, b)
-#define max8(a, b)                                           __builtin_pulp_maxu8(a, b)
-#define maxs8(a, b)                                          __builtin_pulp_max8(a, b)
-#define max16(a, b)                                          __builtin_pulp_maxu16(a, b)
-#define maxs16(a, b)                                         __builtin_pulp_max16(a, b)
-#define max32(a,b)                                           __builtin_pulp_maxusi(a,b)
-#define maxs32(a,b)                                          __builtin_pulp_maxsi(a,b)
-#define min32(a,b)                                           __builtin_pulp_minusi(a,b)
-#define mins32(a,b)                                          __builtin_pulp_minsi(a,b)
-#define min4(a, b)                                           __builtin_pulp_minu4(a, b)
-#define mins4(a, b)                                          __builtin_pulp_min4(a, b)
-#define min8(a, b)                                           __builtin_pulp_minu8(a, b)
-#define mins8(a, b)                                          __builtin_pulp_min8(a, b)
-#define min16(a, b)                                          __builtin_pulp_minu16(a, b)
-#define mins16(a, b)                                         __builtin_pulp_min16(a, b)
-#define avg4(a,b)                                            __builtin_pulp_avgu4(a,b)
-#define avg8(a,b)                                            __builtin_pulp_avgu8(a,b)
-#define avg16(a,b)                                           __builtin_pulp_avgu16(a,b)
-#define log2(x)                                              __builtin_pulp_fl1(x)
-#define min(a,b)                                             ((a)<(b)?(a):(b))
-#define SumDotp4(a, b, c)                                    __builtin_pulp_sdotusp4(a, b, c)
-#define SumDotp8(a, b, c)                                    __builtin_pulp_sdotusp8(a, b, c)
-#define SumDotp16(a, b, c)                                   __builtin_pulp_sdotusp16(a, b, c)
-#define SumDotps4(a, b, c)                                    __builtin_pulp_sdotsp4(a, b, c)
-#define SumDotps8(a, b, c)                                    __builtin_pulp_sdotsp8(a, b, c)
-#define SumDotps16(a, b, c)                                   __builtin_pulp_sdotsp16(a, b, c)
-#define clip4(x)                                             __builtin_pulp_clipu_r(x, 15)
-#define clip2(x)                                             __builtin_pulp_clipu_r(x, 3)
-#define clip8(x)                                             __builtin_pulp_clipu_r(x, 255)
+#define bitext(x,size,off)                                      __builtin_pulp_bextract(x,size,off)
+#define bitextu(x,size,off)                                     __builtin_pulp_bextractu(x,size,off)
+#define bitins(dst,not_mask_imm,src,mask_imm,off)               __builtin_pulp_binsert(dst,not_mask_imm,src,mask_imm,off)
+#define pack(x,y,z,t)                                           __builtin_pulp_pack4(x,y,z,t)
+#define max4(a,b)                                               __builtin_pulp_maxu4(a,b)
+#define maxs4(a, b)                                             __builtin_pulp_max4(a, b)
+#define max8(a, b)                                              __builtin_pulp_maxu8(a, b)
+#define maxs8(a, b)                                             __builtin_pulp_max8(a, b)
+#define max16(a, b)                                             __builtin_pulp_maxu16(a, b)
+#define maxs16(a, b)                                            __builtin_pulp_max16(a, b)
+#define max32(a,b)                                              __builtin_pulp_maxusi(a,b)
+#define maxs32(a,b)                                             __builtin_pulp_maxsi(a,b)
+#define min32(a,b)                                              __builtin_pulp_minusi(a,b)
+#define mins32(a,b)                                             __builtin_pulp_minsi(a,b)
+#define min4(a, b)                                              __builtin_pulp_minu4(a, b)
+#define mins4(a, b)                                             __builtin_pulp_min4(a, b)
+#define min8(a, b)                                              __builtin_pulp_minu8(a, b)
+#define mins8(a, b)                                             __builtin_pulp_min8(a, b)
+#define min16(a, b)                                             __builtin_pulp_minu16(a, b)
+#define mins16(a, b)                                            __builtin_pulp_min16(a, b)
+#define avg4(a,b)                                               __builtin_pulp_avgu4(a,b)
+#define avg8(a,b)                                               __builtin_pulp_avgu8(a,b)
+#define avg16(a,b)                                              __builtin_pulp_avgu16(a,b)
+#define log2(x)                                                 __builtin_pulp_fl1(x)
+#define min(a,b)                                                ((a)<(b)?(a):(b))
+#define SumDotp4(a, b, c)                                       __builtin_pulp_sdotusp4(a, b, c)
+#define SumDotp8(a, b, c)                                       __builtin_pulp_sdotusp8(a, b, c)
+#define SumDotp16(a, b, c)                                      __builtin_pulp_sdotusp16(a, b, c)
+#define SumDotps4(a, b, c)                                      __builtin_pulp_sdotsp4(a, b, c)
+#define SumDotps8(a, b, c)                                      __builtin_pulp_sdotsp8(a, b, c)
+#define SumDotps16(a, b, c)                                     __builtin_pulp_sdotsp16(a, b, c)
+#define clip4(x)                                                __builtin_pulp_clipu_r(x, 15)
+#define clip2(x)                                                __builtin_pulp_clipu_r(x, 3)
+#define clip8(x)                                                __builtin_pulp_clipu_r(x, 255)
 
-#define clips4(x)                                            __builtin_pulp_clip_r(x, 7)
-#define clips2(x)                                            __builtin_pulp_clip_r(x, 1)
-#define clips8(x)                                            __builtin_pulp_clip_r(x, 127)
-#define MacLoadInit(a_update, b_update, a_reg, b_reg, ptr)   __builtin_pulp_mlinitspr_v3(a_update, b_update, a_reg, b_reg, ptr)
-#define MacLoadUpdate(ptr)                                   __builtin_pulp_mlupdatespr_v3(ptr)
-#define MacLoadAssign(ptr)                                   __builtin_pulp_mlassignspr_v3(ptr)
-#define MacLoad4(a_update, b_update, a_reg, b_reg, ptr, sum) __builtin_pulp_mlsdotsup4_v3(a_update, b_update, a_reg, b_reg, ptr, sum)
-#define MacLoad8(a_update, b_update, a_reg, b_reg, ptr, sum) __builtin_pulp_mlsdotsup8_v3(a_update, b_update, a_reg, b_reg, ptr, sum)
-#define MacLoad16(a_update, b_update, a_reg, b_reg, ptr, sum)__builtin_pulp_mlsdotsup16_v3(a_update, b_update, a_reg, b_reg, ptr, sum)
-#define MacLoads4(a_update, b_update, a_reg, b_reg, ptr, sum) __builtin_pulp_mlsdotsp4_v3(a_update, b_update, a_reg, b_reg, ptr, sum)
-#define MacLoads8(a_update, b_update, a_reg, b_reg, ptr, sum) __builtin_pulp_mlsdotsp8_v3(a_update, b_update, a_reg, b_reg, ptr, sum)
-#define MacLoads16(a_update, b_update, a_reg, b_reg, ptr, sum)__builtin_pulp_mlsdotsp16_v3(a_update, b_update, a_reg, b_reg, ptr, sum)
+#define clips4(x)                                               __builtin_pulp_clip_r(x, 7)
+#define clips2(x)                                               __builtin_pulp_clip_r(x, 1)
+#define clips8(x)                                               __builtin_pulp_clip_r(x, 127)
+#define MacLoadInit(a_update, b_update, a_reg, b_reg, ptr)      __builtin_pulp_mlinitspr_v3(a_update, b_update, a_reg, b_reg, ptr)
+#define MacLoadUpdate(ptr)                                      __builtin_pulp_mlupdatespr_v3(ptr)
+#define MacLoadAssign(ptr)                                      __builtin_pulp_mlassignspr_v3(ptr)
+#define MacLoad4(a_update, b_update, a_reg, b_reg, ptr, sum)    __builtin_pulp_mlsdotsup4_v3(a_update, b_update, a_reg, b_reg, ptr, sum)
+#define MacLoad8(a_update, b_update, a_reg, b_reg, ptr, sum)    __builtin_pulp_mlsdotsup8_v3(a_update, b_update, a_reg, b_reg, ptr, sum)
+#define MacLoad16(a_update, b_update, a_reg, b_reg, ptr, sum)   __builtin_pulp_mlsdotsup16_v3(a_update, b_update, a_reg, b_reg, ptr, sum)
+#define MacLoads4(a_update, b_update, a_reg, b_reg, ptr, sum)   __builtin_pulp_mlsdotsp4_v3(a_update, b_update, a_reg, b_reg, ptr, sum)
+#define MacLoads8(a_update, b_update, a_reg, b_reg, ptr, sum)   __builtin_pulp_mlsdotsp8_v3(a_update, b_update, a_reg, b_reg, ptr, sum)
+#define MacLoads16(a_update, b_update, a_reg, b_reg, ptr, sum)  __builtin_pulp_mlsdotsp16_v3(a_update, b_update, a_reg, b_reg, ptr, sum)
 
 #define PACK_INT8_SIZE(x)                                    (x)
 #define PACK_INT4_SIZE(x)                                    ((x) >> 1)
@@ -940,7 +940,7 @@ static void __attribute__((noinline)) xpulp_nn_im2col_u2_to_u4(uint8_t * pInput,
   {
     pInput = pulp_nn_u2_to_u4(pInput, pOutput);
     MemoryFence();
-    pInput += 16;
+    pOutput += 8;
   }
   while (lfover)
   {
@@ -961,7 +961,7 @@ static void __attribute__((noinline)) xpulp_nn_im2col_i2_to_i4(int8_t * pInput, 
   {
     pInput = pulp_nn_i2_to_i4(pInput, pOutput);
     MemoryFence();
-    pInput += 16;
+    pOutput += 8;
   }
   while (lfover)
   {
@@ -982,7 +982,7 @@ static void __attribute__((noinline)) xpulp_nn_im2col_u2_to_u8(uint8_t * pInput,
   {
     pInput = pulp_nn_u2_to_u8(pInput, pOutput);
     MemoryFence();
-    pInput += 16;
+    pOutput += 16;
   }
   while (lfover)
   {
@@ -1007,7 +1007,7 @@ static void __attribute__((noinline)) xpulp_nn_im2col_i2_to_i8(int8_t * pInput, 
   {
     pInput = pulp_nn_i2_to_i8(pInput, pOutput);
     MemoryFence();
-    pInput += 16;
+    pOutput += 16;
   }
   while (lfover)
   {
@@ -1070,7 +1070,7 @@ static void __attribute__((noinline)) xpulp_nn_im2col_u4_to_u8(uint8_t * pInput,
   {
     pInput = pulp_nn_u4_to_u8(pInput, pOutput);
     MemoryFence();
-    pInput += 8;
+    pOutput += 8;
   }
   while (lfover)
   {
@@ -1091,7 +1091,7 @@ static void __attribute__((noinline)) xpulp_nn_im2col_i4_to_i8(int8_t * pInput, 
   {
     pInput = pulp_nn_i4_to_i8(pInput, pOutput);
     MemoryFence();
-    pInput += 8;
+    pOutput += 8;
   }
   while (lfover)
   {

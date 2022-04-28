@@ -940,7 +940,7 @@ static void __attribute__((noinline)) xpulp_nn_im2col_u2_to_u4(uint8_t * pInput,
   {
     pInput = pulp_nn_u2_to_u4(pInput, pOutput);
     MemoryFence();
-    pInput += 16;
+    pOutput += 8;
   }
   while (lfover)
   {
@@ -961,7 +961,7 @@ static void __attribute__((noinline)) xpulp_nn_im2col_i2_to_i4(int8_t * pInput, 
   {
     pInput = pulp_nn_i2_to_i4(pInput, pOutput);
     MemoryFence();
-    pInput += 16;
+    pOutput += 8;
   }
   while (lfover)
   {
@@ -982,7 +982,7 @@ static void __attribute__((noinline)) xpulp_nn_im2col_u2_to_u8(uint8_t * pInput,
   {
     pInput = pulp_nn_u2_to_u8(pInput, pOutput);
     MemoryFence();
-    pInput += 16;
+    pOutput += 16;
   }
   while (lfover)
   {
@@ -1007,7 +1007,7 @@ static void __attribute__((noinline)) xpulp_nn_im2col_i2_to_i8(int8_t * pInput, 
   {
     pInput = pulp_nn_i2_to_i8(pInput, pOutput);
     MemoryFence();
-    pInput += 16;
+    pOutput += 16;
   }
   while (lfover)
   {
@@ -1070,7 +1070,7 @@ static void __attribute__((noinline)) xpulp_nn_im2col_u4_to_u8(uint8_t * pInput,
   {
     pInput = pulp_nn_u4_to_u8(pInput, pOutput);
     MemoryFence();
-    pInput += 8;
+    pOutput += 8;
   }
   while (lfover)
   {
@@ -1091,7 +1091,7 @@ static void __attribute__((noinline)) xpulp_nn_im2col_i4_to_i8(int8_t * pInput, 
   {
     pInput = pulp_nn_i4_to_i8(pInput, pOutput);
     MemoryFence();
-    pInput += 8;
+    pOutput += 8;
   }
   while (lfover)
   {

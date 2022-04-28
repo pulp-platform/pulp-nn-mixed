@@ -368,16 +368,16 @@ void __attribute__((noinline)) ${config.fn_name}(
           {
 %if config.max_precision == 2:
             int8_t inA1 = (int8_t) bitext((int) *pA, 2, 0);
-            ${pt_in} inB1 = (${pt_in}) ${bex}((${int_t_in) *pB, 2, 0);
+            ${pt_in} inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 2, 0);
             sum += inA1 * inB1;
             inA1 = (int8_t) bitext((int) *pA, 2, 2);
-            inB1 = (${pt_in}) ${bex}((${int_t_in) *pB, 2, 2);
+            inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 2, 2);
             sum += inA1 * inB1;
             inA1 = (int8_t) bitext((int) *pA, 2, 4);
-            inB1 = (${pt_in}) ${bex}((${int_t_in) *pB, 2, 4);
+            inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 2, 4);
             sum += inA1 * inB1;
             inA1 = (int8_t) bitext((int) *pA, 2, 6);
-            inB1 = (${pt_in}) ${bex}((${int_t_in) *pB, 2, 6);
+            inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 2, 6);
             sum += inA1 * inB1;
 
             pA++;
@@ -386,17 +386,17 @@ void __attribute__((noinline)) ${config.fn_name}(
 %elif config.max_precision == 4:
 %if config.kernel.wt_data_t < config.kernel.in_data_t:
             int8_t inA1 = (int8_t) bitext((int) *pA, 2, 0);
-            ${pt_in} inB1 = (${pt_in}) ${bex}((${int_t_in) *pB, 4, 0);
+            ${pt_in} inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 4, 0);
             sum += inA1 * inB1;
             inA1 = (int8_t) bitext((int) *pA, 2, 2);
-            inB1 = (${pt_in}) ${bex}((${int_t_in) *pB, 4, 4);
+            inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 4, 4);
             sum += inA1 * inB1;
             pB++;
             inA1 = (int8_t) bitext((int) *pA, 2, 4);
-            inB1 = (${pt_in}) ${bex}((${int_t_in) *pB, 4, 0);
+            inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 4, 0);
             sum += inA1 * inB1;
             inA1 = (int8_t) bitext((int) *pA, 2, 6);
-            inB1 = (${pt_in}) ${bex}((${int_t_in) *pB, 4, 4);
+            inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 4, 4);
             sum += inA1 * inB1;
 
             pA++;
@@ -404,10 +404,10 @@ void __attribute__((noinline)) ${config.fn_name}(
             col_cnt_im2col-=4;
 %else:
             int8_t inA1 = (int8_t) bitext((int) *pA, 4, 0);
-            ${pt_in} inB1 = (${pt_in}) ${bex}((${int_t_in) *pB, 4, 0);
+            ${pt_in} inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 4, 0);
             sum += inA1 * inB1;
             inA1 = (int8_t) bitext((int) *pA, 4, 4);
-            inB1 = (${pt_in}) ${bex}((${int_t_in) *pB, 4, 4);
+            inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 4, 4);
             sum += inA1 * inB1;
 
             pA++;
