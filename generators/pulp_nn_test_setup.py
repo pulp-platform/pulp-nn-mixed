@@ -30,7 +30,7 @@ ISA 				= 'XpulpNN'
 # Select from the supported ones:
 
 # -> 4x2, 4x4
-MATMUL_FMT			= '4x4'
+MATMUL_FMT			= '4x2'
 
 # Select from the supported ones:
 
@@ -42,8 +42,14 @@ TYPE_OF_KERNEL 		= 'convolution'
 #
 # -> input activations precision:
 #       - 8, 4, 2
+# -> input signedness:
+#       - True or False for all except QuantAdd
+#       - [{True, False}, {True, False}] for QuantAdd (describing
+#         input1/input2's signedness respectively)
 # -> output activations precision:
 #       - 8, 4, 2
+# -> output signedness:
+#       - True or False
 # -> weights precision:
 #       - 8, 4, 2
 # -> quantization method:
@@ -51,8 +57,12 @@ TYPE_OF_KERNEL 		= 'convolution'
 
 in_precision 		= 8
 wt_precision 		= 8
-out_precision 		= 8 # if is add layer, out_precision is the second input precision
-quantization_type 	= 'shift_clip'
+in_signed = True
+out_precision 		= 8 # if is add layer, out_precision is the second input
+# precision
+out_signed = True
+quantization_type 	= 'shift_clip' # TODO / WARNING: THRESHOLD QUANTIZATION NOT
+# SUPPORTED FOR SIGNED OUTPUT KERNELS
 
 # Select layer dimensions from supported ones:
 

@@ -2,8 +2,9 @@
  * pulp_nn_utils.h
  * Nazareno   Bruschi  <nazareno.bruschi@unibo.it>
  * Alessandro Nadalini <alessandro.nadalini3@unibo.it>
+ * Georg Rutishauser   <georgr@iis.ee.ethz.ch>
  *
- * Copyright (C) 2019-2020 University of Bologna
+ * Copyright (C) 2019-2020 ETH Zurich & University of Bologna
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +19,14 @@
  * limitations under the License.
  */
 
+<%
+from itertools import product
+import numpy as np
+if config.act_prec == '32bit':
+    act_t = 'int32_t'
+else:
+    act_t = 'int64_t'
+%>\
 #ifndef __PULPNN_UTILS__
 #define __PULPNN_UTILS__
 
@@ -26,39 +35,53 @@
 #include "pulp.h"
 #endif
 
-#define bitext(x,size,off)                                   __builtin_pulp_bextract(x,size,off)
-#define bitextu(x,size,off)                                  __builtin_pulp_bextractu(x,size,off)
-#define bitins(dst,not_mask_imm,src,mask_imm,off)            __builtin_pulp_binsert(dst,not_mask_imm,src,mask_imm,off)
-#define pack(x,y,z,t)                                        __builtin_pulp_pack4(x,y,z,t)
-#define max4(a,b)                                            __builtin_pulp_maxu4(a,b)
-#define max8(a,b)                                            __builtin_pulp_maxu8(a,b)
-#define max16(a,b)                                           __builtin_pulp_maxu16(a,b)
-#define max32(a,b)                                           __builtin_pulp_maxusi(a,b)
-#define maxs32(a,b)                                          __builtin_pulp_maxsi(a,b)
-#define min32(a,b)                                           __builtin_pulp_minusi(a,b)
-#define mins32(a,b)                                          __builtin_pulp_minsi(a,b)
-#define min4(a,b)                                            __builtin_pulp_minu4(a,b)
-#define min8(a,b)                                            __builtin_pulp_minu8(a,b)
-#define min16(a,b)                                           __builtin_pulp_minu16(a,b)
-#define avg4(a,b)                                            __builtin_pulp_avgu4(a,b)
-#define avg8(a,b)                                            __builtin_pulp_avgu8(a,b)
-#define avg16(a,b)                                           __builtin_pulp_avgu16(a,b)
-       
-#define log2(x)                                              __builtin_pulp_fl1(x)
-#define min(a,b)                                             ((a)<(b)?(a):(b))
-#define SumDotp4(a, b, c)                                    __builtin_pulp_sdotusp4(a, b, c)
-#define SumDotp8(a, b, c)                                    __builtin_pulp_sdotusp8(a, b, c)
-#define SumDotp16(a, b, c)                                   __builtin_pulp_sdotusp16(a, b, c)
-#define clip4(x)                                             __builtin_pulp_clipu_r(x, 15)
-#define clip2(x)                                             __builtin_pulp_clipu_r(x, 3)
-#define clip8(x)                                             __builtin_pulp_clipu_r(x, 255)
+#define bitext(x,size,off)                                      __builtin_pulp_bextract(x,size,off)
+#define bitextu(x,size,off)                                     __builtin_pulp_bextractu(x,size,off)
+#define bitins(dst,not_mask_imm,src,mask_imm,off)               __builtin_pulp_binsert(dst,not_mask_imm,src,mask_imm,off)
+#define pack(x,y,z,t)                                           __builtin_pulp_pack4(x,y,z,t)
+#define max4(a,b)                                               __builtin_pulp_maxu4(a,b)
+#define maxs4(a, b)                                             __builtin_pulp_max4(a, b)
+#define max8(a, b)                                              __builtin_pulp_maxu8(a, b)
+#define maxs8(a, b)                                             __builtin_pulp_max8(a, b)
+#define max16(a, b)                                             __builtin_pulp_maxu16(a, b)
+#define maxs16(a, b)                                            __builtin_pulp_max16(a, b)
+#define max32(a,b)                                              __builtin_pulp_maxusi(a,b)
+#define maxs32(a,b)                                             __builtin_pulp_maxsi(a,b)
+#define min32(a,b)                                              __builtin_pulp_minusi(a,b)
+#define mins32(a,b)                                             __builtin_pulp_minsi(a,b)
+#define min4(a, b)                                              __builtin_pulp_minu4(a, b)
+#define mins4(a, b)                                             __builtin_pulp_min4(a, b)
+#define min8(a, b)                                              __builtin_pulp_minu8(a, b)
+#define mins8(a, b)                                             __builtin_pulp_min8(a, b)
+#define min16(a, b)                                             __builtin_pulp_minu16(a, b)
+#define mins16(a, b)                                            __builtin_pulp_min16(a, b)
+#define avg4(a,b)                                               __builtin_pulp_avgu4(a,b)
+#define avg8(a,b)                                               __builtin_pulp_avgu8(a,b)
+#define avg16(a,b)                                              __builtin_pulp_avgu16(a,b)
+#define log2(x)                                                 __builtin_pulp_fl1(x)
+#define min(a,b)                                                ((a)<(b)?(a):(b))
+#define SumDotp4(a, b, c)                                       __builtin_pulp_sdotusp4(a, b, c)
+#define SumDotp8(a, b, c)                                       __builtin_pulp_sdotusp8(a, b, c)
+#define SumDotp16(a, b, c)                                      __builtin_pulp_sdotusp16(a, b, c)
+#define SumDotps4(a, b, c)                                      __builtin_pulp_sdotsp4(a, b, c)
+#define SumDotps8(a, b, c)                                      __builtin_pulp_sdotsp8(a, b, c)
+#define SumDotps16(a, b, c)                                     __builtin_pulp_sdotsp16(a, b, c)
+#define clip4(x)                                                __builtin_pulp_clipu_r(x, 15)
+#define clip2(x)                                                __builtin_pulp_clipu_r(x, 3)
+#define clip8(x)                                                __builtin_pulp_clipu_r(x, 255)
 
-#define MacLoadInit(a_update, b_update, a_reg, b_reg, ptr)   __builtin_pulp_mlinitspr_v3(a_update, b_update, a_reg, b_reg, ptr)
-#define MacLoadUpdate(ptr)                                   __builtin_pulp_mlupdatespr_v3(ptr)
-#define MacLoadAssign(ptr)                                   __builtin_pulp_mlassignspr_v3(ptr)
-#define MacLoad4(a_update, b_update, a_reg, b_reg, ptr, sum) __builtin_pulp_mlsdotsup4_v3(a_update, b_update, a_reg, b_reg, ptr, sum)
-#define MacLoad8(a_update, b_update, a_reg, b_reg, ptr, sum) __builtin_pulp_mlsdotsup8_v3(a_update, b_update, a_reg, b_reg, ptr, sum)
-#define MacLoad16(a_update, b_update, a_reg, b_reg, ptr, sum)__builtin_pulp_mlsdotsup16_v3(a_update, b_update, a_reg, b_reg, ptr, sum)
+#define clips4(x)                                               __builtin_pulp_clip_r(x, 7)
+#define clips2(x)                                               __builtin_pulp_clip_r(x, 1)
+#define clips8(x)                                               __builtin_pulp_clip_r(x, 127)
+#define MacLoadInit(a_update, b_update, a_reg, b_reg, ptr)      __builtin_pulp_mlinitspr_v3(a_update, b_update, a_reg, b_reg, ptr)
+#define MacLoadUpdate(ptr)                                      __builtin_pulp_mlupdatespr_v3(ptr)
+#define MacLoadAssign(ptr)                                      __builtin_pulp_mlassignspr_v3(ptr)
+#define MacLoad4(a_update, b_update, a_reg, b_reg, ptr, sum)    __builtin_pulp_mlsdotsup4_v3(a_update, b_update, a_reg, b_reg, ptr, sum)
+#define MacLoad8(a_update, b_update, a_reg, b_reg, ptr, sum)    __builtin_pulp_mlsdotsup8_v3(a_update, b_update, a_reg, b_reg, ptr, sum)
+#define MacLoad16(a_update, b_update, a_reg, b_reg, ptr, sum)   __builtin_pulp_mlsdotsup16_v3(a_update, b_update, a_reg, b_reg, ptr, sum)
+#define MacLoads4(a_update, b_update, a_reg, b_reg, ptr, sum)   __builtin_pulp_mlsdotsp4_v3(a_update, b_update, a_reg, b_reg, ptr, sum)
+#define MacLoads8(a_update, b_update, a_reg, b_reg, ptr, sum)   __builtin_pulp_mlsdotsp8_v3(a_update, b_update, a_reg, b_reg, ptr, sum)
+#define MacLoads16(a_update, b_update, a_reg, b_reg, ptr, sum)  __builtin_pulp_mlsdotsp16_v3(a_update, b_update, a_reg, b_reg, ptr, sum)
 
 #define PACK_INT8_SIZE(x)                                    (x)
 #define PACK_INT4_SIZE(x)                                    ((x) >> 1)
@@ -78,146 +101,51 @@
 #define A_SKIP(x)                                            asm volatile ("csrwi 0x106," x)
 #define W_SKIP(x)                                            asm volatile ("csrwi 0x107," x)
 
-static uint8_t __attribute__((noinline)) pulp_nn_bn_quant_u8 (
+% for prec in [2,4,8]:
+% for signed in [False, True]:
+% for bn in [False, True]:
+<%
+t_prefix = "i" if signed else "u"
+dst_t = f"{t_prefix}{prec}"
+rt = f"{'u' if not signed else ''}int8_t"
+int_t = f"{'u' if not signed else ''}int32_t"
+clip_fn = f"clip{'s' if signed else ''}{prec}"
+%>\
+static ${rt} __attribute__((noinline)) pulp_nn${"_bn" if bn else ""}_quant_${dst_t} (
   int32_t phi,
-%if config.act_prec == '32bit':
-  int32_t k,
-  int32_t lambda,
-%elif config.act_prec == '64bit':
-  int64_t k,
-  int64_t lambda,
-%endif
-  int8_t  d
-) {
-%if config.act_prec == '32bit':
-  int32_t integer_image_phi = (k * phi) + lambda;
-  int32_t x = (integer_image_phi) >> d;
-%elif config.act_prec == '64bit':
-  int64_t integer_image_phi = (k * phi) + lambda;
-  int64_t x = (integer_image_phi) >> d;
-%endif
-  uint8_t res = clip8(x);
-  return res;
-}
-
-static uint8_t __attribute__((noinline)) pulp_nn_quant_u8(
-  int32_t phi,
+  % if bn:
+  ${act_t} k,
+  ${act_t} lambda,
+  % else:
   int16_t m,
-  int8_t  d
-) {
+  % endif
+  int8_t d
+  ) {
+  % if bn:
+  ${act_t} integer_image_phi = (k * phi) + lambda;
+  ${act_t} x = (integer_image_phi) >> d;
+  % else:
   int32_t x = (m * phi) >> d;
-  uint8_t res = clip8(x);
+  % endif
+  ${rt} res = ${clip_fn}(x);
   return res;
 }
-
-static uint8_t __attribute__((noinline)) pulp_nn_add_quant_u8 (
-  uint8_t pix1,
-  uint8_t pix2,
+% endfor
+static ${rt} __attribute__((noinline)) pulp_nn_add_quant_${dst_t} (
+  ${rt} pix1,
+  ${rt} pix2,
   int16_t m1,
   int16_t m2,
-  int8_t  d
-) {
-  /* Integer Batch Normalization */
-  uint32_t integer_image = pix1*m1 + pix2*m2;
-  /* Quantization */
-  uint32_t x = (integer_image) >> d;
-  uint8_t res = clip8(x);
+  int8_t d
+  ) {
+  ${int_t} integer_image = pix1*m1 + pix2*m2;
+  ${int_t} x = (integer_image) >> d;
+  ${rt} res = ${clip_fn}(x);
   return res;
 }
 
-static uint8_t __attribute__((noinline)) pulp_nn_bn_quant_u4 (
-  int32_t phi,
-%if config.act_prec == '32bit':
-  int32_t k,
-  int32_t lambda,
-%elif config.act_prec == '64bit':
-  int64_t k,
-  int64_t lambda,
-%endif
-  int8_t  d
-) {
-%if config.act_prec == '32bit':
-  int32_t integer_image_phi = (k * phi) + lambda;
-  int32_t x = (integer_image_phi) >> d;
-%elif config.act_prec == '64bit':
-  int64_t integer_image_phi = (k * phi) + lambda;
-  int64_t x = (integer_image_phi) >> d;
-%endif
-  uint8_t res = clip4(x);
-  return res;
-}
-
-static uint8_t __attribute__((noinline)) pulp_nn_quant_u4(
-  int32_t phi,
-  int16_t m,
-  int8_t  d
-) {
-  int32_t x = (m * phi) >> d;
-  uint8_t res = clip4(x);
-  return res;
-}
-
-static uint8_t __attribute__((noinline)) pulp_nn_add_quant_u4 (
-  uint8_t pix1,
-  uint8_t pix2,
-  int16_t m1,
-  int16_t m2,
-  int8_t  d
-) {
-  /* Integer Batch Normalization */
-  uint32_t integer_image = pix1*m1 + pix2*m2;
-  /* Quantization */
-  uint32_t x = (integer_image) >> d;
-  uint8_t res = clip4(x);
-  return res;
-}
-
-static uint8_t __attribute__((noinline)) pulp_nn_bn_quant_u2 (
-  int32_t phi,
-%if config.act_prec == '32bit':
-  int32_t k,
-  int32_t lambda,
-%elif config.act_prec == '64bit':
-  int64_t k,
-  int64_t lambda,
-%endif
-  int8_t  d
-) {
-%if config.act_prec == '32bit':
-  int32_t integer_image_phi = (k * phi) + lambda;
-  int32_t x = (integer_image_phi) >> d;
-%elif config.act_prec == '64bit':
-  int64_t integer_image_phi = (k * phi) + lambda;
-  int64_t x = (integer_image_phi) >> d;
-%endif
-  uint8_t res = clip2(x);
-  return res;
-}
-
-static uint8_t __attribute__((noinline)) pulp_nn_quant_u2(
-  int32_t phi,
-  int16_t m,
-  int8_t  d
-) {
-  int32_t x = (m * phi) >> d;
-  uint8_t res = clip2(x);
-  return res;
-}
-
-static uint8_t __attribute__((noinline)) pulp_nn_add_quant_u2 (
-  uint8_t pix1,
-  uint8_t pix2,
-  int16_t m1,
-  int16_t m2,
-  int8_t  d
-) {
-  /* Integer Batch Normalization */
-  uint32_t integer_image = pix1*m1 + pix2*m2;
-  /* Quantization */
-  uint32_t x = (integer_image) >> d;
-  uint8_t res = clip2(x);
-  return res;
-}
+% endfor
+% endfor
 
 static uint8_t __attribute__((noinline)) pulp_nn_u4_quant(int input, int16_t * pThr)
 {
@@ -326,6 +254,7 @@ static uint8_t __attribute__((noinline)) pulp_nn_u2_quant(int input, int16_t * p
 /*
  * Common
  */
+
 
 static v4s __attribute__((noinline)) pulp_nn_i4_to_i8_r( int8_t *pSrc)
 {
@@ -695,66 +624,119 @@ static void __attribute__((noinline)) pulp_zero_mem(uint8_t * pBuffer, unsigned 
   }
 }
 
-static void __attribute__((noinline)) pulp_nn_im2col_u8_to_u8(uint8_t * pInput, uint8_t * pOutput, unsigned int blockSize)
+% for in_prec in [2,4,8]:
+% for signed in [False, True]:
+<%
+t_prefix = "i" if signed else "u"
+src_t = f"{t_prefix}{in_prec}"
+dst_t = f"{t_prefix}8"
+vt = f"v4{'s' if signed else 'u'}"
+pt = f"{'u' if not signed else ''}int8_t"
+in_els_per_word = 32//in_prec
+in_els_per_byte = in_els_per_word//4
+log_in_els_per_word = int(np.log2(32/in_prec))
+bex = "bitext" + ("u" if not signed else "")
+%>\
+static void __attribute__((noinline)) pulp_nn_im2col_${src_t}_to_${dst_t}(${pt} * pInput, ${pt} * pOutput, unsigned int blockSize)
 {
-  unsigned int blkCnt = blockSize >> 2u;
-  int lfover = blockSize & 0x3;
-
+  unsigned int blkCnt = blockSize >> ${log_in_els_per_word}u;
+  int lfover = blockSize & ${f"0x{in_els_per_word-1:02x}"};
   for (int i = 0; i<blkCnt; i++)
   {
-    *((v4u*)pOutput) = *((v4u*) pInput);
+  % if in_prec == 8:
+    *((${vt}*)pOutput) = *((${vt}*)pInput);
     pInput+=4;
     pOutput+=4;
+  % else:
+    pInput = pulp_nn_${src_t}_to_${dst_t}(pInput, pOutput);
+    MemoryFence();
+    pOutput += ${in_els_per_word};
+  % endif
   }
-  while(lfover)
+  while (lfover)
   {
-    *((uint8_t*)pOutput) = *((uint8_t*)pInput);
+    % if in_prec == 8:
+    *((${pt}*)pOutput) = *((${pt}*)pInput);
     pOutput++;
     pInput++;
     lfover--;
+    % else:
+    % for e in range(in_els_per_byte):
+    *((${pt}*)pOutput) = (${pt}) ${bex}((${"unsigned " if not signed else ""}int) *pInput, ${in_prec}, ${in_prec * e});
+    pOutput++;
+    % endfor
+    pInput++;
+    lfover -= ${in_els_per_byte};
+    % endif
   }
 }
+% endfor
+% endfor
 
-static void __attribute__((noinline)) pulp_nn_im2col_u4_to_u8(uint8_t * pInput, uint8_t * pOutput, unsigned int blockSize)
+% for in_prec, out_prec in product([2,4,8], [2,4,8]):
+% if out_prec >= in_prec:
+% for signed in [False, True]:
+<%
+t_prefix = "i" if signed else "u"
+src_t = f"{t_prefix}{in_prec}"
+dst_t = f"{t_prefix}{out_prec}"
+vt = f"v4{'s' if signed else 'u'}"
+pt = f"{'u' if not signed else ''}int8_t"
+in_els_per_word = 32//in_prec
+in_els_per_byte = in_els_per_word//4
+out_els_per_word = 32//out_prec
+out_els_per_byte = out_els_per_word//4
+log_in_els_per_word = int(np.log2(32/in_prec))
+bex = "bitext" + ("u" if not signed else "")
+%>\
+static void __attribute__((noinline)) xpulp_nn_im2col_${src_t}_to_${dst_t}(${pt} * pInput, ${pt} * pOutput, unsigned int blockSize)
 {
-  unsigned int blkCnt = blockSize >> 3u;
-  int lfover = blockSize & 0x7;
-
+  unsigned int blkCnt = blockSize >> ${log_in_els_per_word}u;
+  int lfover = blockSize & ${f"0x{in_els_per_word-1:02x}"};
   for (int i = 0; i<blkCnt; i++)
   {
-    pInput = pulp_nn_u4_to_u8(pInput, pOutput);
+  % if in_prec == out_prec:
+    *((${vt}*)pOutput) = *((${vt}*)pInput);
+    pInput+=4;
+    pOutput+=4;
+  % else:
+    pInput = pulp_nn_${src_t}_to_${dst_t}(pInput, pOutput);
     MemoryFence();
-    pOutput+=8;
+    pInput += ${in_els_per_word};
+  % endif
   }
-  while(lfover)
+  while (lfover)
   {
-  *((uint8_t*)pOutput) = (uint8_t) bitextu((unsigned int) *pInput, 4, 0);
-  pOutput++;
-  *((uint8_t*)pOutput) = (uint8_t) bitextu((unsigned int) *pInput, 4, 4);
-  pOutput++;
-  pInput++;
-  lfover-=2;
+    ${pt} extr;
+    % if in_prec == out_prec:
+    *((${pt}*)pOutput) = *((${pt}*)pInput);
+    pOutput++;
+    pInput++;
+    lfover -= ${in_els_per_byte};
+    % else:
+    % if out_prec == 8:
+    % for e in range(in_els_per_byte):
+    *((${pt}*)pOutput) = (${pt}) ${bex}((${"unsigned " if not signed else ""}int) *pInput, ${in_prec}, ${in_prec * e});
+    pOutput++;
+    % endfor
+    pInput++;
+    lfover -= ${in_els_per_byte};
+    % else :
+    // TODO: this is potentially dangerous/wrong if the number of channels
+    // is not a multiple of ${out_els_per_word}!
+    *((${vt} *)pOutput) = pulp_nn_${src_t}_to_${dst_t}_r(pInput);
+    pInput += ${out_els_per_word//in_els_per_byte};
+    pOutput += 4;
+    lfover -= ${out_els_per_word};
+    % endif
+    % endif
   }
 }
+% endfor
+% endif
+% endfor
 
-static void __attribute__((noinline)) pulp_nn_im2col_u2_to_u8(uint8_t * pInput, uint8_t * pOutput, unsigned int blockSize)
-{
-  unsigned int blkCnt = blockSize >> 4u;
-  int lfover = blockSize & 0xf;
 
-  for(int i = 0; i<blkCnt; i++)
-  {
-    pInput = pulp_nn_u2_to_u8(pInput, pOutput);
-    pOutput+=16;
-  }
-  while(lfover)
-  {
-  *((v4u*)pOutput) = pulp_nn_u2_to_u8_r(pInput);
-  pInput++;
-  pOutput+=4;
-  lfover-=4;
-  }
-}
 
 static void __attribute__((noinline)) pulp_nn_compare_and_replace_if_larger_u8(uint8_t * base,
                                                 uint8_t * target,
@@ -784,6 +766,36 @@ static void __attribute__((noinline)) pulp_nn_compare_and_replace_if_larger_u8(u
     if(*pIn<*pCom)
       *pIn=*pCom;
     
+    pIn++;
+    pCom++;
+    left--;
+  }
+}
+
+static void __attribute__((noinline)) pulp_nn_compare_and_replace_if_larger_i8(
+    int8_t * base, int8_t * target, uint16_t length) {
+  int8_t *pIn = base;
+  int8_t *pCom = target;
+  v4s inp;
+  v4s com;
+  int cnt = length >> 2;
+
+  while (cnt > 0u) {
+    inp = *((v4s *)pIn);
+    com = *((v4s *)pCom);
+
+    *((v4s *)pIn) = maxs4(inp, com);
+
+    pCom += 4;
+    pIn += 4;
+    cnt--;
+  }
+
+  int left = length & 0x3;
+  while (left > 0u) {
+    if (*pIn < *pCom)
+      *pIn = *pCom;
+
     pIn++;
     pCom++;
     left--;
@@ -860,6 +872,66 @@ static void __attribute__((noinline)) pulp_nn_compare_and_replace_if_larger_u4(u
       inA1=inB1;
 
     *((uint8_t*)pIn) = bitins(inA0, n_mask, inA1, mask, off);
+
+    pIn++;
+    pCom++;
+    left--;
+  }
+}
+
+static void __attribute__((noinline)) pulp_nn_compare_and_replace_if_larger_i4(int8_t * base,
+                                                int8_t * target,
+                                                uint16_t length)
+{
+  int8_t mask = 0xf0;
+  int8_t n_mask = ~ mask;
+  int8_t off = 0x04;
+
+  int8_t *pIn = base;
+  int8_t *pCom = target;
+  v4s inp[2];
+  v4s com[2];
+  int8_t *out;
+  int cnt = length >> 2;
+
+  while(cnt > 0u)
+  {
+    pulp_nn_i4_to_i8(pIn, inp);
+    pulp_nn_i4_to_i8(pCom, com);
+
+    *((v4s *)out) = maxs4(inp[0], com[0]);
+
+    *((int8_t*)pIn) = bitins(*out, n_mask, *(out + 1), mask, off);
+    pIn++;
+    *((int8_t*)pIn) = bitins(*(out + 2), n_mask, *(out + 3), mask, off);
+    pIn++;
+
+    *((v4s *)out) = maxs4(inp[1], com[1]);
+
+    *((int8_t*)pIn) = bitins(*out, n_mask, *(out + 1), mask, off);
+    pIn++;
+    *((int8_t*)pIn) = bitins(*(out + 2), n_mask, *(out + 3), mask, off);
+    pIn++;
+
+    pCom+=4;
+    cnt--;
+  }
+
+  int left = length & 0x3;
+  while (left>0u)
+  {
+    int8_t inA0 = (int8_t) bitext((int) *pIn, 4, 0);
+    int8_t inA1 = (int8_t) bitext((int) *pIn, 4, 4);
+    int8_t inB0 = (int8_t) bitext((int) *pCom, 4, 0);
+    int8_t inB1 = (int8_t) bitext((int) *pCom, 4, 4);
+
+    if(inA0<inB0)
+      inA0=inB0;
+
+    if(inA1<inB1)
+      inA1=inB1;
+
+    *((int8_t*)pIn) = bitins(inA0, n_mask, inA1, mask, off);
 
     pIn++;
     pCom++;
@@ -980,6 +1052,91 @@ static void __attribute__((noinline)) pulp_nn_compare_and_replace_if_larger_u2(u
   }
 }
 
+
+static void __attribute__((noinline)) pulp_nn_compare_and_replace_if_larger_i2(int8_t * base,
+                                                int8_t * target,
+                                                uint16_t length)
+{
+  int8_t mask2 = 0x0c;
+  int8_t n_mask2 = ~ mask2;
+  int8_t mask4 = 0x30;
+  int8_t n_mask4 = ~ mask4;
+  int8_t mask6 = 0xc0;
+  int8_t n_mask6 = ~ mask6;
+  int8_t off2 = 2;
+  int8_t off4 = 4;
+  int8_t off6 = 6;
+
+  int8_t *pIn = base;
+  int8_t *pCom = target;
+  v4s inp[4];
+  v4s com[4];
+  int8_t *out;
+  int cnt = length >> 2;
+
+  while(cnt > 0u)
+  {
+    pulp_nn_i2_to_i8(pIn, inp);
+    pulp_nn_i2_to_i8(pCom, com);
+
+    *((v4s*)out) = maxs4(inp[0], com[0]);
+
+    int8_t inA = (int8_t) bitins(*out, n_mask2, *(out + 1), mask2, off2);
+    inA = bitins(inA, n_mask4, *(out + 2), mask4, off4);
+    *((int8_t*)pIn) = bitins(inA, n_mask6, *(out + 3), mask6, off6);
+    pIn++;
+
+    *((v4s*)out) = maxs4(inp[1], com[1]);
+
+    inA = (int8_t) bitins(*out, n_mask2, *(out + 1), mask2, off2);
+    inA = bitins(inA, n_mask4, *(out + 2), mask4, off4);
+    *((int8_t*)pIn) = bitins(inA, n_mask6, *(out + 3), mask6, off6);
+    pIn++;
+
+    *((v4s*)out) = maxs4(inp[2], com[2]);
+
+    inA = (int8_t) bitins(*out, n_mask2, *(out + 1), mask2, off2);
+    inA = bitins(inA, n_mask4, *(out + 2), mask4, off4);
+    *((int8_t*)pIn) = bitins(inA, n_mask6, *(out + 3), mask6, off6);
+    pIn++;
+
+    *((v4s*)out) = maxs4(inp[3], com[3]);
+
+    inA = (int8_t) bitins(*out, n_mask2, *(out + 1), mask2, off2);
+    inA = bitins(inA, n_mask4, *(out + 2), mask4, off4);
+    *((int8_t*)pIn) = bitins(inA, n_mask6, *(out + 3), mask6, off6);
+    pIn++;
+
+    pCom+=4;
+    cnt--;
+  }
+
+  int left = length & 0x3;
+  while (left>0u)
+  {
+    int8_t inA0 = (int8_t) bitext((unsigned int) *pIn, 2, 0);
+    int8_t inA1 = (int8_t) bitext((unsigned int) *pIn, 2, 2);
+    int8_t inA2 = (int8_t) bitext((unsigned int) *pIn, 2, 4);
+    int8_t inA3 = (int8_t) bitext((unsigned int) *pIn, 2, 6);
+    v4s inA4 = pack((int8_t) inA0, (int8_t) inA1, (int8_t) inA2, (int8_t) inA3);
+    int8_t inB0 = (int8_t) bitext((unsigned int) *pCom, 2, 0);
+    int8_t inB1 = (int8_t) bitext((unsigned int) *pCom, 2, 2);
+    int8_t inB2 = (int8_t) bitext((unsigned int) *pCom, 2, 4);
+    int8_t inB3 = (int8_t) bitext((unsigned int) *pCom, 2, 6);
+    v4s inB4 = pack((int8_t) inB0, (int8_t) inB1, (int8_t) inB2, (int8_t) inB3);
+
+    *((v4s*)out) = maxs4(inA4, inB4);
+
+    int8_t inA = (int8_t) bitins(*out, n_mask2, *(out + 1), mask2, off2);
+    inA = bitins(inA, n_mask4, *(out + 2), mask4, off4);
+    *((int8_t*)pIn) = bitins(inA, n_mask6, *(out + 3), mask6, off6);
+
+    pIn++;
+    pCom++;
+    left--;
+  }
+}
+
 static void __attribute__((noinline)) pulp_nn_avg_and_replace_u2(uint8_t * base,
                                   uint8_t * target,
                                   uint16_t length)
@@ -1076,125 +1233,6 @@ static void __attribute__((noinline)) xpulp_nn_zero_mem_u2(uint8_t * pBuffer, un
   }
 }
 
-static void __attribute__((noinline)) xpulp_nn_im2col_u8_to_u8(uint8_t * pInput, uint8_t * pOutput, unsigned int blockSize)
-{
-  unsigned int blkCnt = blockSize >> 2u;
-  int lfover = blockSize & 0x3;
-
-  for (int i = 0; i<blkCnt; i++)
-  {
-    *((v4u*)pOutput) = *((v4u*) pInput);
-    pInput+=4;
-    pOutput+=4;
-  }
-  while(lfover)
-  {
-    *((uint8_t*)pOutput) = *((uint8_t*)pInput);
-    pOutput++;
-    pInput++;
-    lfover--;
-  }
-}
-
-static void __attribute__((noinline)) xpulp_nn_im2col_u4_to_u8(uint8_t * pInput, uint8_t * pOutput, unsigned int blockSize)
-{
-  unsigned int blkCnt = blockSize >> 3u;
-  int lfover = blockSize & 0x7;
-
-  for (int i = 0; i<blkCnt; i++)
-  {
-    pInput = pulp_nn_u4_to_u8(pInput, pOutput);
-    MemoryFence();
-    pOutput+=8;
-  }
-  while(lfover)
-  {
-  *((uint8_t*)pOutput) = (uint8_t) bitextu((unsigned int) *pInput, 4, 0);
-  pOutput++;
-  *((uint8_t*)pOutput) = (uint8_t) bitextu((unsigned int) *pInput, 4, 4);
-  pOutput++;
-  pInput++;
-  lfover-=2;
-  }
-}
-
-static void __attribute__((noinline)) xpulp_nn_im2col_u4_to_u4(uint8_t * pInput, uint8_t * pOutput, unsigned int blockSize)
-{
-  unsigned int blkCnt = blockSize >> 3u;
-  int lfover = blockSize & 0x7;
-
-  for (int i = 0; i<blkCnt; i++)
-  {
-    *((v4u*)pOutput) = *((v4u*) pInput);
-    pInput+=4;
-    pOutput+=4;
-  }
-  while(lfover)
-  {
-    *((uint8_t*)pOutput) = *((uint8_t*)pInput);
-    pOutput++;
-    pInput++;
-    lfover-=2;
-  }
-}
-
-static void __attribute__((noinline)) xpulp_nn_im2col_u2_to_u8(uint8_t * pInput, uint8_t * pOutput, unsigned int blockSize)
-{
-  unsigned int blkCnt = blockSize >> 4u;
-  int lfover = blockSize & 0xf;
-
-  for(int i = 0; i<blkCnt; i++)
-  {
-    pInput = pulp_nn_u2_to_u8(pInput, pOutput);
-    pOutput+=16;
-  }
-  while(lfover)
-  {
-  *((v4u*)pOutput) = pulp_nn_u2_to_u8_r(pInput);
-  pInput++;
-  pOutput+=4;
-  lfover-=4;
-  }
-}
-
-static void __attribute__((noinline)) xpulp_nn_im2col_u2_to_u4(uint8_t * pInput, uint8_t * pOutput, unsigned int blockSize)
-{
-  unsigned int blkCnt = blockSize >> 4u;
-  int lfover = blockSize & 0xf;
-
-  for(int i = 0; i<blkCnt; i++)
-  {
-    pInput = pulp_nn_u2_to_u4(pInput, pOutput);
-    pOutput+=8;
-  }
-  while(lfover)
-  {
-    *((v4u*)pOutput) = pulp_nn_u2_to_u4_r(pInput);
-    pInput+=2;
-    pOutput+=4;
-    lfover-=8;
-  }
-}
-
-static void __attribute__((noinline)) xpulp_nn_im2col_u2_to_u2(uint8_t * pInput, uint8_t * pOutput, unsigned int blockSize)
-{
-  unsigned int blkCnt = blockSize >> 4u;
-  int lfover = blockSize & 0xf;
-
-  for (int i = 0; i<blkCnt; i++)
-  {
-    *((v4u*)pOutput) = *((v4u*) pInput);
-    pInput+=4;
-    pOutput+=4;
-  }
-  while(lfover)
-  {
-    *((uint8_t*)pOutput) = *((uint8_t*)pInput);
-    pOutput++;
-    pInput++;
-    lfover-=4;
-  }
-}
 
 static void __attribute__((noinline)) xpulp_nn_compare_and_replace_if_larger_u4(uint8_t * base,
                                                 uint8_t * target,
@@ -1234,6 +1272,47 @@ static void __attribute__((noinline)) xpulp_nn_compare_and_replace_if_larger_u4(
       inA1=inB1;
 
     *((uint8_t*)pIn) = bitins(inA0, n_mask, inA1, mask, off);
+
+    pIn++;
+    pCom++;
+    left--;
+  }
+}
+
+static void __attribute__((noinline)) xpulp_nn_compare_and_replace_if_larger_i4(
+    int8_t * base, int8_t * target, uint16_t length) {
+  int8_t mask = 0xf0;
+  int8_t n_mask = ~mask;
+  int8_t off = 0x04;
+
+  int8_t *pIn = base;
+  int8_t *pCom = target;
+
+  int cnt = length >> 2;
+
+  while (cnt > 0u) {
+    *((int32_t *)pIn) = maxs8(*((int32_t *)pIn), *((int32_t *)pCom));
+
+    pIn += 4;
+    pCom += 4;
+
+    cnt--;
+  }
+
+  int left = length & 0x3;
+  while (left > 0u) {
+    int8_t inA0 = (int8_t)bitext((int)*pIn, 4, 0);
+    int8_t inA1 = (int8_t)bitext((int)*pIn, 4, 4);
+    int8_t inB0 = (int8_t)bitext((int)*pCom, 4, 0);
+    int8_t inB1 = (int8_t)bitext((int)*pCom, 4, 4);
+
+    if (inA0 < inB0)
+      inA0 = inB0;
+
+    if (inA1 < inB1)
+      inA1 = inB1;
+
+    *((int8_t *)pIn) = bitins(inA0, n_mask, inA1, mask, off);
 
     pIn++;
     pCom++;
@@ -1331,6 +1410,60 @@ static void __attribute__((noinline)) xpulp_nn_compare_and_replace_if_larger_u2(
     uint8_t inA = (uint8_t) bitins(*out, n_mask2, *(out + 1), mask2, off2);
     inA = bitins(inA, n_mask4, *(out + 2), mask4, off4);
     *((uint8_t*)pIn) = bitins(inA, n_mask6, *(out + 3), mask6, off6);
+
+    pIn++;
+    pCom++;
+    left--;
+  }
+}
+static void __attribute__((noinline)) xpulp_nn_compare_and_replace_if_larger_i2(int8_t * base,
+                                                int8_t * target,
+                                                uint16_t length)
+{
+  int8_t mask2 = 0x0c;
+  int8_t n_mask2 = ~ mask2;
+  int8_t mask4 = 0x30;
+  int8_t n_mask4 = ~ mask4;
+  int8_t mask6 = 0xc0;
+  int8_t n_mask6 = ~ mask6;
+  int8_t off2 = 2;
+  int8_t off4 = 4;
+  int8_t off6 = 6;
+
+  int8_t *pIn = base;
+  int8_t *pCom = target;
+  int8_t *out;
+
+  int cnt = length >> 2;
+
+  while(cnt > 0u)
+  {
+    *((int32_t *)pIn) = maxs16(*((int32_t *)pIn), *((int32_t *)pCom));
+
+    pIn+=4;
+    pCom+=4;
+    cnt--;
+  }
+
+  int left = length & 0x3;
+  while (left>0u)
+  {
+    int8_t inA0 = (int8_t) bitext((int) *pIn, 2, 0);
+    int8_t inA1 = (int8_t) bitext((int) *pIn, 2, 2);
+    int8_t inA2 = (int8_t) bitext((int) *pIn, 2, 4);
+    int8_t inA3 = (int8_t) bitext((int) *pIn, 2, 6);
+    v4s inA4 = pack((int8_t) inA0, (int8_t) inA1, (int8_t) inA2, (int8_t) inA3);
+    int8_t inB0 = (int8_t) bitext((int) *pCom, 2, 0);
+    int8_t inB1 = (int8_t) bitext((int) *pCom, 2, 2);
+    int8_t inB2 = (int8_t) bitext((int) *pCom, 2, 4);
+    int8_t inB3 = (int8_t) bitext((int) *pCom, 2, 6);
+    v4s inB4 = pack((int8_t) inB0, (int8_t) inB1, (int8_t) inB2, (int8_t) inB3);
+
+    *((v4s*)out) = maxs4(inA4, inB4);
+
+    int8_t inA = (int8_t) bitins(*out, n_mask2, *(out + 1), mask2, off2);
+    inA = bitins(inA, n_mask4, *(out + 2), mask4, off4);
+    *((int8_t*)pIn) = bitins(inA, n_mask6, *(out + 3), mask6, off6);
 
     pIn++;
     pCom++;

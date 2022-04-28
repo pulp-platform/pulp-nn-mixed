@@ -24,7 +24,7 @@
 void __attribute__((noinline)) xpulp_nn_linear_u8_i32_i8(
                   uint8_t *pIn,
                   int8_t *pBias,
-                  uint8_t *pOut,
+                  int8_t *pOut,
                   int8_t *pWeight,
                   uint16_t dim_vec,
                   uint16_t num_o_neurons)
@@ -57,7 +57,7 @@ void __attribute__((noinline)) xpulp_nn_linear_u8_i32_i8(
 
     int32_t *ptrA  = (int32_t *) pA ;
 
-    uint32_t *ptrB  = (uint32_t *) pB ;
+    uint32_t *ptrB  = pB ;
 
     ptrA  = MacLoadInit(1, 0, 0, 0, ptrA);
 

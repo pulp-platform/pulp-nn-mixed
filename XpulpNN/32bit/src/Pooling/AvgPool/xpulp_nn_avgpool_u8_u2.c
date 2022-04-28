@@ -25,6 +25,7 @@
 
 #define bitins(dst,not_mask_imm,src,mask_imm,off) __builtin_pulp_binsert(dst,not_mask_imm,src,mask_imm,off)
 #define bitext_u(x,size,off) __builtin_pulp_bextractu(x,size,off)
+#define bitext(x,size,off) __builtin_pulp_bextract(x,size,off)
 
 void __attribute__ ((noinline))  xpulp_nn_avgpool_u8_u2(
   uint8_t * pIn,
@@ -109,7 +110,7 @@ void __attribute__ ((noinline))  xpulp_nn_avgpool_u8_u2(
                 int32_t out_large;
                 if (flag_requant) {
                   out_large = (sum[0] * lambda + out_add) >> out_shift;
-                  out_el |= (clip2(out_large) << (in_iter_cnt * 2 + 0));
+                    out_el |= (clip22(out_large) << (in_iter_cnt * 2 + 0));
                   } else {
                   out_large = sum[0] / kernel_size_tot;
                   out_el |= (clip2(out_large) << (in_iter_cnt * 2 + 0));

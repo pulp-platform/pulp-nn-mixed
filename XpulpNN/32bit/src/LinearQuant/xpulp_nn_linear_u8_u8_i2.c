@@ -21,6 +21,7 @@
 #include "pulp_nn_utils.h"
 
 
+
 void __attribute__((noinline)) xpulp_nn_linear_u8_u8_i2(
                         uint8_t *pIn,
                         int8_t *pBias,
@@ -50,6 +51,7 @@ void __attribute__((noinline)) xpulp_nn_linear_u8_u8_i2(
   uint8_t *pOutBuffer = (uint8_t *) pOut + start;
 
   int i;
+
   int32_t *k1 = pKappa + start;
   int32_t *lambda1 = pLambda + start;
 

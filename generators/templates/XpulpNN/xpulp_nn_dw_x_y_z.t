@@ -19,22 +19,35 @@
 
 #include "pmsis.h"
 #include "pulp_nn_utils.h"
+<%
+act_prec = int(config.kernel.act_prec[0:2])
+act_t = f"int{act_prec}_t"
+def su(sgn):
+    return 's' if sgn else 'u'
+def u_(sgn):
+    return '' if sgn else 'u'
+def s_(sgn):
+    return 's' if sgn else ''
 
+pt_in = f"{u_(config.kernel.in_signed)}int8_t"
+vt_in = f"v4{su(config.kernel.in_signed)}"
+int_t_in = f"{u_(config.kernel.in_signed)}int32_t"
+pt_out = f"{u_(config.kernel.out_signed)}int8_t"
+macload_fn = f"MacLoad{s_(config.kernel.in_signed)}4"
+sumdotp_fn = f"SumDotp{s_(config.kernel.in_signed)}4"
+out_clip_fn = f"clip{s_(config.kernel.out_signed)}{config.kernel.out_data_t}"
+bex = f"bitext{u_(config.kernel.in_signed)}"
+%>
 
 void ${config.fn_name}(
-                        uint8_t *pIn,
-                        uint8_t *pIm2ColBuffer,
+                        ${pt_in} *pIn,
+                        ${pt_in} *pIm2ColBuffer,
                         int8_t *pBias,
-                        uint8_t *pOut,
+                        ${pt_out} *pOut,
                         int8_t *pWeight,
                         int8_t *pWtBuffer,
-%if config.kernel.act_prec == '32bit':
-                        int32_t *pKappa,
-                        int32_t *pLambda,
-%elif config.kernel.act_prec == '64bit':
-                        int64_t *pKappa,
-                        int64_t *pLambda,
-%endif
+                        ${act_t} *pKappa,
+                        ${act_t} *pLambda,
                         uint16_t out_mult,
                         uint16_t out_shift,
                         uint16_t dim_in_x,
@@ -102,13 +115,13 @@ void ${config.fn_name}(
   uint16_t in_image_size = dim_in_x * dim_in_y;
 
 %if config.less_precision == 8:
-  uint8_t * pIm2ColBase = pIm2ColBuffer + (core_id * im2col_size);
+  ${pt_in} * pIm2ColBase = pIm2ColBuffer + (core_id * im2col_size);
   int8_t * pWtBase = pWtBuffer + kernel_size;
 %elif config.less_precision == 4:
-  uint8_t * pIm2ColBase = pIm2ColBuffer + (core_id * im2col_size << 1);
+  ${pt_in} * pIm2ColBase = pIm2ColBuffer + (core_id * im2col_size << 1);
   int8_t * pWtBase = pWtBuffer + (core_id * (kernel_size << 1));
 %elif config.less_precision == 2:
-  uint8_t * pIm2ColBase = pIm2ColBuffer + (core_id * im2col_size << 2);
+  ${pt_in} * pIm2ColBase = pIm2ColBuffer + (core_id * im2col_size << 2);
   int8_t * pWtBase = pWtBuffer + (core_id * (kernel_size << 2));
 %endif
 
@@ -176,29 +189,9 @@ void ${config.fn_name}(
   %endif
 %endif
 
-%if config.kernel.act_prec == '32bit':
-%if config.less_precision == 8:
-  int32_t *k1 = pKappa + core_id * chunk;
-  int32_t *lambda1 = pLambda + core_id * chunk;
-%elif config.less_precision == 4:
-  int32_t *k1 = pKappa + core_id * (chunk << 1);
-  int32_t *lambda1 = pLambda + core_id * (chunk << 1);
-%elif config.less_precision == 2:
-  int32_t *k1 = pKappa + core_id * (chunk << 2);
-  int32_t *lambda1 = pLambda + core_id * (chunk << 2);
-%endif
-%elif config.kernel.act_prec == '64bit':
-%if config.less_precision == 8:
-  int64_t *k1 = pKappa + core_id * chunk;
-  int64_t *lambda1 = pLambda + core_id * chunk;
-%elif config.less_precision == 4:
-  int64_t *k1 = pKappa + core_id * (chunk << 1);
-  int64_t *lambda1 = pLambda + core_id * (chunk << 1);
-%elif config.less_precision == 2:
-  int64_t *k1 = pKappa + core_id * (chunk << 2);
-  int64_t *lambda1 = pLambda + core_id * (chunk << 2);
-%endif
-%endif
+
+  ${act_t} * k1 = pKappa + core_id * (chunk << ${4//config.less_precision});
+  ${act_t} * lambda1 = plambda + core_id * (chunk << ${4//config.less_precision});
 
   for(int i_ch = start_channel; i_ch < stop_channel; i_ch++)
   {
@@ -270,14 +263,14 @@ void ${config.fn_name}(
     {
       do
       {
-        uint8_t *pOutBuffer = pOut + i_out_ch + (i_out_x * ch_out_r);
-        uint8_t *pIm2Col = pIm2ColBase;
+        ${pt_out} *pOutBuffer = pOut + i_out_ch + (i_out_x * ch_out_r);
+        ${pt_in} *pIm2Col = pIm2ColBase;
   %if config.less_precision == 4:
-        uint8_t *pIm2Col2 = pIm2Col + im2col_size;
+        ${pt_in} *pIm2Col2 = pIm2Col + im2col_size;
   %elif config.less_precision == 2:
-        uint8_t *pIm2Col2 = pIm2Col + im2col_size;
-        uint8_t *pIm2Col3 = pIm2Col2 + im2col_size;
-        uint8_t *pIm2Col4 = pIm2Col3 + im2col_size;
+        ${pt_in} *pIm2Col2 = pIm2Col + im2col_size;
+        ${pt_in} *pIm2Col3 = pIm2Col2 + im2col_size;
+        ${pt_in} *pIm2Col4 = pIm2Col3 + im2col_size;
   %endif
         i_buff_y = - padding_y_top;
         if(padding_y_top > 0)
@@ -287,17 +280,17 @@ void ${config.fn_name}(
             int i=0;
             do
             {
-              *(v4u *) pIm2Col = (v4u) {0, 0, 0, 0};
+              *(${vt_in} *) pIm2Col = (${vt_in}) {0, 0, 0, 0};
               pIm2Col+=4;
     %if config.less_precision == 4:
-              *(v4u *) pIm2Col2 = (v4u) {0, 0, 0, 0};
+              *(${vt_in} *) pIm2Col2 = (${vt_in}) {0, 0, 0, 0};
               pIm2Col2+=4;
     %elif config.less_precision == 2:
-              *(v4u *) pIm2Col2 = (v4u) {0, 0, 0, 0};
+              *(${vt_in} *) pIm2Col2 = (${vt_in}) {0, 0, 0, 0};
               pIm2Col2+=4;
-              *(v4u *) pIm2Col3 = (v4u) {0, 0, 0, 0};
+              *(${vt_in} *) pIm2Col3 = (${vt_in}) {0, 0, 0, 0};
               pIm2Col3+=4;
-              *(v4u *) pIm2Col4 = (v4u) {0, 0, 0, 0};
+              *(${vt_in} *) pIm2Col4 = (${vt_in}) {0, 0, 0, 0};
               pIm2Col4+=4;
     %endif
               i++;
@@ -319,17 +312,17 @@ void ${config.fn_name}(
         {
           for(int j=0; j< (padding_x_left - const1); j++)
           {
-            *(uint8_t *) pIm2Col = 0;
+            *(${pt_in} *) pIm2Col = 0;
             pIm2Col++;
   %if config.less_precision == 4:
-            *(uint8_t *) pIm2Col2 = 0;
+            *(${pt_in} *) pIm2Col2 = 0;
             pIm2Col2++;
   %elif config.less_precision == 2:
-            *(uint8_t *) pIm2Col2 = 0;
+            *(${pt_in} *) pIm2Col2 = 0;
             pIm2Col2++;
-            *(uint8_t *) pIm2Col3 = 0;
+            *(${pt_in} *) pIm2Col3 = 0;
             pIm2Col3++;
-            *(uint8_t *) pIm2Col4 = 0;
+            *(${pt_in} *) pIm2Col4 = 0;
             pIm2Col4++;
   %endif
           }
@@ -338,7 +331,7 @@ void ${config.fn_name}(
   %if config.less_precision == 8:
           do
           {
-            *((v4u*) pIm2Col) = *((v4u*) (base_ptr + idx));
+            *((${vt_in}*) pIm2Col) = *((${vt_in}*) (base_ptr + idx));
             pIm2Col+=4;
             idx+=4;
             i++;
@@ -347,9 +340,9 @@ void ${config.fn_name}(
     %if config.kernel.in_data_t == 8:
           do
           {
-            *((v4u*) pIm2Col) = *((v4u*) (base_ptr + idx));
+            *((${vt_in}*) pIm2Col) = *((${vt_in}*) (base_ptr + idx));
             pIm2Col+=4;
-            *((v4u*) pIm2Col2) = *((v4u*) (base_ptr + idx + in_image_size));
+            *((${vt_in}*) pIm2Col2) = *((${vt_in}*) (base_ptr + idx + in_image_size));
             pIm2Col2+=4;
             idx+=4;
             i++;
@@ -357,21 +350,21 @@ void ${config.fn_name}(
     %elif config.kernel.in_data_t == 4:
           do
           {
-            v4u src_in = *((v4u*) (base_ptr + idx));
-            *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 0);
-            *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 4);
+            ${vt_in} src_in = *((${vt_in}*) (base_ptr + idx));
+            *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 0);
+            *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 4);
             pIm2Col++;
             pIm2Col2++;
-            *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 8);
-            *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 12);
+            *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 8);
+            *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 12);
             pIm2Col++;
             pIm2Col2++;
-            *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 16);
-            *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 20);
+            *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 16);
+            *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 20);
             pIm2Col++;
             pIm2Col2++;
-            *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 24);
-            *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 28);
+            *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 24);
+            *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 28);
             pIm2Col++;
             pIm2Col2++;
             idx+=4;
@@ -383,15 +376,15 @@ void ${config.fn_name}(
           do
           {
             int idc = in_image_size;
-            *((v4u*) pIm2Col) = *((v4u*) (base_ptr + idx));
+            *((${vt_in}*) pIm2Col) = *((${vt_in}*) (base_ptr + idx));
             pIm2Col+=4;
-            *((v4u*) pIm2Col2) = *((v4u*) (base_ptr + idx + idc));
+            *((${vt_in}*) pIm2Col2) = *((${vt_in}*) (base_ptr + idx + idc));
             pIm2Col2+=4;
             idc+=in_image_size;
-            *((v4u*) pIm2Col3) = *((v4u*) (base_ptr + idx + idc));
+            *((${vt_in}*) pIm2Col3) = *((${vt_in}*) (base_ptr + idx + idc));
             pIm2Col3+=4;
             idc+=in_image_size;
-            *((v4u*) pIm2Col4) = *((v4u*) (base_ptr + idx + idc));
+            *((${vt_in}*) pIm2Col4) = *((${vt_in}*) (base_ptr + idx + idc));
             pIm2Col4+=4;
             idx+=4;
             i++;
@@ -399,38 +392,38 @@ void ${config.fn_name}(
     %elif config.kernel.in_data_t == 4:
           do
           {
-            v4u src_in = *((v4u*) (base_ptr + idx));
-            *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 0);
-            *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 4);
+            ${vt_in} src_in = *((${vt_in}*) (base_ptr + idx));
+            *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 0);
+            *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 4);
             pIm2Col++;
             pIm2Col2++;
-            *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 8);
-            *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 12);
+            *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 8);
+            *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 12);
             pIm2Col++;
             pIm2Col2++;
-            *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 16);
-            *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 20);
+            *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 16);
+            *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 20);
             pIm2Col++;
             pIm2Col2++;
-            *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 24);
-            *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 28);
+            *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 24);
+            *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 28);
             pIm2Col++;
             pIm2Col2++;
-            src_in = *((v4u*) (base_ptr + idx + in_image_size));
-            *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 4, 0);
-            *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 4, 4);
+            src_in = *((${vt_in}*) (base_ptr + idx + in_image_size));
+            *pIm2Col3 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 0);
+            *pIm2Col4 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 4);
             pIm2Col3++;
             pIm2Col4++;
-            *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 4, 8);
-            *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 4, 12);
+            *pIm2Col3 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 8);
+            *pIm2Col4 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 12);
             pIm2Col3++;
             pIm2Col4++;
-            *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 4, 16);
-            *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 4, 20);
+            *pIm2Col3 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 16);
+            *pIm2Col4 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 20);
             pIm2Col3++;
             pIm2Col4++;
-            *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 4, 24);
-            *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 4, 28);
+            *pIm2Col3 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 24);
+            *pIm2Col4 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 28);
             pIm2Col3++;
             pIm2Col4++;
             idx+=4;
@@ -439,35 +432,35 @@ void ${config.fn_name}(
     %elif config.kernel.in_data_t == 2:
           do
           {
-            v4u src_in = *((v4u*) (base_ptr + idx));
-            *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 2, 0);
-            *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 2, 2);
-            *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 2, 4);
-            *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 2, 6);
+            ${vt_in} src_in = *((${vt_in}*) (base_ptr + idx));
+            *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 0);
+            *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 2);
+            *pIm2Col3 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 4);
+            *pIm2Col4 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 6);
             pIm2Col++;
             pIm2Col2++;
             pIm2Col3++;
             pIm2Col4++;
-            *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 2, 8);
-            *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 2, 10);
-            *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 2, 12);
-            *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 2, 14);
+            *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 8);
+            *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 10);
+            *pIm2Col3 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 12);
+            *pIm2Col4 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 14);
             pIm2Col++;
             pIm2Col2++;
             pIm2Col3++;
             pIm2Col4++;
-            *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 2, 16);
-            *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 2, 18);
-            *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 2, 20);
-            *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 2, 22);
+            *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 16);
+            *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 18);
+            *pIm2Col3 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 20);
+            *pIm2Col4 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 22);
             pIm2Col++;
             pIm2Col2++;
             pIm2Col3++;
             pIm2Col4++;
-            *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 2, 24);
-            *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 2, 26);
-            *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 2, 28);
-            *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 2, 30);
+            *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 24);
+            *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 26);
+            *pIm2Col3 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 28);
+            *pIm2Col4 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 30);
             pIm2Col++;
             pIm2Col2++;
             pIm2Col3++;
@@ -493,17 +486,17 @@ void ${config.fn_name}(
           int i=0;
           do
           {
-            *(v4u *) pIm2Col = (v4u) {0, 0, 0, 0};
+            *(${vt_in} *) pIm2Col = (${vt_in}) {0, 0, 0, 0};
             pIm2Col+=4;
   %if config.less_precision == 4:
-            *(v4u *) pIm2Col2 = (v4u) {0, 0, 0, 0};
+            *(${vt_in} *) pIm2Col2 = (${vt_in}) {0, 0, 0, 0};
             pIm2Col2+=4;
   %elif config.less_precision == 2:
-            *(v4u *) pIm2Col2 = (v4u) {0, 0, 0, 0};
+            *(${vt_in} *) pIm2Col2 = (${vt_in}) {0, 0, 0, 0};
             pIm2Col2+=4;
-            *(v4u *) pIm2Col3 = (v4u) {0, 0, 0, 0};
+            *(${vt_in} *) pIm2Col3 = (${vt_in}) {0, 0, 0, 0};
             pIm2Col3+=4;
-            *(v4u *) pIm2Col4 = (v4u) {0, 0, 0, 0};
+            *(${vt_in} *) pIm2Col4 = (${vt_in}) {0, 0, 0, 0};
             pIm2Col4+=4;
   %endif
             i++;
@@ -576,15 +569,15 @@ void ${config.fn_name}(
   %endif
 %if config.less_precision == 8:
           int32_t ptrA  = (int32_t *) pWt;
-          uint32_t ptrB = (uint32_t *) pIm2Col;
+          ${int_t_in} ptrB = (${int_t_in} *) pIm2Col;
 
           ptrA = MacLoadInit(1, 0, 0, 0, ptrA);
           ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
 %elif config.less_precision == 4:
           int32_t  ptrA  = (int32_t *) pWt;
           int32_t  ptrA2 = (int32_t *) pWt2;
-          uint32_t ptrB  = (uint32_t *) pIm2Col;
-          uint32_t ptrB2 = (uint32_t *) pIm2Col2;
+          ${int_t_in} ptrB  = (${int_t_in} *) pIm2Col;
+          ${int_t_in} ptrB2 = (${int_t_in} *) pIm2Col2;
 
           ptrA  = MacLoadInit(1, 0, 0, 0, ptrA);
           ptrA2 = MacLoadInit(1, 0, 1, 0, ptrA2);
@@ -595,35 +588,35 @@ void ${config.fn_name}(
           do
           {
   %if config.less_precision == 8:
-            sum  = MacLoad4(1, 0, 0, 0, ptrA, sum);
+            sum  = ${macload_fn}(1, 0, 0, 0, ptrA, sum);
             ptrA = MacLoadUpdate(ptrA);
             ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
   %elif config.less_precision == 4:
-            sum  = MacLoad4(1, 0, 0, 0, ptrA, sum);
+            sum  = ${macload_fn}(1, 0, 0, 0, ptrA, sum);
             ptrA = MacLoadUpdate(ptrA);
             ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
-            sum2  = MacLoad4(1, 0, 1, 1, ptrA2, sum2);
+            sum2  = ${macload_fn}(1, 0, 1, 1, ptrA2, sum2);
             ptrA2 = MacLoadUpdate(ptrA2);
             ptrB2 = MacLoadInit(0, 1, 1, 1, ptrB2);
   %elif config.less_precision == 2:
             v4s w = *(v4s *) pWt;
-            v4u x = *(v4u *) pIm2Col;
-            sum = SumDotp4(x, w, sum);
+            ${vt_in} x = *(${vt_in} *) pIm2Col;
+            sum = ${sumdotp_fn}(x, w, sum);
             pWt += 4;
             pIm2Col += 4;
             v4s w2 = *(v4s *) pWt2;
-            v4u x2 = *(v4u *) pIm2Col2;
-            sum2 = SumDotp4(x2, w2, sum2);
+            ${vt_in} x2 = *(${vt_in} *) pIm2Col2;
+            sum2 = ${sumdotp_fn}(x2, w2, sum2);
             pWt2 += 4;
             pIm2Col2 += 4;
             v4s w3 = *(v4s *) pWt3;
-            v4u x3 = *(v4u *) pIm2Col3;
-            sum3 = SumDotp4(x3, w3, sum3);
+            ${vt_in} x3 = *(${vt_in} *) pIm2Col3;
+            sum3 = ${sumdotp_fn}(x3, w3, sum3);
             pWt3 += 4;
             pIm2Col3 += 4;
             v4s w4 = *(v4s *) pWt4;
-            v4u x4 = *(v4u *) pIm2Col4;
-            sum4 = SumDotp4(x4, w4, sum4);
+            ${vt_in} x4 = *(${vt_in} *) pIm2Col4;
+            sum4 = ${sumdotp_fn}(x4, w4, sum4);
             pWt4 += 4;
             pIm2Col4 += 4;
   %endif
@@ -644,27 +637,27 @@ void ${config.fn_name}(
             {
     %if config.less_precision == 8:
               int8_t w = *(int8_t *) pWt++;
-              uint8_t x = *(uint8_t *) pIm2Col++;
+              ${pt_in} x = *(${pt_in} *) pIm2Col++;
               sum += x * w;
     %elif config.less_precision == 4:
               int8_t w = *(int8_t *) pWt++;
-              uint8_t x = *(uint8_t *) pIm2Col++;
+              ${pt_in} x = *(${pt_in} *) pIm2Col++;
               sum += x * w;
               int8_t w2 = *(int8_t *) pWt2++;
-              uint8_t x2 = *(uint8_t *) pIm2Col2++;
+              ${pt_in} x2 = *(${pt_in} *) pIm2Col2++;
               sum2 += x2 * w2;
     %elif config.less_precision == 2:
               int8_t w = *(int8_t *) pWt++;
-              uint8_t x = *(uint8_t *) pIm2Col++;
+              ${pt_in} x = *(${pt_in} *) pIm2Col++;
               sum += x * w;
               int8_t w2 = *(int8_t *) pWt2++;
-              uint8_t x2 = *(uint8_t *) pIm2Col2++;
+              ${pt_in} x2 = *(${pt_in} *) pIm2Col2++;
               sum2 += x2 * w2;
               int8_t w3 = *(int8_t *) pWt3++;
-              uint8_t x3 = *(uint8_t *) pIm2Col3++;
+              ${pt_in} x3 = *(${pt_in} *) pIm2Col3++;
               sum3 += x3 * w3;
               int8_t w4 = *(int8_t *) pWt4++;
-              uint8_t x4 = *(uint8_t *) pIm2Col4++;
+              ${pt_in} x4 = *(${pt_in} *) pIm2Col4++;
               sum4 += x4 * w4;
     %endif
               j++;
@@ -749,34 +742,34 @@ void ${config.fn_name}(
             else
             {
   %if config.less_precision == 8:
-              *pOutBuffer = (uint8_t) clip8(sum >> out_shift);
+              *pOutBuffer = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
   %elif config.less_precision == 4:
     %if config.kernel.out_data_t == 8:
-              *pOutBuffer = (uint8_t) clip8(sum >> out_shift);
-              *(pOutBuffer + 1) = (uint8_t) clip8(sum2 >> out_shift);
+              *pOutBuffer = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+              *(pOutBuffer + 1) = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
     %elif config.kernel.out_data_t == 4:
-              sum = (uint8_t) clip4(sum >> out_shift);
-              sum2 = (uint8_t) clip4(sum2 >> out_shift);
+              sum = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+              sum2 = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
               *pOutBuffer = bitins(sum, n_mask, sum2, mask, off);
     %endif
   %elif config.less_precision == 2:
     %if config.kernel.out_data_t == 8:
-              *pOutBuffer = (uint8_t) clip8(sum >> out_shift);
-              *(pOutBuffer + 1) = (uint8_t) clip8(sum2 >> out_shift);
-              *(pOutBuffer + 2) = (uint8_t) clip8(sum3 >> out_shift);
-              *(pOutBuffer + 3) = (uint8_t) clip8(sum4 >> out_shift);
+              *pOutBuffer = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+              *(pOutBuffer + 1) = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
+              *(pOutBuffer + 2) = (${pt_out}) ${out_clip_fn}(sum3 >> out_shift);
+              *(pOutBuffer + 3) = (${pt_out}) ${out_clip_fn}(sum4 >> out_shift);
     %elif config.kernel.out_data_t == 4:
-              sum = (uint8_t) clip4(sum >> out_shift);
-              sum2 = (uint8_t) clip4(sum2 >> out_shift);
+              sum = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+              sum2 = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
               *pOutBuffer = bitins(sum, n_mask, sum2, mask, off);
-              sum3 = (uint8_t) clip4(sum3 >> out_shift);
-              sum4 = (uint8_t) clip4(sum4 >> out_shift);
+              sum3 = (${pt_out}) ${out_clip_fn}(sum3 >> out_shift);
+              sum4 = (${pt_out}) ${out_clip_fn}(sum4 >> out_shift);
               *(pOutBuffer + 1) = bitins(sum3, n_mask, sum4, mask, off);
     %elif config.kernel.out_data_t == 2:
-              sum = (uint8_t) clip2(sum >> out_shift);
-              sum2 = (uint8_t) clip2(sum2 >> out_shift);
-              sum3 = (uint8_t) clip2(sum3 >> out_shift);
-              sum4 = (uint8_t) clip2(sum4 >> out_shift);
+              sum = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+              sum2 = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
+              sum3 = (${pt_out}) ${out_clip_fn}(sum3 >> out_shift);
+              sum4 = (${pt_out}) ${out_clip_fn}(sum4 >> out_shift);
               sum = bitins(sum, n_mask2, sum2, mask2, off2);
               sum = bitins(sum, n_mask4, sum3, mask4, off4);
               *pOutBuffer = bitins(sum, n_mask6, sum4, mask6, off6);
@@ -792,14 +785,14 @@ void ${config.fn_name}(
     }
     do
     {
-      uint8_t *pOutBuffer = pOut + i_out_ch + (i_out_x * ch_out_r);
-      uint8_t *pIm2Col = pIm2ColBase;
+      ${pt_out} *pOutBuffer = pOut + i_out_ch + (i_out_x * ch_out_r);
+      ${pt_in} *pIm2Col = pIm2ColBase;
 %if config.less_precision == 4:
-      uint8_t *pIm2Col2 = pIm2Col + im2col_size;
+      ${pt_in} *pIm2Col2 = pIm2Col + im2col_size;
 %elif config.less_precision == 2:
-      uint8_t *pIm2Col2 = pIm2Col + im2col_size;
-      uint8_t *pIm2Col3 = pIm2Col2 + im2col_size;
-      uint8_t *pIm2Col4 = pIm2Col3 + im2col_size;
+      ${pt_in} *pIm2Col2 = pIm2Col + im2col_size;
+      ${pt_in} *pIm2Col3 = pIm2Col2 + im2col_size;
+      ${pt_in} *pIm2Col4 = pIm2Col3 + im2col_size;
 %endif
       i_buff_y = - padding_y_top;
       if(padding_y_top > 0)
@@ -809,17 +802,17 @@ void ${config.fn_name}(
           int i=0;
           do
           {
-            *(v4u *) pIm2Col = (v4u) {0, 0, 0, 0};
+            *(${vt_in} *) pIm2Col = (${vt_in}) {0, 0, 0, 0};
             pIm2Col+=4;
   %if config.less_precision == 4:
-            *(v4u *) pIm2Col2 = (v4u) {0, 0, 0, 0};
+            *(${vt_in} *) pIm2Col2 = (${vt_in}) {0, 0, 0, 0};
             pIm2Col2+=4;
   %elif config.less_precision == 2:
-            *(v4u *) pIm2Col2 = (v4u) {0, 0, 0, 0};
+            *(${vt_in} *) pIm2Col2 = (${vt_in}) {0, 0, 0, 0};
             pIm2Col2+=4;
-            *(v4u *) pIm2Col3 = (v4u) {0, 0, 0, 0};
+            *(${vt_in} *) pIm2Col3 = (${vt_in}) {0, 0, 0, 0};
             pIm2Col3+=4;
-            *(v4u *) pIm2Col4 = (v4u) {0, 0, 0, 0};
+            *(${vt_in} *) pIm2Col4 = (${vt_in}) {0, 0, 0, 0};
             pIm2Col4+=4;
   %endif
             i++;
@@ -842,7 +835,7 @@ void ${config.fn_name}(
 %if config.less_precision == 8:
         for (int i=0; i<dim_kernel_x_size_padded; i++)
         {
-          *((v4u*) pIm2Col) = *((v4u*) (base_ptr + idx));
+          *((${vt_in}*) pIm2Col) = *((${vt_in}*) (base_ptr + idx));
           pIm2Col+=4;
           idx+=4;
         }
@@ -850,30 +843,30 @@ void ${config.fn_name}(
   %if config.kernel.in_data_t == 8:
         for (int i=0; i<dim_kernel_x_size_padded; i++)
         {
-          *((v4u*) pIm2Col) = *((v4u*) (base_ptr + idx));
+          *((${vt_in}*) pIm2Col) = *((${vt_in}*) (base_ptr + idx));
           pIm2Col+=4;
-          *((v4u*) pIm2Col2) = *((v4u*) (base_ptr + idx + in_image_size));
+          *((${vt_in}*) pIm2Col2) = *((${vt_in}*) (base_ptr + idx + in_image_size));
           pIm2Col2+=4;
           idx+=4;
         }
   %elif config.kernel.in_data_t == 4:
         for (int i=0; i<dim_kernel_x_size_padded; i++)
         {
-          v4u src_in = *((v4u*) (base_ptr + idx));
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 0);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 4);
+          ${vt_in} src_in = *((${vt_in}*) (base_ptr + idx));
+          *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 0);
+          *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 4);
           pIm2Col++;
           pIm2Col2++;
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 8);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 12);
+          *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 8);
+          *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 12);
           pIm2Col++;
           pIm2Col2++;
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 16);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 20);
+          *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 16);
+          *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 20);
           pIm2Col++;
           pIm2Col2++;
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 24);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 28);
+          *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 24);
+          *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 28);
           pIm2Col++;
           pIm2Col2++;
           idx+=4;
@@ -884,53 +877,53 @@ void ${config.fn_name}(
         for (int i=0; i<dim_kernel_x_size_padded; i++)
         {
           int idc = in_image_size;
-          *((v4u*) pIm2Col) = *((v4u*) (base_ptr + idx));
+          *((${vt_in}*) pIm2Col) = *((${vt_in}*) (base_ptr + idx));
           pIm2Col+=4;
-          *((v4u*) pIm2Col2) = *((v4u*) (base_ptr + idx + idc));
+          *((${vt_in}*) pIm2Col2) = *((${vt_in}*) (base_ptr + idx + idc));
           pIm2Col2+=4;
           idc+=in_image_size;
-          *((v4u*) pIm2Col3) = *((v4u*) (base_ptr + idx + idc));
+          *((${vt_in}*) pIm2Col3) = *((${vt_in}*) (base_ptr + idx + idc));
           pIm2Col3+=4;
           idc+=in_image_size;
-          *((v4u*) pIm2Col4) = *((v4u*) (base_ptr + idx + idc));
+          *((${vt_in}*) pIm2Col4) = *((${vt_in}*) (base_ptr + idx + idc));
           pIm2Col4+=4;
           idx+=4;
         }
   %elif config.kernel.in_data_t == 4:
         for (int i=0; i<dim_kernel_x_size_padded; i++)
         {
-          v4u src_in = *((v4u*) (base_ptr + idx));
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 0);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 4);
+          ${vt_in} src_in = *((${vt_in}*) (base_ptr + idx));
+          *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 0);
+          *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 4);
           pIm2Col++;
           pIm2Col2++;
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 8);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 12);
+          *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 8);
+          *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 12);
           pIm2Col++;
           pIm2Col2++;
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 16);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 20);
+          *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 16);
+          *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 20);
           pIm2Col++;
           pIm2Col2++;
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 24);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 28);
+          *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 24);
+          *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 28);
           pIm2Col++;
           pIm2Col2++;
-          src_in = *((v4u*) (base_ptr + idx + in_image_size));
-          *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 4, 0);
-          *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 4, 4);
+          src_in = *((${vt_in}*) (base_ptr + idx + in_image_size));
+          *pIm2Col3 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 0);
+          *pIm2Col4 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 4);
           pIm2Col3++;
           pIm2Col4++;
-          *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 4, 8);
-          *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 4, 12);
+          *pIm2Col3 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 8);
+          *pIm2Col4 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 12);
           pIm2Col3++;
           pIm2Col4++;
-          *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 4, 16);
-          *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 4, 20);
+          *pIm2Col3 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 16);
+          *pIm2Col4 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 20);
           pIm2Col3++;
           pIm2Col4++;
-          *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 4, 24);
-          *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 4, 28);
+          *pIm2Col3 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 24);
+          *pIm2Col4 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 28);
           pIm2Col3++;
           pIm2Col4++;
           idx+=4;
@@ -938,35 +931,35 @@ void ${config.fn_name}(
   %elif config.kernel.in_data_t == 2:
         for (int i=0; i<dim_kernel_x_size_padded; i++)
         {
-          v4u src_in = *((v4u*) (base_ptr + idx));
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 2, 0);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 2, 2);
-          *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 2, 4);
-          *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 2, 6);
+          ${vt_in} src_in = *((${vt_in}*) (base_ptr + idx));
+          *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 0);
+          *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 2);
+          *pIm2Col3 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 4);
+          *pIm2Col4 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 6);
           pIm2Col++;
           pIm2Col2++;
           pIm2Col3++;
           pIm2Col4++;
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 2, 8);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 2, 10);
-          *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 2, 12);
-          *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 2, 14);
+          *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 8);
+          *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 10);
+          *pIm2Col3 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 12);
+          *pIm2Col4 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 14);
           pIm2Col++;
           pIm2Col2++;
           pIm2Col3++;
           pIm2Col4++;
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 2, 16);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 2, 18);
-          *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 2, 20);
-          *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 2, 22);
+          *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 16);
+          *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 18);
+          *pIm2Col3 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 20);
+          *pIm2Col4 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 22);
           pIm2Col++;
           pIm2Col2++;
           pIm2Col3++;
           pIm2Col4++;
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 2, 24);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 2, 26);
-          *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 2, 28);
-          *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 2, 30);
+          *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 24);
+          *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 26);
+          *pIm2Col3 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 28);
+          *pIm2Col4 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 30);
           pIm2Col++;
           pIm2Col2++;
           pIm2Col3++;
@@ -991,17 +984,17 @@ void ${config.fn_name}(
         int i=0;
         do
         {
-          *(v4u *) pIm2Col = (v4u) {0, 0, 0, 0};
+          *(${vt_in} *) pIm2Col = (${vt_in}) {0, 0, 0, 0};
           pIm2Col+=4;
 %if config.less_precision == 4:
-          *(v4u *) pIm2Col2 = (v4u) {0, 0, 0, 0};
+          *(${vt_in} *) pIm2Col2 = (${vt_in}) {0, 0, 0, 0};
           pIm2Col2+=4;
 %elif config.less_precision == 2:
-          *(v4u *) pIm2Col2 = (v4u) {0, 0, 0, 0};
+          *(${vt_in} *) pIm2Col2 = (${vt_in}) {0, 0, 0, 0};
           pIm2Col2+=4;
-          *(v4u *) pIm2Col3 = (v4u) {0, 0, 0, 0};
+          *(${vt_in} *) pIm2Col3 = (${vt_in}) {0, 0, 0, 0};
           pIm2Col3+=4;
-          *(v4u *) pIm2Col4 = (v4u) {0, 0, 0, 0};
+          *(${vt_in} *) pIm2Col4 = (${vt_in}) {0, 0, 0, 0};
           pIm2Col4+=4;
 %endif
           i++;
@@ -1073,15 +1066,15 @@ void ${config.fn_name}(
 %endif
 %if config.less_precision == 8:
         int32_t ptrA  = (int32_t *) pWt;
-        uint32_t ptrB = (uint32_t *) pIm2Col;
+        ${int_t_in} ptrB = (${int_t_in} *) pIm2Col;
 
         ptrA = MacLoadInit(1, 0, 0, 0, ptrA);
         ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
 %elif config.less_precision == 4:
         int32_t  ptrA  = (int32_t *) pWt;
         int32_t  ptrA2 = (int32_t *) pWt2;
-        uint32_t ptrB  = (uint32_t *) pIm2Col;
-        uint32_t ptrB2 = (uint32_t *) pIm2Col2;
+        ${int_t_in} ptrB  = (${int_t_in} *) pIm2Col;
+        ${int_t_in} ptrB2 = (${int_t_in} *) pIm2Col2;
 
         ptrA  = MacLoadInit(1, 0, 0, 0, ptrA);
         ptrA2 = MacLoadInit(1, 0, 1, 0, ptrA2);
@@ -1092,35 +1085,35 @@ void ${config.fn_name}(
         do
         {
 %if config.less_precision == 8:
-          sum  = MacLoad4(1, 0, 0, 0, ptrA, sum);
+          sum  = ${macload_fn}(1, 0, 0, 0, ptrA, sum);
           ptrA = MacLoadUpdate(ptrA);
           ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
 %elif config.less_precision == 4:
-          sum  = MacLoad4(1, 0, 0, 0, ptrA, sum);
+          sum  = ${macload_fn}(1, 0, 0, 0, ptrA, sum);
           ptrA = MacLoadUpdate(ptrA);
           ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
-          sum2  = MacLoad4(1, 0, 1, 1, ptrA2, sum2);
+          sum2  = ${macload_fn}(1, 0, 1, 1, ptrA2, sum2);
           ptrA2 = MacLoadUpdate(ptrA2);
           ptrB2 = MacLoadInit(0, 1, 1, 1, ptrB2);
 %elif config.less_precision == 2:
           v4s w = *(v4s *) pWt;
-          v4u x = *(v4u *) pIm2Col;
-          sum = SumDotp4(x, w, sum);
+          ${vt_in} x = *(${vt_in} *) pIm2Col;
+          sum = ${sumdotp_fn}(x, w, sum);
           pWt += 4;
           pIm2Col += 4;
           v4s w2 = *(v4s *) pWt2;
-          v4u x2 = *(v4u *) pIm2Col2;
-          sum2 = SumDotp4(x2, w2, sum2);
+          ${vt_in} x2 = *(${vt_in} *) pIm2Col2;
+          sum2 = ${sumdotp_fn}(x2, w2, sum2);
           pWt2 += 4;
           pIm2Col2 += 4;
           v4s w3 = *(v4s *) pWt3;
-          v4u x3 = *(v4u *) pIm2Col3;
-          sum3 = SumDotp4(x3, w3, sum3);
+          ${vt_in} x3 = *(${vt_in} *) pIm2Col3;
+          sum3 = ${sumdotp_fn}(x3, w3, sum3);
           pWt3 += 4;
           pIm2Col3 += 4;
           v4s w4 = *(v4s *) pWt4;
-          v4u x4 = *(v4u *) pIm2Col4;
-          sum4 = SumDotp4(x4, w4, sum4);
+          ${vt_in} x4 = *(${vt_in} *) pIm2Col4;
+          sum4 = ${sumdotp_fn}(x4, w4, sum4);
           pWt4 += 4;
           pIm2Col4 += 4;
 %endif
@@ -1141,27 +1134,27 @@ void ${config.fn_name}(
           {
   %if config.less_precision == 8:
             int8_t w = *(int8_t *) pWt++;
-            uint8_t x = *(uint8_t *) pIm2Col++;
+            ${pt_in} x = *(${pt_in} *) pIm2Col++;
             sum += x * w;
   %elif config.less_precision == 4:
             int8_t w = *(int8_t *) pWt++;
-            uint8_t x = *(uint8_t *) pIm2Col++;
+            ${pt_in} x = *(${pt_in} *) pIm2Col++;
             sum += x * w;
             int8_t w2 = *(int8_t *) pWt2++;
-            uint8_t x2 = *(uint8_t *) pIm2Col2++;
+            ${pt_in} x2 = *(${pt_in} *) pIm2Col2++;
             sum2 += x2 * w2;
   %elif config.less_precision == 2:
             int8_t w = *(int8_t *) pWt++;
-            uint8_t x = *(uint8_t *) pIm2Col++;
+            ${pt_in} x = *(${pt_in} *) pIm2Col++;
             sum += x * w;
             int8_t w2 = *(int8_t *) pWt2++;
-            uint8_t x2 = *(uint8_t *) pIm2Col2++;
+            ${pt_in} x2 = *(${pt_in} *) pIm2Col2++;
             sum2 += x2 * w2;
             int8_t w3 = *(int8_t *) pWt3++;
-            uint8_t x3 = *(uint8_t *) pIm2Col3++;
+            ${pt_in} x3 = *(${pt_in} *) pIm2Col3++;
             sum3 += x3 * w3;
             int8_t w4 = *(int8_t *) pWt4++;
-            uint8_t x4 = *(uint8_t *) pIm2Col4++;
+            ${pt_in} x4 = *(${pt_in} *) pIm2Col4++;
             sum4 += x4 * w4;
   %endif
             j++;
@@ -1246,34 +1239,34 @@ void ${config.fn_name}(
           else
           {
 %if config.less_precision == 8:
-            *pOutBuffer = (uint8_t) clip8(sum >> out_shift);
+            *pOutBuffer = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
 %elif config.less_precision == 4:
   %if config.kernel.out_data_t == 8:
-            *pOutBuffer = (uint8_t) clip8(sum >> out_shift);
-            *(pOutBuffer + 1) = (uint8_t) clip8(sum2 >> out_shift);
+            *pOutBuffer = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+            *(pOutBuffer + 1) = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
   %elif config.kernel.out_data_t == 4:
-            sum = (uint8_t) clip4(sum >> out_shift);
-            sum2 = (uint8_t) clip4(sum2 >> out_shift);
+            sum = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+            sum2 = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
             *pOutBuffer = bitins(sum, n_mask, sum2, mask, off);
   %endif
 %elif config.less_precision == 2:
   %if config.kernel.out_data_t == 8:
-            *pOutBuffer = (uint8_t) clip8(sum >> out_shift);
-            *(pOutBuffer + 1) = (uint8_t) clip8(sum2 >> out_shift);
-            *(pOutBuffer + 2) = (uint8_t) clip8(sum3 >> out_shift);
-            *(pOutBuffer + 3) = (uint8_t) clip8(sum4 >> out_shift);
+            *pOutBuffer = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+            *(pOutBuffer + 1) = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
+            *(pOutBuffer + 2) = (${pt_out}) ${out_clip_fn}(sum3 >> out_shift);
+            *(pOutBuffer + 3) = (${pt_out}) ${out_clip_fn}(sum4 >> out_shift);
   %elif config.kernel.out_data_t == 4:
-            sum = (uint8_t) clip4(sum >> out_shift);
-            sum2 = (uint8_t) clip84(sum2 >> out_shift);
+            sum = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+            sum2 = (${pt_out}) ${out_clip_fn}4(sum2 >> out_shift);
             *pOutBuffer = bitins(sum, n_mask, sum2, mask, off);
-            sum3 = (uint8_t) clip4(sum3 >> out_shift);
-            sum4 = (uint8_t) clip4(sum4 >> out_shift);
+            sum3 = (${pt_out}) ${out_clip_fn}(sum3 >> out_shift);
+            sum4 = (${pt_out}) ${out_clip_fn}(sum4 >> out_shift);
             *(pOutBuffer + 1) = bitins(sum3, n_mask, sum4, mask, off);
   %elif config.kernel.out_data_t == 2:
-            sum = (uint8_t) clip2(sum >> out_shift);
-            sum2 = (uint8_t) clip2(sum2 >> out_shift);
-            sum3 = (uint8_t) clip2(sum3 >> out_shift);
-            sum4 = (uint8_t) clip2(sum4 >> out_shift);
+            sum = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+            sum2 = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
+            sum3 = (${pt_out}) ${out_clip_fn}(sum3 >> out_shift);
+            sum4 = (${pt_out}) ${out_clip_fn}(sum4 >> out_shift);
             sum = bitins(sum, n_mask2, sum2, mask2, off2);
             sum = bitins(sum, n_mask4, sum3, mask4, off4);
             *pOutBuffer = bitins(sum, n_mask6, sum4, mask6, off6);
@@ -1288,14 +1281,14 @@ void ${config.fn_name}(
     }while((i_out_x * stride_x) < ((dim_out_x * stride_x) - padding_x_right));
     for (i_out_x; i_out_x < dim_out_x; i_out_x++)
     {
-      uint8_t *pOutBuffer = pOut + i_out_ch + (i_out_x * ch_out_r);
-      uint8_t *pIm2Col = pIm2ColBase;
+      ${pt_out} *pOutBuffer = pOut + i_out_ch + (i_out_x * ch_out_r);
+      ${pt_in} *pIm2Col = pIm2ColBase;
 %if config.less_precision == 4:
-      uint8_t *pIm2Col2 = pIm2Col + im2col_size;
+      ${pt_in} *pIm2Col2 = pIm2Col + im2col_size;
 %elif config.less_precision == 2:
-      uint8_t *pIm2Col2 = pIm2Col + im2col_size;
-      uint8_t *pIm2Col3 = pIm2Col2 + im2col_size;
-      uint8_t *pIm2Col4 = pIm2Col3 + im2col_size;
+      ${pt_in} *pIm2Col2 = pIm2Col + im2col_size;
+      ${pt_in} *pIm2Col3 = pIm2Col2 + im2col_size;
+      ${pt_in} *pIm2Col4 = pIm2Col3 + im2col_size;
 %endif
       asm volatile ("":::"memory");
       i_buff_y = - padding_y_top;
@@ -1306,17 +1299,17 @@ void ${config.fn_name}(
           int i=0;
           do
           {
-            *(v4u *) pIm2Col = (v4u) {0, 0, 0, 0};
+            *(${vt_in} *) pIm2Col = (${vt_in}) {0, 0, 0, 0};
             pIm2Col+=4;
   %if config.less_precision == 4:
-            *(v4u *) pIm2Col2 = (v4u) {0, 0, 0, 0};
+            *(${vt_in} *) pIm2Col2 = (${vt_in}) {0, 0, 0, 0};
             pIm2Col2+=4;
   %elif config.less_precision == 2:
-            *(v4u *) pIm2Col2 = (v4u) {0, 0, 0, 0};
+            *(${vt_in} *) pIm2Col2 = (${vt_in}) {0, 0, 0, 0};
             pIm2Col2+=4;
-            *(v4u *) pIm2Col3 = (v4u) {0, 0, 0, 0};
+            *(${vt_in} *) pIm2Col3 = (${vt_in}) {0, 0, 0, 0};
             pIm2Col3+=4;
-            *(v4u *) pIm2Col4 = (v4u) {0, 0, 0, 0};
+            *(${vt_in} *) pIm2Col4 = (${vt_in}) {0, 0, 0, 0};
             pIm2Col4+=4;
   %endif
             i++;
@@ -1340,111 +1333,111 @@ void ${config.fn_name}(
         do
         {
 %if config.less_precision == 8:
-          *((v4u*) pIm2Col) = *((v4u*) (base_ptr + idx));
+          *((${vt_in}*) pIm2Col) = *((${vt_in}*) (base_ptr + idx));
           pIm2Col+=4;
 %elif config.less_precision == 4:
   %if config.kernel.in_data_t == 8:
-          *((v4u*) pIm2Col) = *((v4u*) (base_ptr + idx));
+          *((${vt_in}*) pIm2Col) = *((${vt_in}*) (base_ptr + idx));
           pIm2Col+=4;
-          *((v4u*) pIm2Col2) = *((v4u*) (base_ptr + idx + in_image_size));
+          *((${vt_in}*) pIm2Col2) = *((${vt_in}*) (base_ptr + idx + in_image_size));
           pIm2Col2+=4;
   %elif config.kernel.in_data_t == 4:
-          v4u src_in = *((v4u*) (base_ptr + idx));
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 0);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 4);
+          ${vt_in} src_in = *((${vt_in}*) (base_ptr + idx));
+          *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 0);
+          *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 4);
           pIm2Col++;
           pIm2Col2++;
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 8);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 12);
+          *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 8);
+          *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 12);
           pIm2Col++;
           pIm2Col2++;
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 16);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 20);
+          *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 16);
+          *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 20);
           pIm2Col++;
           pIm2Col2++;
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 24);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 28);
+          *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 24);
+          *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 28);
           pIm2Col++;
           pIm2Col2++;
   %endif
 %elif config.less_precision == 2:
   %if config.kernel.in_data_t == 8:
           int idc = in_image_size;
-          *((v4u*) pIm2Col) = *((v4u*) (base_ptr + idx));
+          *((${vt_in}*) pIm2Col) = *((${vt_in}*) (base_ptr + idx));
           pIm2Col+=4;
-          *((v4u*) pIm2Col2) = *((v4u*) (base_ptr + idx + idc));
+          *((${vt_in}*) pIm2Col2) = *((${vt_in}*) (base_ptr + idx + idc));
           pIm2Col2+=4;
           idc+=in_image_size;
-          *((v4u*) pIm2Col3) = *((v4u*) (base_ptr + idx + idc));
+          *((${vt_in}*) pIm2Col3) = *((${vt_in}*) (base_ptr + idx + idc));
           pIm2Col3+=4;
           idc+=in_image_size;
-          *((v4u*) pIm2Col4) = *((v4u*) (base_ptr + idx + idc));
+          *((${vt_in}*) pIm2Col4) = *((${vt_in}*) (base_ptr + idx + idc));
           pIm2Col4+=4;
   %elif config.kernel.in_data_t == 4:
-          v4u src_in = *((v4u*) (base_ptr + idx));
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 0);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 4);
+          ${vt_in} src_in = *((${vt_in}*) (base_ptr + idx));
+          *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 0);
+          *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 4);
           pIm2Col++;
           pIm2Col2++;
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 8);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 12);
+          *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 8);
+          *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 12);
           pIm2Col++;
           pIm2Col2++;
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 16);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 20);
+          *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 16);
+          *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 20);
           pIm2Col++;
           pIm2Col2++;
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 24);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 28);
+          *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 24);
+          *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 28);
           pIm2Col++;
           pIm2Col2++;
-          src_in = *((v4u*) (base_ptr + idx + in_image_size));
-          *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 4, 0);
-          *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 4, 4);
+          src_in = *((${vt_in}*) (base_ptr + idx + in_image_size));
+          *pIm2Col3 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 0);
+          *pIm2Col4 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 4);
           pIm2Col3++;
           pIm2Col4++;
-          *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 4, 8);
-          *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 4, 12);
+          *pIm2Col3 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 8);
+          *pIm2Col4 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 12);
           pIm2Col3++;
           pIm2Col4++;
-          *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 4, 16);
-          *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 4, 20);
+          *pIm2Col3 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 16);
+          *pIm2Col4 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 20);
           pIm2Col3++;
           pIm2Col4++;
-          *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 4, 24);
-          *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 4, 28);
+          *pIm2Col3 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 24);
+          *pIm2Col4 = (${pt_in}) ${bex}((${int_t_in}) src_in, 4, 28);
           pIm2Col3++;
           pIm2Col4++;
   %elif config.kernel.in_data_t == 2:
-          v4u src_in = *((v4u*) (base_ptr + idx));
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 2, 0);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 2, 2);
-          *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 2, 4);
-          *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 2, 6);
+          ${vt_in} src_in = *((${vt_in}*) (base_ptr + idx));
+          *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 0);
+          *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 2);
+          *pIm2Col3 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 4);
+          *pIm2Col4 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 6);
           pIm2Col++;
           pIm2Col2++;
           pIm2Col3++;
           pIm2Col4++;
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 2, 8);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 2, 10);
-          *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 2, 12);
-          *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 2, 14);
+          *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 8);
+          *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 10);
+          *pIm2Col3 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 12);
+          *pIm2Col4 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 14);
           pIm2Col++;
           pIm2Col2++;
           pIm2Col3++;
           pIm2Col4++;
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 2, 16);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 2, 18);
-          *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 2, 20);
-          *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 2, 22);
+          *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 16);
+          *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 18);
+          *pIm2Col3 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 20);
+          *pIm2Col4 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 22);
           pIm2Col++;
           pIm2Col2++;
           pIm2Col3++;
           pIm2Col4++;
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 2, 24);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 2, 26);
-          *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 2, 28);
-          *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 2, 30);
+          *pIm2Col = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 24);
+          *pIm2Col2 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 26);
+          *pIm2Col3 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 28);
+          *pIm2Col4 = (${pt_in}) ${bex}((${int_t_in}) src_in, 2, 30);
           pIm2Col++;
           pIm2Col2++;
           pIm2Col3++;
@@ -1466,17 +1459,17 @@ void ${config.fn_name}(
         base_ptr+=dim_in_x;
         for(int j=0; j<(1 + (i_out_x * stride_x) - (dim_out_x * stride_x) + padding_x_right); j++)
         {
-          *(uint8_t *) pIm2Col = 0;
+          *(${pt_in} *) pIm2Col = 0;
           pIm2Col++;
 %if config.less_precision == 4:
-          *(uint8_t *) pIm2Col2 = 0;
+          *(${pt_in} *) pIm2Col2 = 0;
           pIm2Col2++;
 %elif config.less_precision == 2:
-          *(uint8_t *) pIm2Col2 = 0;
+          *(${pt_in} *) pIm2Col2 = 0;
           pIm2Col2++;
-          *(uint8_t *) pIm2Col3 = 0;
+          *(${pt_in} *) pIm2Col3 = 0;
           pIm2Col3++;
-          *(uint8_t *) pIm2Col4 = 0;
+          *(${pt_in} *) pIm2Col4 = 0;
           pIm2Col4++;
 %endif
         }
@@ -1487,17 +1480,17 @@ void ${config.fn_name}(
         int i=0;
         do
         {
-          *(v4u *) pIm2Col = (v4u) {0, 0, 0, 0};
+          *(${vt_in} *) pIm2Col = (${vt_in}) {0, 0, 0, 0};
           pIm2Col+=4;
 %if config.less_precision == 4:
-          *(v4u *) pIm2Col2 = (v4u) {0, 0, 0, 0};
+          *(${vt_in} *) pIm2Col2 = (${vt_in}) {0, 0, 0, 0};
           pIm2Col2+=4;
 %elif config.less_precision == 2:
-          *(v4u *) pIm2Col2 = (v4u) {0, 0, 0, 0};
+          *(${vt_in} *) pIm2Col2 = (${vt_in}) {0, 0, 0, 0};
           pIm2Col2+=4;
-          *(v4u *) pIm2Col3 = (v4u) {0, 0, 0, 0};
+          *(${vt_in} *) pIm2Col3 = (${vt_in}) {0, 0, 0, 0};
           pIm2Col3+=4;
-          *(v4u *) pIm2Col4 = (v4u) {0, 0, 0, 0};
+          *(${vt_in} *) pIm2Col4 = (${vt_in}) {0, 0, 0, 0};
           pIm2Col4+=4;
 %endif
           i++;
@@ -1570,15 +1563,15 @@ void ${config.fn_name}(
 %endif
 %if config.less_precision == 8:
         int32_t ptrA  = (int32_t *) pWt;
-        uint32_t ptrB = (uint32_t *) pIm2Col;
+        ${int_t_in} ptrB = (${int_t_in} *) pIm2Col;
 
         ptrA = MacLoadInit(1, 0, 0, 0, ptrA);
         ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
 %elif config.less_precision == 4:
         int32_t  ptrA  = (int32_t *) pWt;
         int32_t  ptrA2 = (int32_t *) pWt2;
-        uint32_t ptrB  = (uint32_t *) pIm2Col;
-        uint32_t ptrB2 = (uint32_t *) pIm2Col2;
+        ${int_t_in} ptrB  = (${int_t_in} *) pIm2Col;
+        ${int_t_in} ptrB2 = (${int_t_in} *) pIm2Col2;
 
         ptrA  = MacLoadInit(1, 0, 0, 0, ptrA);
         ptrA2 = MacLoadInit(1, 0, 1, 0, ptrA2);
@@ -1589,35 +1582,35 @@ void ${config.fn_name}(
         do
         {
 %if config.less_precision == 8:
-          sum  = MacLoad4(1, 0, 0, 0, ptrA, sum);
+          sum  = ${macload_fn}(1, 0, 0, 0, ptrA, sum);
           ptrA = MacLoadUpdate(ptrA);
           ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
 %elif config.less_precision == 4:
-          sum  = MacLoad4(1, 0, 0, 0, ptrA, sum);
+          sum  = ${macload_fn}(1, 0, 0, 0, ptrA, sum);
           ptrA = MacLoadUpdate(ptrA);
           ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
-          sum2  = MacLoad4(1, 0, 1, 1, ptrA2, sum2);
+          sum2  = ${macload_fn}(1, 0, 1, 1, ptrA2, sum2);
           ptrA2 = MacLoadUpdate(ptrA2);
           ptrB2 = MacLoadInit(0, 1, 1, 1, ptrB2);
 %elif config.less_precision == 2:
           v4s w = *(v4s *) pWt;
-          v4u x = *(v4u *) pIm2Col;
-          sum = SumDotp4(x, w, sum);
+          ${vt_in} x = *(${vt_in} *) pIm2Col;
+          sum = ${sumdotp_fn}(x, w, sum);
           pWt += 4;
           pIm2Col += 4;
           v4s w2 = *(v4s *) pWt2;
-          v4u x2 = *(v4u *) pIm2Col2;
-          sum2 = SumDotp4(x2, w2, sum2);
+          ${vt_in} x2 = *(${vt_in} *) pIm2Col2;
+          sum2 = ${sumdotp_fn}(x2, w2, sum2);
           pWt2 += 4;
           pIm2Col2 += 4;
           v4s w3 = *(v4s *) pWt3;
-          v4u x3 = *(v4u *) pIm2Col3;
-          sum3 = SumDotp4(x3, w3, sum3);
+          ${vt_in} x3 = *(${vt_in} *) pIm2Col3;
+          sum3 = ${sumdotp_fn}(x3, w3, sum3);
           pWt3 += 4;
           pIm2Col3 += 4;
           v4s w4 = *(v4s *) pWt4;
-          v4u x4 = *(v4u *) pIm2Col4;
-          sum4 = SumDotp4(x4, w4, sum4);
+          ${vt_in} x4 = *(${vt_in} *) pIm2Col4;
+          sum4 = ${sumdotp_fn}(x4, w4, sum4);
           pWt4 += 4;
           pIm2Col4 += 4;
 %endif
@@ -1638,27 +1631,27 @@ void ${config.fn_name}(
           {
   %if config.less_precision == 8:
             int8_t w = *(int8_t *) pWt++;
-            uint8_t x = *(uint8_t *) pIm2Col++;
+            ${pt_in} x = *(${pt_in} *) pIm2Col++;
             sum += x * w;
   %elif config.less_precision == 4:
             int8_t w = *(int8_t *) pWt++;
-            uint8_t x = *(uint8_t *) pIm2Col++;
+            ${pt_in} x = *(${pt_in} *) pIm2Col++;
             sum += x * w;
             int8_t w2 = *(int8_t *) pWt2++;
-            uint8_t x2 = *(uint8_t *) pIm2Col2++;
+            ${pt_in} x2 = *(${pt_in} *) pIm2Col2++;
             sum2 += x2 * w2;
   %elif config.less_precision == 2:
             int8_t w = *(int8_t *) pWt++;
-            uint8_t x = *(uint8_t *) pIm2Col++;
+            ${pt_in} x = *(${pt_in} *) pIm2Col++;
             sum += x * w;
             int8_t w2 = *(int8_t *) pWt2++;
-            uint8_t x2 = *(uint8_t *) pIm2Col2++;
+            ${pt_in} x2 = *(${pt_in} *) pIm2Col2++;
             sum2 += x2 * w2;
             int8_t w3 = *(int8_t *) pWt3++;
-            uint8_t x3 = *(uint8_t *) pIm2Col3++;
+            ${pt_in} x3 = *(${pt_in} *) pIm2Col3++;
             sum3 += x3 * w3;
             int8_t w4 = *(int8_t *) pWt4++;
-            uint8_t x4 = *(uint8_t *) pIm2Col4++;
+            ${pt_in} x4 = *(${pt_in} *) pIm2Col4++;
             sum4 += x4 * w4;
   %endif
             j++;
@@ -1743,34 +1736,34 @@ void ${config.fn_name}(
           else
           {
 %if config.less_precision == 8:
-            *pOutBuffer = (uint8_t) clip8(sum >> out_shift);
+            *pOutBuffer = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
 %elif config.less_precision == 4:
   %if config.kernel.out_data_t == 8:
-            *pOutBuffer = (uint8_t) clip8(sum >> out_shift);
-            *(pOutBuffer + 1) = (uint8_t) clip8(sum2 >> out_shift);
+            *pOutBuffer = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+            *(pOutBuffer + 1) = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
   %elif config.kernel.out_data_t == 4:
-            sum = (uint8_t) clip4(sum >> out_shift);
-            sum2 = (uint8_t) clip4(sum2 >> out_shift);
+            sum = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+            sum2 = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
             *pOutBuffer = bitins(sum, n_mask, sum2, mask, off);
   %endif
 %elif config.less_precision == 2:
   %if config.kernel.out_data_t == 8:
-            *pOutBuffer = (uint8_t) clip8(sum >> out_shift);
-            *(pOutBuffer + 1) = (uint8_t) clip8(sum2 >> out_shift);
-            *(pOutBuffer + 2) = (uint8_t) clip8(sum3 >> out_shift);
-            *(pOutBuffer + 3) = (uint8_t) clip8(sum4 >> out_shift);
+            *pOutBuffer = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+            *(pOutBuffer + 1) = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
+            *(pOutBuffer + 2) = (${pt_out}) ${out_clip_fn}(sum3 >> out_shift);
+            *(pOutBuffer + 3) = (${pt_out}) ${out_clip_fn}(sum4 >> out_shift);
   %elif config.kernel.out_data_t == 4:
-            sum = (uint8_t) clip4(sum >> out_shift);
-            sum2 = (uint8_t) clip4(sum2 >> out_shift);
+            sum = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+            sum2 = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
             *pOutBuffer = bitins(sum, n_mask, sum2, mask, off);
-            sum3 = (uint8_t) clip4(sum3 >> out_shift);
-            sum4 = (uint8_t) clip4(sum4 >> out_shift);
+            sum3 = (${pt_out}) ${out_clip_fn}(sum3 >> out_shift);
+            sum4 = (${pt_out}) ${out_clip_fn}(sum4 >> out_shift);
             *(pOutBuffer + 1) = bitins(sum3, n_mask, sum4, mask, off);
   %elif config.kernel.out_data_t == 2:
-            sum = (uint8_t) clip2(sum >> out_shift);
-            sum2 = (uint8_t) clip2(sum2 >> out_shift);
-            sum3 = (uint8_t) clip2(sum3 >> out_shift);
-            sum4 = (uint8_t) clip2(sum4 >> out_shift);
+            sum = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+            sum2 = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
+            sum3 = (${pt_out}) ${out_clip_fn}(sum3 >> out_shift);
+            sum4 = (${pt_out}) ${out_clip_fn}(sum4 >> out_shift);
             sum = bitins(sum, n_mask2, sum2, mask2, off2);
             sum = bitins(sum, n_mask4, sum3, mask4, off4);
             *pOutBuffer = bitins(sum, n_mask6, sum4, mask6, off6);

@@ -96,7 +96,7 @@ void pulp_nn_pointwise_u8_u4_i8(
     for(int n = 0; n<((dim_out_x_r + (section * flag_dim_out_x_odd)) >> 1); n++)
     {
       uint8_t *pIm2Col = (pIn + (i_out_x * ch_in) + (i_out_y * dim_in_x * ch_in));
-      pOutBuffer = pulp_nn_matmul_u4_i8(
+      pOutBuffer = pulp_nn_matmul_u8_u4_i8(
           pIm2Col,
           pBias,
           pOutBuffer,

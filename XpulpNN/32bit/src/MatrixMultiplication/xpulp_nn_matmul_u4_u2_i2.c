@@ -21,6 +21,7 @@
 #include "pulp_nn_utils.h"
 
 
+
 uint8_t * __attribute__((noinline)) xpulp_nn_matmul_u4_u2_i2(
                         uint8_t *pIn,
                         int8_t *pBias,
@@ -196,8 +197,8 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_u4_u2_i2(
         int8_t inA3 = (int8_t) bitext((int) *pA3, 2, 0);
         int8_t inA4 = (int8_t) bitext((int) *pA4, 2, 0);
 
-        uint8_t inB = (uint8_t)bitextu((unsigned int) *pB, 4, 0);
-        uint8_t inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 0);
+        uint8_t inB = (uint8_t)bitextu((uint32_t) *pB, 4, 0);
+        uint8_t inB2 = (uint8_t)bitextu((uint32_t) *pB2, 4, 0);
 
         sum += inA * inB;
         sum2 += inA2 * inB;
@@ -214,8 +215,8 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_u4_u2_i2(
         inA3 = (int8_t) bitext((int) *pA3, 2, 2);
         inA4 = (int8_t) bitext((int) *pA4, 2, 2);
 
-        inB = (uint8_t)bitextu((unsigned int) *pB, 4, 4);
-        inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 4);
+        inB = (uint8_t)bitextu((uint32_t) *pB, 4, 4);
+        inB2 = (uint8_t)bitextu((uint32_t) *pB2, 4, 4);
 
         sum += inA * inB;
         sum2 += inA2 * inB;
@@ -235,8 +236,8 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_u4_u2_i2(
         inA3 = (int8_t) bitext((int) *pA3, 2, 4);
         inA4 = (int8_t) bitext((int) *pA4, 2, 4);
 
-        inB = (uint8_t)bitextu((unsigned int) *pB, 4, 0);
-        inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 0);
+        inB = (uint8_t)bitextu((uint32_t) *pB, 4, 0);
+        inB2 = (uint8_t)bitextu((uint32_t) *pB2, 4, 0);
 
         sum += inA * inB;
         sum2 += inA2 * inB;
@@ -253,8 +254,8 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_u4_u2_i2(
         inA3 = (int8_t) bitext((int) *pA3, 2, 6);
         inA4 = (int8_t) bitext((int) *pA4, 2, 6);
 
-        inB = (uint8_t)bitextu((unsigned int) *pB, 4, 4);
-        inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 4);
+        inB = (uint8_t)bitextu((uint32_t) *pB, 4, 4);
+        inB2 = (uint8_t)bitextu((uint32_t) *pB2, 4, 4);
 
         sum += inA * inB;
         sum2 += inA2 * inB;

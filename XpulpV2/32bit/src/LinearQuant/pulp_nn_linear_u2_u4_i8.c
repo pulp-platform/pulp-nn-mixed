@@ -21,6 +21,7 @@
 #include "pulp_nn_utils.h"
 
 
+
 void pulp_nn_linear_u2_u4_i8(
                         uint8_t *pIn,
                         int8_t *pBias,
@@ -98,10 +99,10 @@ void pulp_nn_linear_u2_u4_i8(
         uint16_t col_cnt = dim_vec & 0xf;
         while (col_cnt)
         {
-          uint8_t inA = (uint8_t) bitext((unsigned int) *pA, 2, 0);
-          uint8_t inA2 = (uint8_t) bitext((unsigned int) *pA, 2, 2);
-          uint8_t inA3 = (uint8_t) bitext((unsigned int) *pA, 2, 4);
-          uint8_t inA4 = (uint8_t) bitext((unsigned int) *pA, 2, 6);
+          uint8_t inA = (uint8_t) bitextu((uint32_t) *pA, 2, 0);
+          uint8_t inA2 = (uint8_t) bitextu((uint32_t) *pA, 2, 2);
+          uint8_t inA3 = (uint8_t) bitextu((uint32_t) *pA, 2, 4);
+          uint8_t inA4 = (uint8_t) bitextu((uint32_t) *pA, 2, 6);
           pA++;
           int8_t inB = *pB;
           pB++;

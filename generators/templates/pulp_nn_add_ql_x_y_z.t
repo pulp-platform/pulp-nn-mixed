@@ -23,13 +23,28 @@
 <%
 import numpy as np
 act_prec = int(config.kernel.act_prec[0:2])
-act_t = f"uint{act_prec}_t"
+act_t = f"int{act_prec}_t"
+def clip_fn_name(prec, signed):
+    return f"clip{'s' if signed else ''}{prec}"
+
+clip_in1_fn = clip_fn_name(8, config.in1_signed)
+clip_in2_fn = clip_fn_name(8, config.in2_signed)
+clip_out_fn = clip_fn_name(config.out_data_t, config.kernel.out_signed)
+def su(sgn):
+    return 's' if sgn else 'u'
+def u_(sgn):
+    return '' if sgn else 'u'
+vt_in1 = f"v4{su(config.in1_signed)}"
+vt_in2 = f"v4{su(config.in2_signed)}"
+pt_in1 = f"{u_(config.in1_signed)}int8_t"
+pt_in2 = f"{u_(config.in2_signed)}int8_t"
+pt_out = f"{u_(config.kernel.out_signed)}int8_t"
 %>
 
 void __attribute__ ((noinline)) ${config.fn_name}(
-    uint8_t * pIn1,
-    uint8_t * pIn2,
-    uint8_t * pOut,
+    ${pt_in1} * pIn1,
+    ${pt_in2} * pIn2,
+    ${pt_out} * pOut,
     ${act_t} in1_mul,
     ${act_t} in1_add,
     uint16_t in1_shift,
@@ -103,29 +118,29 @@ byte_chan_shift_out = int(np.log2(els_per_byte_out))
     int start = min(chunck * core_id, dim_im_in_y);
     int stop = min(start + chunck, dim_im_in_y);
 
-    uint8_t *target1 = pIn1 + start * ch_im_in1_r * dim_im_in_x;
-    uint8_t *target2 = pIn2 + start * ch_im_in2_r * dim_im_in_x;
-    uint8_t *pOutBuffer = pOut + start * ch_im_out_r * dim_im_in_x;
+    ${pt_in1} *target1 = pIn1 + start * ch_im_in1_r * dim_im_in_x;
+    ${pt_in2} *target2 = pIn2 + start * ch_im_in2_r * dim_im_in_x;
+    ${pt_out} *pOutBuffer = pOut + start * ch_im_out_r * dim_im_in_x;
 
     int a = 0;
     int b = 0;
 
-    uint8_t *target1_ext = &a;
-    uint8_t *target2_ext = &b;
+    ${pt_in1} *target1_ext = &a;
+    ${pt_in2} *target2_ext = &b;
 
     for (int i=0; i<(((stop-start) * ch_im_out_r * dim_im_in_x) >> ${int(np.log2(4/els_per_byte_out))}); i++)
     {
 %if config.in1_data_t == 8:
         target1_ext = target1;
 %else:
-        *((v4u*)target1_ext) = ${config.unpack_in1_fn}(target1);
+        *((${vt_in1}*)target1_ext) = ${config.unpack_in1_fn}(target1);
 %endif
         target1+=${int(dw_in1/2)};
 
 %if config.in2_data_t == 8:
         target2_ext = target2;
 %else:
-        *((v4u*)target2_ext) = ${config.unpack_in2_fn}(target2);
+        *((${vt_in2}*)target2_ext) = ${config.unpack_in2_fn}(target2);
 
 %endif
         target2+=${int(dw_in2/2)};
@@ -136,10 +151,10 @@ byte_chan_shift_out = int(np.log2(els_per_byte_out))
 #endif
         in1_rq${pp+1} = ((*(target1_ext${f" + {pp} " if pp else ""})) * in1_mul + in1_add) >> in1_shift;
         in2_rq${pp+1} = ((*(target2_ext${f" + {pp} " if pp else ""})) * in2_mul + in2_add) >> in2_shift;
-        sum${pp+1} = clip8(in1_rq${pp+1}) + clip8(in2_rq${pp+1});
+        sum${pp+1} = ${clip_in1_fn}(in1_rq${pp+1}) + ${clip_in2_fn}(in2_rq${pp+1});
 #ifdef ADD_VERBOSE
-        printf("core %d - in1_rq${pp+1} it${pp} after requant: %d\nclipped in1_rq${pp+1}: %d\n", core_id, in1_rq${pp+1}, clip8(in1_rq${pp+1}));
-        printf("core %d - in2_rq${pp+1} it${pp} after requant: %d\nclipped in2_rq${pp+1}: %d\n", core_id, in2_rq${pp+1}), clip8(in2_rq${pp+1});
+        printf("core %d - in1_rq${pp+1} it${pp} after requant: %d\nclipped in1_rq${pp+1}: %d\n", core_id, in1_rq${pp+1}, ${clip_in1_fn}(in1_rq${pp+1}));
+        printf("core %d - in2_rq${pp+1} it${pp} after requant: %d\nclipped in2_rq${pp+1}: %d\n", core_id, in2_rq${pp+1}), ${clip_in2_fn}(in2_rq${pp+1});
         printf("core %d - sum${pp+1}: %d\n", core_id, sum${pp+1});
 #endif
         % endfor
@@ -153,23 +168,22 @@ byte_chan_shift_out = int(np.log2(els_per_byte_out))
         % endfor
         }
         % for pp in range(4):
-        out${pp+1} = clip${config.out_data_t}(sum${pp+1});
+          out${pp+1} = ${clip_out_fn}(sum${pp+1});
 #ifdef ADD_VERBOSE
         printf("core %d - out${pp+1} clipped: %d\n", core_id, out${pp+1});
 #endif
         % endfor
 
-        
 
 %if dw_out == 8:
         % for pp in range(4):
-        *pOutBuffer = (uint8_t) out${pp+1};
+        *pOutBuffer = (${pt_out}) out${pp+1};
         pOutBuffer++;
         % endfor
 %elif dw_out == 4:
-        *pOutBuffer = (uint8_t) bitins(out1, (int8_t) ${out_mask_n_strings[1]}, out2, (int8_t) ${out_mask_strings[1]}, 4);
+        *pOutBuffer = (${pt_out}) bitins(out1, (int8_t) ${out_mask_n_strings[1]}, out2, (int8_t) ${out_mask_strings[1]}, 4);
         pOutBuffer++;
-        *pOutBuffer = (uint8_t) bitins(out3, (int8_t) ${out_mask_n_strings[1]}, out4, (int8_t) ${out_mask_strings[1]}, 4);
+        *pOutBuffer = (${pt_out}) bitins(out3, (int8_t) ${out_mask_n_strings[1]}, out4, (int8_t) ${out_mask_strings[1]}, 4);
         pOutBuffer++;
 %elif dw_out == 2:
         out1 = bitins(out1, (int8_t) ${out_mask_n_strings[1]}, out2, (int8_t) ${out_mask_strings[1]}, 2);

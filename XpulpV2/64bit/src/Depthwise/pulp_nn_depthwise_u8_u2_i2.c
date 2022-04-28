@@ -21,6 +21,7 @@
 #include "pulp_nn_utils.h"
 
 
+
 void pulp_nn_depthwise_u8_u2_i2(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
@@ -93,8 +94,10 @@ void pulp_nn_depthwise_u8_u2_i2(
   int i_in_ch = (start_channel << 2) * in_image_size;
   int i_wt_ch = start_channel * kernel_size;
 
-  int64_t *k1 = pKappa + core_id * (chunk << 2);
-  int64_t *lambda1 = pLambda + core_id * (chunk << 2);
+
+
+  int64_t * k1 = pKappa + core_id * (chunk << 2);
+  int64_t * lambda1 = plambda + core_id * (chunk << 2);
 
   for(int i_ch = start_channel; i_ch < stop_channel; i_ch++)
   {

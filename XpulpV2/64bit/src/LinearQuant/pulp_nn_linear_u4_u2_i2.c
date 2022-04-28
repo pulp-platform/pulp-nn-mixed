@@ -21,6 +21,7 @@
 #include "pulp_nn_utils.h"
 
 
+
 void pulp_nn_linear_u4_u2_i2(
                         uint8_t *pIn,
                         int8_t *pBias,
@@ -117,11 +118,11 @@ void pulp_nn_linear_u4_u2_i2(
         uint16_t col_cnt = dim_vec & 0xf;
         while (col_cnt)
         {
-          uint8_t inA = (uint8_t) bitext((unsigned int) *pA, 4, 0);
-          uint8_t inA2 = (uint8_t) bitext((unsigned int) *pA, 4, 4);
+          uint8_t inA = (uint8_t) bitextu((uint32_t) *pA, 4, 0);
+          uint8_t inA2 = (uint8_t) bitextu((uint32_t) *pA, 4, 4);
           pA++;
-          uint8_t inA3 = (uint8_t) bitext((unsigned int) *pA, 4, 0);
-          uint8_t inA4 = (uint8_t) bitext((unsigned int) *pA, 4, 4);
+          uint8_t inA3 = (uint8_t) bitextu((uint32_t) *pA, 4, 0);
+          uint8_t inA4 = (uint8_t) bitextu((uint32_t) *pA, 4, 4);
           pA++;
           int8_t inB = (int8_t) bitext((int) *pB, 2, 0);
           int8_t inB2 = (int8_t) bitext((int) *pB, 2, 2);
@@ -189,7 +190,7 @@ void pulp_nn_linear_u4_u2_i2(
           }
           else
           {
-            sum = (uint8_t) clip2(sum >> out_shift);
+            sum = (uint8_t)  clip2(sum >> out_shift);
             sum2 = (uint8_t) clip2(sum2 >> out_shift);
             sum3 = (uint8_t) clip2(sum3 >> out_shift);
             sum4 = (uint8_t) clip2(sum4 >> out_shift);

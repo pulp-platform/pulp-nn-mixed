@@ -108,7 +108,7 @@ void __attribute__((noinline)) xpulp_nn_mix_conv_u8_u8_i2(
             }
             else
             {
-              xpulp_nn_im2col_u8_to_u8((uint8_t*) (pIn + ((i_ker_y * dim_in_x + i_ker_x) * ch_in_r)), pIm2Col, ch_in);
+              xpulp_nn_im2col_i8_to_i8((uint8_t*) (pIn + ((i_ker_y * dim_in_x + i_ker_x) * ch_in_r)), pIm2Col, ch_in);
             }
             pIm2Col+=PACK_INT8_SIZE(ch_in);
           }
@@ -128,7 +128,7 @@ void __attribute__((noinline)) xpulp_nn_mix_conv_u8_u8_i2(
               }
               else
               {
-                xpulp_nn_im2col_u8_to_u8((uint8_t*) (pIn + ((i_ker_y * dim_in_x + i_ker_x) * ch_in_r)), pIm2Col, ch_in);
+                xpulp_nn_im2col_i8_to_i8((uint8_t*) (pIn + ((i_ker_y * dim_in_x + i_ker_x) * ch_in_r)), pIm2Col, ch_in);
               }
               pIm2Col+=PACK_INT8_SIZE(ch_in);
             }
@@ -138,7 +138,7 @@ void __attribute__((noinline)) xpulp_nn_mix_conv_u8_u8_i2(
         {
           for(i_ker_y=((i_out_y * stride_y) - padding_y_top); i_ker_y<((i_out_y * stride_y) - padding_y_top + dim_kernel_y); i_ker_y++)
           {
-            xpulp_nn_im2col_u8_to_u8((uint8_t*) pIn + (i_ker_y * dim_in_x + i_out_x * stride_x - padding_x_left)*ch_in_r,pIm2Col,ch_in * dim_kernel_x);
+            xpulp_nn_im2col_i8_to_i8((uint8_t*) pIn + (i_ker_y * dim_in_x + i_out_x * stride_x - padding_x_left)*ch_in_r,pIm2Col,ch_in * dim_kernel_x);
             pIm2Col+=PACK_INT8_SIZE(ch_in * dim_kernel_x);
           }
         }
@@ -154,7 +154,7 @@ void __attribute__((noinline)) xpulp_nn_mix_conv_u8_u8_i2(
               }
               else
               {
-                xpulp_nn_im2col_u8_to_u8((uint8_t *)pIn + (i_ker_y*dim_in_x+i_ker_x)* ch_in_r, pIm2Col, ch_in);
+                xpulp_nn_im2col_i8_to_i8((uint8_t *)pIn + (i_ker_y*dim_in_x+i_ker_x)* ch_in_r, pIm2Col, ch_in);
               }
               pIm2Col+=PACK_INT8_SIZE(ch_in);
             }
@@ -173,7 +173,7 @@ void __attribute__((noinline)) xpulp_nn_mix_conv_u8_u8_i2(
             }
             else
             {
-              xpulp_nn_im2col_u8_to_u8((uint8_t *) pIn + (i_ker_y * dim_in_x + i_ker_x) * ch_in_r, pIm2Col, ch_in);
+              xpulp_nn_im2col_i8_to_i8((uint8_t *) pIn + (i_ker_y * dim_in_x + i_ker_x) * ch_in_r, pIm2Col, ch_in);
             }
             pIm2Col+=PACK_INT8_SIZE(ch_in);
           }
@@ -276,7 +276,7 @@ void __attribute__((noinline)) xpulp_nn_mix_conv_u8_u8_i2(
         }
         if (flag_batch_norm && flag_relu)
         {
-          *pOutBuffer = pulp_nn_bn_quant_u8(sum, *k1, *lambda1, out_shift);
+          *pOutBuffer = pulp_nn_bn_quant_i8(sum, *k1, *lambda1, out_shift);
           k1++;
           lambda1++;
           pOutBuffer++;
@@ -285,7 +285,7 @@ void __attribute__((noinline)) xpulp_nn_mix_conv_u8_u8_i2(
         {
           if(flag_relu == 1)
           {
-            *pOutBuffer = pulp_nn_quant_u8(sum, out_mult, out_shift);
+            *pOutBuffer = pulp_nn_quant_i8(sum, out_mult, out_shift);
             pOutBuffer++;
           }
           else

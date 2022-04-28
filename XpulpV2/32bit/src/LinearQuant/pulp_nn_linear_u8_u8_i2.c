@@ -21,6 +21,7 @@
 #include "pulp_nn_utils.h"
 
 
+
 void pulp_nn_linear_u8_u8_i2(
                         uint8_t *pIn,
                         int8_t *pBias,

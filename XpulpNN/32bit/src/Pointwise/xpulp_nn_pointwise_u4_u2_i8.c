@@ -22,7 +22,7 @@
 #include "pulp_nn_kernels.h"
 
 
-void __attribute__((noinline)) xpulp_nn_pointwise_u4_u2_i8(
+void xpulp_nn_pointwise_u4_u2_i8(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -130,6 +130,7 @@ void __attribute__((noinline)) xpulp_nn_pointwise_u4_u2_i8(
       int i;
       int32_t * k1 = pKappa;
       int32_t * lambda1 = pLambda;
+
       v4s inA;
       v4u inB[2];
       uint8_t out[4];
@@ -151,7 +152,7 @@ void __attribute__((noinline)) xpulp_nn_pointwise_u4_u2_i8(
 
           pA+=4;
 
-          pB = pulp_nn_i4_to_i8(pB,inB);
+          pB = pulp_nn_u4_to_u8(pB,inB);
 
           sum = SumDotp4(inB[0], inA, sum);
 
@@ -165,10 +166,10 @@ void __attribute__((noinline)) xpulp_nn_pointwise_u4_u2_i8(
         while (col_cnt_im2col)
         {
           int8_t inA1 = *pA++;
-          uint8_t inB1 = (uint8_t) bitextu((unsigned int) *pB, 4, 0);
+          uint8_t inB1 = (uint8_t) bitextu((uint32_t) *pB, 4, 0);
           sum += inA1 * inB1;
           inA1 = *pA++;
-          inB1 = (uint8_t) bitextu((unsigned int) *pB, 4, 4);
+          inB1 = (uint8_t) bitextu((uint32_t) *pB, 4, 4);
           sum += inA1 * inB1;
           pB++;
           col_cnt_im2col-=2;

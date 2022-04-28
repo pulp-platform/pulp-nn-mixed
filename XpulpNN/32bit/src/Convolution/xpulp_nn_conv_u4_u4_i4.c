@@ -22,6 +22,8 @@
 #include "pulp_nn_kernels.h"
 
 
+
+
 void __attribute__((noinline)) xpulp_nn_conv_u4_u4_i4(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
@@ -209,6 +211,7 @@ void __attribute__((noinline)) xpulp_nn_conv_u4_u4_i4(
       int i;
       int32_t * k1 = pKappa;
       int32_t * lambda1 = pLambda;
+
       uint8_t out[2];
       uint16_t num_col_im2col = ch_in * dim_kernel_x * dim_kernel_y;
       uint16_t num_col_im2col_w = PACK_INT4_SIZE(ch_in) * dim_kernel_x * dim_kernel_y;
@@ -228,7 +231,7 @@ void __attribute__((noinline)) xpulp_nn_conv_u4_u4_i4(
 
         for(int j=0; j < (num_col_im2col >> 3); j++)
         {
-          sum = SumDotp8(*(uint32_t *)ptrB, *(int32_t *)ptrA, sum);
+   sum = SumDotp8(*(uint32_t *)ptrB, *(int32_t *)ptrA, sum);
           ptrA++;
           ptrB++;
         }

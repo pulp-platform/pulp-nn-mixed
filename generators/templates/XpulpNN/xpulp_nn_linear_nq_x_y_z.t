@@ -19,12 +19,27 @@
 
 #include "pmsis.h"
 #include "pulp_nn_utils.h"
+<%
+act_prec = int(config.kernel.act_prec[0:2])
+act_t = f"int{act_prec}_t"
+def su(sgn):
+    return 's' if sgn else 'u'
+def u_(sgn):
+    return '' if sgn else 'u'
+def s_(sgn):
+    return 's' if sgn else ''
 
+pt_in = f"{u_(config.kernel.in_signed)}int8_t"
+int_t_in = f"{u_(config.kernel.in_signed)}int32_t"
+pt_out = f"{u_(config.kernel.out_signed)}int8_t"
+macload_fn = f"MacLoad{s_(config.kernel.in_signed)}{int(32/config.max_precision)}"
+bex = f"bitext{u_(config.kernel.in_signed)}"
+%>
 
 void __attribute__((noinline)) ${config.fn_name}(
-                  uint8_t *pIn,
+                  ${pt_in} *pIn,
                   int8_t *pBias,
-                  uint8_t *pOut,
+                  ${pt_out} *pOut,
                   int8_t *pWeight,
                   uint16_t dim_vec,
                   uint16_t num_o_neurons)
@@ -44,7 +59,7 @@ void __attribute__((noinline)) ${config.fn_name}(
   int32_t vecA[${int(config.max_precision/config.kernel.wt_data_t)}];
 %endif
 %if config.kernel.in_data_t <= config.kernel.wt_data_t:
-  uint32_t vecB[${int(config.max_precision/config.kernel.in_data_t)}];
+  ${int_t_in} vecB[${int(config.max_precision/config.kernel.in_data_t)}];
 %endif
 
   for(int i=start; i<stop; i++)
@@ -58,7 +73,7 @@ void __attribute__((noinline)) ${config.fn_name}(
 
     int8_t *pA = pWeight + (i * dim_vec_wt);
 
-    uint8_t *pB = pIn;
+    ${pt_in} *pB = pIn;
 
 %if config.kernel.in_data_t != config.kernel.wt_data_t:
 %if config.kernel.wt_data_t < config.kernel.in_data_t:
@@ -75,18 +90,18 @@ void __attribute__((noinline)) ${config.fn_name}(
 %if config.kernel.in_data_t < config.kernel.wt_data_t:
     pB  = ${config.unpack_in_fn}(pB , vecB);
 
-    uint32_t *startB;
+    ${int_t_in} *startB;
 
     asm volatile("mv %0, %1":"=r"(startB):"r"(vecB));
 
-    uint32_t *ptrB  = (uint32_t *) vecB;
+    ${int_t_in} *ptrB  = vecB;
 %else:
-    uint32_t *ptrB  = (uint32_t *) pB ;
+    ${int_t_in} *ptrB  = pB ;
 %endif
 %else:
     int32_t *ptrA  = (int32_t *) pA ;
 
-    uint32_t *ptrB  = (uint32_t *) pB ;
+    ${int_t_in} *ptrB  = pB ;
 %endif
 
     ptrA  = MacLoadInit(1, 0, 0, 0, ptrA);
@@ -100,19 +115,19 @@ void __attribute__((noinline)) ${config.fn_name}(
     for(int j=0; j < (dim_vec >> ${int(math.log2((int(32/config.max_precision))*(int(config.kernel.wt_data_t/config.kernel.in_data_t))))}); j++)
 %endif
     {
-      sum = MacLoad${int(32/config.max_precision)}(1, 0, 0, 0, ptrA, sum);
+      sum = ${macload_fn}(1, 0, 0, 0, ptrA, sum);
       ptrA = MacLoadUpdate(ptrA);
 
       ptrB  = MacLoadInit(0, 1, 0, 0, ptrB);
 
 %if config.kernel.in_data_t != config.kernel.wt_data_t:
 %if (int(config.kernel.in_data_t/config.kernel.wt_data_t) == 4) or (int(config.kernel.wt_data_t/config.kernel.in_data_t) == 4):
-      sum = MacLoad${int(32/config.max_precision)}(1, 0, 0, 0, ptrA, sum);
+      sum = ${macload_fn}(1, 0, 0, 0, ptrA, sum);
       ptrA = MacLoadUpdate(ptrA);
 
       ptrB  = MacLoadInit(0, 1, 0, 0, ptrB);
 
-      sum = MacLoad${int(32/config.max_precision)}(1, 0, 0, 0, ptrA, sum);
+      sum = ${macload_fn}(1, 0, 0, 0, ptrA, sum);
       ptrA = MacLoadUpdate(ptrA);
 
       ptrB  = MacLoadInit(0, 1, 0, 0, ptrB);
@@ -127,7 +142,7 @@ void __attribute__((noinline)) ${config.fn_name}(
 
       ptrB   = MacLoadAssign(startB);
 %endif
-      sum = MacLoad${int(32/config.max_precision)}(1, 0, 0, 0, ptrA, sum);
+      sum = ${macload_fn}(1, 0, 0, 0, ptrA, sum);
       ptrA = MacLoadUpdate(ptrA);
 
       ptrB  = MacLoadInit(0, 1, 0, 0, ptrB);
@@ -177,26 +192,26 @@ void __attribute__((noinline)) ${config.fn_name}(
         pA++;
 %endif
 %if config.kernel.in_data_t == 2:
-        uint8_t inB =  (uint8_t) bitextu((unsigned int) *pB, 2, 0);
-        uint8_t inB2 = (uint8_t) bitextu((unsigned int) *pB, 2, 2);
-        uint8_t inB3 = (uint8_t) bitextu((unsigned int) *pB, 2, 4);
-        uint8_t inB4 = (uint8_t) bitextu((unsigned int) *pB, 2, 6);
+        ${pt_in} inB =  (${pt_in}) ${bex}((${int_t_in}) *pB, 2, 0);
+        ${pt_in} inB2 = (${pt_in}) ${bex}((${int_t_in}) *pB, 2, 2);
+        ${pt_in} inB3 = (${pt_in}) ${bex}((${int_t_in}) *pB, 2, 4);
+        ${pt_in} inB4 = (${pt_in}) ${bex}((${int_t_in}) *pB, 2, 6);
         pB++;
 %elif config.kernel.in_data_t == 4:
-        uint8_t inB =  (uint8_t) bitextu((unsigned int) *pB, 4, 0);
-        uint8_t inB2 = (uint8_t) bitextu((unsigned int) *pB, 4, 4);
+        ${pt_in} inB =  (${pt_in}) ${bex}((${int_t_in}) *pB, 4, 0);
+        ${pt_in} inB2 = (${pt_in}) ${bex}((${int_t_in}) *pB, 4, 4);
         pB++;
-        uint8_t inB3 = (uint8_t) bitextu((unsigned int) *pB, 4, 0);
-        uint8_t inB4 = (uint8_t) bitextu((unsigned int) *pB, 4, 4);
+        ${pt_in} inB3 = (${pt_in}) ${bex}((${int_t_in}) *pB, 4, 0);
+        ${pt_in} inB4 = (${pt_in}) ${bex}((${int_t_in}) *pB, 4, 4);
         pB++;
 %elif config.kernel.in_data_t == 8:
-        uint8_t inB = *pB;
+        ${pt_in} inB = *pB;
         pB++;
-        uint8_t inB2 = *pB;
+        ${pt_in} inB2 = *pB;
         pB++;
-        uint8_t inB3 = *pB;
+        ${pt_in} inB3 = *pB;
         pB++;
-        uint8_t inB4 = *pB;
+        ${pt_in} inB4 = *pB;
         pB++;
 %endif
         sum += inA * inB;
@@ -216,13 +231,13 @@ void __attribute__((noinline)) ${config.fn_name}(
         pA++;
 %endif
 %if config.kernel.in_data_t == 4:
-        uint8_t inB  = (uint8_t) bitextu((unsigned int) *pB, 4, 0);
-        uint8_t inB2 = (uint8_t) bitextu((unsigned int) *pB, 4, 4);
+        ${pt_in} inB  = (${pt_in}) ${bex}((${int_t_in}) *pB, 4, 0);
+        ${pt_in} inB2 = (${pt_in}) ${bex}((${int_t_in}) *pB, 4, 4);
         pB++;
 %elif config.kernel.in_data_t == 8:
-        uint8_t inB = *pB;
+        ${pt_in} inB = *pB;
         pB++;
-        uint8_t inB2 = *pB;
+        ${pt_in} inB2 = *pB;
         pB++;
 %endif
         sum += inA * inB;
@@ -231,7 +246,7 @@ void __attribute__((noinline)) ${config.fn_name}(
 %elif config.less_precision == 8:
         int8_t inA = *pA;
         pA++;
-        uint8_t inB = *pB;
+        ${pt_in} inB = *pB;
         pB++;
         sum += inA * inB;
         col_cnt--;

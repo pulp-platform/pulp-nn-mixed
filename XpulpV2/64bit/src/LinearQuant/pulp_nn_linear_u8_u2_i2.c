@@ -21,6 +21,7 @@
 #include "pulp_nn_utils.h"
 
 
+
 void pulp_nn_linear_u8_u2_i2(
                         uint8_t *pIn,
                         int8_t *pBias,
@@ -195,7 +196,7 @@ void pulp_nn_linear_u8_u2_i2(
           }
           else
           {
-            sum = (uint8_t) clip2(sum >> out_shift);
+            sum = (uint8_t)  clip2(sum >> out_shift);
             sum2 = (uint8_t) clip2(sum2 >> out_shift);
             sum3 = (uint8_t) clip2(sum3 >> out_shift);
             sum4 = (uint8_t) clip2(sum4 >> out_shift);

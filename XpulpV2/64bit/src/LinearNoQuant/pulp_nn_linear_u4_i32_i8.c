@@ -24,7 +24,7 @@
 void pulp_nn_linear_u4_i32_i8(
                   uint8_t *pIn,
                   int8_t *pBias,
-                  uint8_t *pOut,
+                  int8_t *pOut,
                   int8_t *pWeight,
                   uint16_t dim_vec,
                   uint16_t num_o_neurons)
@@ -44,7 +44,7 @@ void pulp_nn_linear_u4_i32_i8(
 
     int32_t *pOutBuffer = (int32_t *) pOut + start;
 
-      int lft_neurons = chunk & 0x01;
+    int lft_neurons = chunk & 0x01;
     int stop_even = stop - lft_neurons;
     int i;
 
@@ -65,7 +65,7 @@ void pulp_nn_linear_u4_i32_i8(
             pB+=4;
             pB2+=4;
             vecB[1] = *((v4s*)pB);
-                    vecB2[1] = *((v4s*)pB2);
+            vecB2[1] = *((v4s*)pB2);
                 sum = SumDotp4(vecA[0], vecB[0], sum);
                   sum = SumDotp4(vecA[1], vecB[1], sum);
                   sum2 = SumDotp4(vecA[0], vecB2[0], sum2);
@@ -77,8 +77,8 @@ void pulp_nn_linear_u4_i32_i8(
             uint16_t col_cnt = dim_vec & 0x7;
             while (col_cnt)
             {
-                  uint8_t inA = (uint8_t) bitext((unsigned int) *pA, 4, 0);
-                  uint8_t inA2 = (uint8_t) bitext((unsigned int) *pA, 4, 4);
+                  uint8_t inA = (uint8_t) bitextu((uint32_t) *pA, 4, 0);
+                  uint8_t inA2 = (uint8_t) bitextu((uint32_t) *pA, 4, 4);
                   pA++;
                   int8_t inB = *pB;
                   pB++;
@@ -120,8 +120,8 @@ void pulp_nn_linear_u4_i32_i8(
             uint16_t col_cnt = dim_vec & 0x7;
             while (col_cnt)
             {
-                  uint8_t inA = (uint8_t) bitext((unsigned int) *pA, 4, 0);
-                  uint8_t inA2 = (uint8_t) bitext((unsigned int) *pA, 4, 4);
+                  uint8_t inA = (uint8_t) bitextu((uint32_t) *pA, 4, 0);
+                  uint8_t inA2 = (uint8_t) bitextu((uint32_t) *pA, 4, 4);
                   pA++;
                   int8_t inB = *pB;
                   pB++;

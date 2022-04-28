@@ -22,9 +22,10 @@
 #include "pulp_nn_utils.h"
 
 
+
 void __attribute__ ((noinline)) pulp_nn_maxpool_u8(
-  uint8_t * pIn,
-  uint8_t * pOut,
+                                                  uint8_t * pIn,
+                                                  uint8_t * pOut,
   uint16_t  dim_im_in_x,
   uint16_t  dim_im_in_y,
   uint16_t  ch_im_in,
@@ -131,7 +132,7 @@ void __attribute__ ((noinline)) pulp_nn_maxpool_u8(
     /* copy over the first row */
     for (int i = 0; i< dim_im_out_x * ch_im_in_r; i++)
     {
-      target[i] = row_start[i];
+      target[i] = (uint8_t) row_start[i];
     }
     /* move over to next row */
     row_start += ch_im_in_r * dim_im_in_x;

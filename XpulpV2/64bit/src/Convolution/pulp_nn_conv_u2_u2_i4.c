@@ -22,6 +22,7 @@
 #include "pulp_nn_kernels.h"
 
 
+
 void pulp_nn_conv_u2_u2_i4(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
@@ -180,7 +181,7 @@ void pulp_nn_conv_u2_u2_i4(
       }
       if(pIm2Col == (pIm2ColBase + ((ch_in * dim_kernel_x * dim_kernel_y) << 1)))
       {
-        pOutBuffer = pulp_nn_matmul_u2_i4(
+        pOutBuffer = pulp_nn_matmul_u8_u2_i4(
           pIm2ColBase,
           pBias,
           pOutBuffer,

@@ -26,14 +26,14 @@ void __attribute__ ((noinline)) xpulp_nn_add_u4_u4_u2(
     uint8_t * pIn1,
     uint8_t * pIn2,
     uint8_t * pOut,
-    uint32_t in1_mul,
-    uint32_t in1_add,
+    int32_t in1_mul,
+    int32_t in1_add,
     uint16_t in1_shift,
-    uint32_t in2_mul,
-    uint32_t in2_add,
+    int32_t in2_mul,
+    int32_t in2_add,
     uint16_t in2_shift,
-    uint32_t out_mul,
-    uint32_t out_add,
+    int32_t out_mul,
+    int32_t out_add,
     uint16_t out_shift,
     uint16_t dim_im_in_x,
     uint16_t dim_im_in_y,
@@ -51,10 +51,10 @@ void __attribute__ ((noinline)) xpulp_nn_add_u4_u4_u2(
     int  Log2Core = log2(n_cores);
     int chunck = (dim_im_in_y >> Log2Core) + ((dim_im_in_y & (NUM_CORES-1))!=0);
 
-    uint32_t in1_rq1, in1_rq2, in1_rq3, in1_rq4,
+    int32_t in1_rq1, in1_rq2, in1_rq3, in1_rq4,
              in2_rq1, in2_rq2, in2_rq3, in2_rq4;
-    uint32_t sum1, sum2, sum3, sum4;
-    uint32_t sum_out1, sum_out2, sum_out3, sum_out4;
+    int32_t sum1, sum2, sum3, sum4;
+    int32_t sum_out1, sum_out2, sum_out3, sum_out4;
     int32_t out1, out2, out3, out4,
             sum_int1, sum_int2, sum_int3, sum_int4;
 
@@ -152,24 +152,23 @@ void __attribute__ ((noinline)) xpulp_nn_add_u4_u4_u2(
           printf("core %d - requantized sum4: %d\n", core_id, sum4);
 #endif
         }
-        out1 = clip2(sum1);
+          out1 = clip2(sum1);
 #ifdef ADD_VERBOSE
         printf("core %d - out1 clipped: %d\n", core_id, out1);
 #endif
-        out2 = clip2(sum2);
+          out2 = clip2(sum2);
 #ifdef ADD_VERBOSE
         printf("core %d - out2 clipped: %d\n", core_id, out2);
 #endif
-        out3 = clip2(sum3);
+          out3 = clip2(sum3);
 #ifdef ADD_VERBOSE
         printf("core %d - out3 clipped: %d\n", core_id, out3);
 #endif
-        out4 = clip2(sum4);
+          out4 = clip2(sum4);
 #ifdef ADD_VERBOSE
         printf("core %d - out4 clipped: %d\n", core_id, out4);
 #endif
 
-        
 
         out1 = bitins(out1, (int8_t) 0xf3, out2, (int8_t) 0x0c, 2);
         out1 = bitins(out1, (int8_t) 0xcf, out3, (int8_t) 0x30, 4);

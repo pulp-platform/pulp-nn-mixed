@@ -17,6 +17,16 @@
  * limitations under the License.
  */
 
+<%
+def u_(sgn):
+    return '' if sgn else 'u'
+
+
+pt_in = f"{u_(config.kernel.in_signed)}int8_t"
+pt_out = f"{u_(config.kernel.out_signed)}int8_t"
+%>\
+
+
 #ifndef __PULPNN_TEST_DATA_ALLOCATION__
 #define __PULPNN_TEST_DATA_ALLOCATION__
 
@@ -61,22 +71,22 @@ PI_L1 int16_t THR_INT4_L1[CH_IM_OUT << 4];
 %endif
 
 %if config.kernel.type == 'matmul':
-PI_L2 uint8_t IN_INT8_L2[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN)] = IN_INT8;
-PI_L1 uint8_t IN_INT8_L1[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN)];
+PI_L2 ${pt_in} IN_INT8_L2[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN)] = IN_INT8;
+PI_L1 ${pt_in} IN_INT8_L1[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN)];
 %if config.kernel.out_data_t == 2:
-PI_L2 uint8_t OUT_INT2_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT2;
-PI_L2 uint8_t OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
-PI_L2 uint8_t OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
-PI_L1 uint8_t OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
+PI_L2 ${pt_out} OUT_INT2_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT2;
+PI_L2 ${pt_out} OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
+PI_L2 ${pt_out} OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
+PI_L1 ${pt_out} OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
 %elif config.kernel.out_data_t == 4:
-PI_L2 uint8_t OUT_INT4_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT4;
-PI_L2 uint8_t OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
-PI_L2 uint8_t OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
-PI_L1 uint8_t OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
+PI_L2 ${pt_out} OUT_INT4_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT4;
+PI_L2 ${pt_out} OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
+PI_L2 ${pt_out} OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
+PI_L1 ${pt_out} OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
 %else:
-PI_L2 uint8_t OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT8;
-PI_L2 uint8_t OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)];
-PI_L1 uint8_t OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)];
+PI_L2 ${pt_out} OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT8;
+PI_L2 ${pt_out} OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)];
+PI_L1 ${pt_out} OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)];
 %endif
 %if config.kernel.wt_data_t == 2:
 PI_L2 int8_t WEIGHT_INT2_L2[(DIM_KERNEL_X * DIM_KERNEL_Y * CH_IM_IN * CH_IM_OUT)] = WEIGHT_INT2;
@@ -95,29 +105,29 @@ PI_L1 int8_t BIAS_L1[CH_IM_OUT] = {0};
 %endif
 %elif config.kernel.type == 'convolution' or config.kernel.type == 'pointwise':
 %if config.kernel.in_data_t == 2:
-PI_L2 uint8_t IN_INT2_L2[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN)] = IN_INT2;
-PI_L1 uint8_t IN_INT8_L1[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN) >> 2];
+PI_L2 ${pt_in} IN_INT2_L2[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN)] = IN_INT2;
+PI_L1 ${pt_in} IN_INT8_L1[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN) >> 2];
 %elif config.kernel.in_data_t == 4:
-PI_L2 uint8_t IN_INT4_L2[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN)] = IN_INT4;
-PI_L1 uint8_t IN_INT8_L1[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN) >> 1];
+PI_L2 ${pt_in} IN_INT4_L2[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN)] = IN_INT4;
+PI_L1 ${pt_in} IN_INT8_L1[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN) >> 1];
 %else:
-PI_L2 uint8_t IN_INT8_L2[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN)] = IN_INT8;
-PI_L1 uint8_t IN_INT8_L1[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN)];
+PI_L2 ${pt_in} IN_INT8_L2[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN)] = IN_INT8;
+PI_L1 ${pt_in} IN_INT8_L1[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN)];
 %endif
 %if config.kernel.out_data_t == 2:
-PI_L2 uint8_t OUT_INT2_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT2;
-PI_L2 uint8_t OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
-PI_L2 uint8_t OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
-PI_L1 uint8_t OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
+PI_L2 ${pt_out} OUT_INT2_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT2;
+PI_L2 ${pt_out} OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
+PI_L2 ${pt_out} OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
+PI_L1 ${pt_out} OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
 %elif config.kernel.out_data_t == 4:
-PI_L2 uint8_t OUT_INT4_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT4;
-PI_L2 uint8_t OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
-PI_L2 uint8_t OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
-PI_L1 uint8_t OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
+PI_L2 ${pt_out} OUT_INT4_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT4;
+PI_L2 ${pt_out} OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
+PI_L2 ${pt_out} OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
+PI_L1 ${pt_out} OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
 %else:
-PI_L2 uint8_t OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT8;
-PI_L2 uint8_t OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)];
-PI_L1 uint8_t OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)];
+PI_L2 ${pt_out} OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT8;
+PI_L2 ${pt_out} OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)];
+PI_L1 ${pt_out} OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)];
 %endif
 %if config.kernel.wt_data_t == 2:
 PI_L2 int8_t WEIGHT_INT2_L2[(DIM_KERNEL_X * DIM_KERNEL_Y * CH_IM_IN * CH_IM_OUT)] = WEIGHT_INT2;
@@ -130,45 +140,45 @@ PI_L2 int8_t WEIGHT_INT8_L2[(DIM_KERNEL_X * DIM_KERNEL_Y * CH_IM_IN * CH_IM_OUT)
 PI_L1 int8_t WEIGHT_INT8_L1[(DIM_KERNEL_X * DIM_KERNEL_Y * CH_IM_IN * CH_IM_OUT)];
 %endif
 %if config.kernel.extentions == 'XpulpV2':
-PI_L1 uint8_t IM2COL_L1[((CH_IM_IN * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) * NUM_CORES];
+PI_L1 ${pt_in} IM2COL_L1[((CH_IM_IN * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) * NUM_CORES];
 %elif config.kernel.extentions == 'XpulpNN':
 %if max(config.kernel.in_data_t, config.kernel.wt_data_t) == 8:
 %if config.kernel.matmul_fmt == '4x2':
-PI_L1 uint8_t IM2COL_L1[((CH_IM_IN * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) * NUM_CORES];
+PI_L1 ${pt_in} IM2COL_L1[((CH_IM_IN * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) * NUM_CORES];
 %elif config.kernel.matmul_fmt == '4x4':
-PI_L1 uint8_t IM2COL_L1[((CH_IM_IN * DIM_KERNEL_X * DIM_KERNEL_Y) << 2) * NUM_CORES];
+PI_L1 ${pt_in} IM2COL_L1[((CH_IM_IN * DIM_KERNEL_X * DIM_KERNEL_Y) << 2) * NUM_CORES];
 %endif
 %elif max(config.kernel.in_data_t, config.kernel.wt_data_t) == 4:
 %if config.kernel.matmul_fmt == '4x2':
-PI_L1 uint8_t IM2COL_L1[(((CH_IM_IN >> 1) * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) * NUM_CORES];
+PI_L1 ${pt_in} IM2COL_L1[(((CH_IM_IN >> 1) * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) * NUM_CORES];
 %elif config.kernel.matmul_fmt == '4x4':
-PI_L1 uint8_t IM2COL_L1[(((CH_IM_IN >> 1) * DIM_KERNEL_X * DIM_KERNEL_Y) << 2) * NUM_CORES];
+PI_L1 ${pt_in} IM2COL_L1[(((CH_IM_IN >> 1) * DIM_KERNEL_X * DIM_KERNEL_Y) << 2) * NUM_CORES];
 %endif
 %elif max(config.kernel.in_data_t, config.kernel.wt_data_t) == 2:
 %if config.kernel.matmul_fmt == '4x2':
-PI_L1 uint8_t IM2COL_L1[(((CH_IM_IN >> 2) * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) * NUM_CORES];
+PI_L1 ${pt_in} IM2COL_L1[(((CH_IM_IN >> 2) * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) * NUM_CORES];
 %elif config.kernel.matmul_fmt == '4x4':
-PI_L1 uint8_t IM2COL_L1[(((CH_IM_IN >> 2) * DIM_KERNEL_X * DIM_KERNEL_Y) << 2) * NUM_CORES];
+PI_L1 ${pt_in} IM2COL_L1[(((CH_IM_IN >> 2) * DIM_KERNEL_X * DIM_KERNEL_Y) << 2) * NUM_CORES];
 %endif
 %endif
 %elif config.kernel.extentions == 'XpulpNN-mixed':
 %if max(config.kernel.in_data_t, config.kernel.wt_data_t) == 8:
 %if config.kernel.matmul_fmt == '4x2':
-PI_L1 uint8_t IM2COL_L1[((CH_IM_IN * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) * NUM_CORES];
+PI_L1 ${pt_in} IM2COL_L1[((CH_IM_IN * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) * NUM_CORES];
 %elif config.kernel.matmul_fmt == '4x4':
-PI_L1 uint8_t IM2COL_L1[((CH_IM_IN * DIM_KERNEL_X * DIM_KERNEL_Y) << 2) * NUM_CORES];
+PI_L1 ${pt_in} IM2COL_L1[((CH_IM_IN * DIM_KERNEL_X * DIM_KERNEL_Y) << 2) * NUM_CORES];
 %endif
 %elif max(config.kernel.in_data_t, config.kernel.wt_data_t) == 4:
 %if config.kernel.matmul_fmt == '4x2':
-PI_L1 uint8_t IM2COL_L1[(((CH_IM_IN >> 1) * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) * NUM_CORES];
+PI_L1 ${pt_in} IM2COL_L1[(((CH_IM_IN >> 1) * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) * NUM_CORES];
 %elif config.kernel.matmul_fmt == '4x4':
-PI_L1 uint8_t IM2COL_L1[(((CH_IM_IN >> 1) * DIM_KERNEL_X * DIM_KERNEL_Y) << 2) * NUM_CORES];
+PI_L1 ${pt_in} IM2COL_L1[(((CH_IM_IN >> 1) * DIM_KERNEL_X * DIM_KERNEL_Y) << 2) * NUM_CORES];
 %endif
 %elif max(config.kernel.in_data_t, config.kernel.wt_data_t) == 2:
 %if config.kernel.matmul_fmt == '4x2':
-PI_L1 uint8_t IM2COL_L1[(((CH_IM_IN >> 2) * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) * NUM_CORES];
+PI_L1 ${pt_in} IM2COL_L1[(((CH_IM_IN >> 2) * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) * NUM_CORES];
 %elif config.kernel.matmul_fmt == '4x4':
-PI_L1 uint8_t IM2COL_L1[(((CH_IM_IN >> 2) * DIM_KERNEL_X * DIM_KERNEL_Y) << 2) * NUM_CORES];
+PI_L1 ${pt_in} IM2COL_L1[(((CH_IM_IN >> 2) * DIM_KERNEL_X * DIM_KERNEL_Y) << 2) * NUM_CORES];
 %endif
 %endif
 %endif
@@ -179,31 +189,31 @@ PI_L1 int8_t BIAS_L1[CH_IM_OUT] = {0};
 %endif
 %elif config.kernel.type == 'depthwise':
 %if config.kernel.in_data_t == 2:
-PI_L2 uint8_t IN_INT2_L2_HWC[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN)] = IN_INT2;
-PI_L2 uint8_t IN_INT8_L2_HWC[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN) >> 2];
-PI_L1 uint8_t IN_INT8_L1_CHW[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN) >> 2];
+PI_L2 ${pt_in} IN_INT2_L2_HWC[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN)] = IN_INT2;
+PI_L2 ${pt_in} IN_INT8_L2_HWC[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN) >> 2];
+PI_L1 ${pt_in} IN_INT8_L1_CHW[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN) >> 2];
 %elif config.kernel.in_data_t == 4:
-PI_L2 uint8_t IN_INT4_L2_HWC[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN)] = IN_INT4;
-PI_L2 uint8_t IN_INT8_L2_HWC[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN) >> 1];
-PI_L1 uint8_t IN_INT8_L1_CHW[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN) >> 1];
+PI_L2 ${pt_in} IN_INT4_L2_HWC[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN)] = IN_INT4;
+PI_L2 ${pt_in} IN_INT8_L2_HWC[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN) >> 1];
+PI_L1 ${pt_in} IN_INT8_L1_CHW[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN) >> 1];
 %else:
-PI_L2 uint8_t IN_INT8_L2_HWC[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN)] = IN_INT8;
-PI_L1 uint8_t IN_INT8_L1_CHW[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN)];
+PI_L2 ${pt_in} IN_INT8_L2_HWC[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN)] = IN_INT8;
+PI_L1 ${pt_in} IN_INT8_L1_CHW[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN)];
 %endif
 %if config.kernel.out_data_t == 2:
-PI_L2 uint8_t OUT_INT2_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT2;
-PI_L2 uint8_t OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
-PI_L2 uint8_t OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
-PI_L1 uint8_t OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
+PI_L2 ${pt_out} OUT_INT2_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT2;
+PI_L2 ${pt_out} OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
+PI_L2 ${pt_out} OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
+PI_L1 ${pt_out} OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
 %elif config.kernel.out_data_t == 4:
-PI_L2 uint8_t OUT_INT4_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT4;
-PI_L2 uint8_t OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
-PI_L2 uint8_t OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
-PI_L1 uint8_t OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
+PI_L2 ${pt_out} OUT_INT4_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT4;
+PI_L2 ${pt_out} OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
+PI_L2 ${pt_out} OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
+PI_L1 ${pt_out} OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
 %else:
-PI_L2 uint8_t OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT8;
-PI_L2 uint8_t OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)];
-PI_L1 uint8_t OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)];
+PI_L2 ${pt_out} OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT8;
+PI_L2 ${pt_out} OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)];
+PI_L1 ${pt_out} OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)];
 %endif
 %if config.kernel.wt_data_t == 2:
 PI_L2 int8_t WEIGHT_INT2_L2_CHW[(DIM_KERNEL_X * DIM_KERNEL_Y * CH_IM_IN)] = WEIGHT_INT2;
@@ -220,13 +230,13 @@ PI_L2 int8_t WEIGHT_INT8_L2_CHW[(DIM_KERNEL_X * DIM_KERNEL_Y * CH_IM_IN)] = WEIG
 PI_L1 int8_t WEIGHT_INT8_L1_CHW[(DIM_KERNEL_X * DIM_KERNEL_Y * CH_IM_IN)];
 %endif
 %if config.less_precision == 2:
-PI_L1 uint8_t IM2COL_L1[(((DIM_KERNEL_X * (DIM_IM_IN_Y + PADDING_Y_TOP + PADDING_Y_BOTTOM)) + DIM_KERNEL_X) << 2) * NUM_CORES];
+PI_L1 ${pt_in} IM2COL_L1[(((DIM_KERNEL_X * (DIM_IM_IN_Y + PADDING_Y_TOP + PADDING_Y_BOTTOM)) + DIM_KERNEL_X) << 2) * NUM_CORES];
 PI_L1 int8_t WTBUFF_L1[((DIM_KERNEL_Y * DIM_KERNEL_X) << 2) * NUM_CORES];
 %elif config.less_precision == 4:
-PI_L1 uint8_t IM2COL_L1[(((DIM_KERNEL_X * (DIM_IM_IN_Y + PADDING_Y_TOP + PADDING_Y_BOTTOM)) + DIM_KERNEL_X) << 1) * NUM_CORES];
+PI_L1 ${pt_in} IM2COL_L1[(((DIM_KERNEL_X * (DIM_IM_IN_Y + PADDING_Y_TOP + PADDING_Y_BOTTOM)) + DIM_KERNEL_X) << 1) * NUM_CORES];
 PI_L1 int8_t WTBUFF_L1[((DIM_KERNEL_Y * DIM_KERNEL_X) << 1) * NUM_CORES];
 %elif config.less_precision == 8:
-PI_L1 uint8_t IM2COL_L1[((DIM_KERNEL_X * (DIM_IM_IN_Y + PADDING_Y_TOP + PADDING_Y_BOTTOM)) + DIM_KERNEL_X) * NUM_CORES];
+PI_L1 ${pt_in} IM2COL_L1[((DIM_KERNEL_X * (DIM_IM_IN_Y + PADDING_Y_TOP + PADDING_Y_BOTTOM)) + DIM_KERNEL_X) * NUM_CORES];
 PI_L1 int8_t WTBUFF_L1[DIM_KERNEL_Y * DIM_KERNEL_X * NUM_CORES];
 %endif
 %if config.layer.bias == True:
@@ -236,16 +246,16 @@ PI_L1 int8_t BIAS_L1[CH_IM_OUT] = {0};
 %endif
 %elif config.kernel.type == 'linear_no_quant':
 %if config.kernel.in_data_t == 8:
-PI_L2 uint8_t IN_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN_INT8;
-PI_L1 uint8_t IN_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)];
+PI_L2 ${pt_in} IN_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN_INT8;
+PI_L1 ${pt_in} IN_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)];
 %elif config.kernel.in_data_t == 4:
-PI_L2 uint8_t IN_INT4_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN_INT4;
-PI_L2 uint8_t IN_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 1];
-PI_L1 uint8_t IN_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 1];
+PI_L2 ${pt_in} IN_INT4_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN_INT4;
+PI_L2 ${pt_in} IN_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 1];
+PI_L1 ${pt_in} IN_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 1];
 %elif config.kernel.in_data_t == 2:
-PI_L2 uint8_t IN_INT2_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN_INT2;
-PI_L2 uint8_t IN_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 2];
-PI_L1 uint8_t IN_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 2];
+PI_L2 ${pt_in} IN_INT2_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN_INT2;
+PI_L2 ${pt_in} IN_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 2];
+PI_L1 ${pt_in} IN_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 2];
 %endif
 %if config.kernel.wt_data_t == 8:
 PI_L2 int8_t WEIGHT_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_OUT)] = WEIGHT_INT8;
@@ -268,16 +278,16 @@ PI_L1 int8_t BIAS_L1[CH_IM_OUT] = {0};
 %endif
 %elif config.kernel.type == 'linear_quant':
 %if config.kernel.in_data_t == 8:
-PI_L2 uint8_t IN_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN_INT8;
-PI_L1 uint8_t IN_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)];
+PI_L2 ${pt_in} IN_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN_INT8;
+PI_L1 ${pt_in} IN_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)];
 %elif config.kernel.in_data_t == 4:
-PI_L2 uint8_t IN_INT4_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN_INT4;
-PI_L2 uint8_t IN_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 1];
-PI_L1 uint8_t IN_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 1];
+PI_L2 ${pt_in} IN_INT4_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN_INT4;
+PI_L2 ${pt_in} IN_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 1];
+PI_L1 ${pt_in} IN_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 1];
 %elif config.kernel.in_data_t == 2:
-PI_L2 uint8_t IN_INT2_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN_INT2;
-PI_L2 uint8_t IN_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 2];
-PI_L1 uint8_t IN_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 2];
+PI_L2 ${pt_in} IN_INT2_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN_INT2;
+PI_L2 ${pt_in} IN_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 2];
+PI_L1 ${pt_in} IN_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 2];
 %endif
 %if config.kernel.wt_data_t == 8:
 PI_L2 int8_t WEIGHT_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_OUT)] = WEIGHT_INT8;
@@ -292,19 +302,19 @@ PI_L2 int8_t WEIGHT_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_OUT) >
 PI_L1 int8_t WEIGHT_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_OUT) >> 2];
 %endif
 %if config.kernel.out_data_t == 8:
-PI_L2 uint8_t OUT_INT8_L2[CH_IM_OUT] = OUT_INT8;
-PI_L2 uint8_t OUT_L2[CH_IM_OUT];
-PI_L1 uint8_t OUT_L1[CH_IM_OUT];
+PI_L2 ${pt_out} OUT_INT8_L2[CH_IM_OUT] = OUT_INT8;
+PI_L2 ${pt_out} OUT_L2[CH_IM_OUT];
+PI_L1 ${pt_out} OUT_L1[CH_IM_OUT];
 %elif config.kernel.out_data_t == 4:
-PI_L2 uint8_t OUT_INT4_L2[CH_IM_OUT] = OUT_INT4;
-PI_L2 uint8_t OUT_INT8_L2[CH_IM_OUT >> 1];
-PI_L2 uint8_t OUT_L2[CH_IM_OUT >> 1];
-PI_L1 uint8_t OUT_L1[CH_IM_OUT >> 1];
+PI_L2 ${pt_out} OUT_INT4_L2[CH_IM_OUT] = OUT_INT4;
+PI_L2 ${pt_out} OUT_INT8_L2[CH_IM_OUT >> 1];
+PI_L2 ${pt_out} OUT_L2[CH_IM_OUT >> 1];
+PI_L1 ${pt_out} OUT_L1[CH_IM_OUT >> 1];
 %elif config.kernel.out_data_t == 2:
-PI_L2 uint8_t OUT_INT2_L2[CH_IM_OUT] = OUT_INT2;
-PI_L2 uint8_t OUT_INT8_L2[CH_IM_OUT >> 2];
-PI_L2 uint8_t OUT_L2[CH_IM_OUT >> 2];
-PI_L1 uint8_t OUT_L1[CH_IM_OUT >> 2];
+PI_L2 ${pt_out} OUT_INT2_L2[CH_IM_OUT] = OUT_INT2;
+PI_L2 ${pt_out} OUT_INT8_L2[CH_IM_OUT >> 2];
+PI_L2 ${pt_out} OUT_L2[CH_IM_OUT >> 2];
+PI_L1 ${pt_out} OUT_L1[CH_IM_OUT >> 2];
 %endif
 %if config.layer.bias == True:
 PI_L1 int8_t BIAS_L1[CH_IM_OUT] = BIAS;
@@ -313,69 +323,69 @@ PI_L1 int8_t BIAS_L1[CH_IM_OUT] = {0};
 %endif
 %elif config.kernel.type == 'maxpool' or config.kernel.type == 'avgpool':
 %if config.kernel.in_data_t == 8:
-PI_L2 uint8_t IN_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN_INT8;
-PI_L1 uint8_t IN_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)];
-PI_L2 uint8_t OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT8;
-PI_L2 uint8_t OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)];
-PI_L1 uint8_t OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)];
+PI_L2 ${pt_in} IN_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN_INT8;
+PI_L1 ${pt_in} IN_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)];
+PI_L2 ${pt_out} OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT8;
+PI_L2 ${pt_out} OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)];
+PI_L1 ${pt_out} OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)];
 %elif config.kernel.in_data_t == 4:
-PI_L2 uint8_t IN_INT4_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN_INT4;
-PI_L2 uint8_t IN_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 1];
-PI_L1 uint8_t IN_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 1];
-PI_L2 uint8_t OUT_INT4_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT4;
-PI_L2 uint8_t OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
-PI_L2 uint8_t OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
-PI_L1 uint8_t OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
+PI_L2 ${pt_in} IN_INT4_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN_INT4;
+PI_L2 ${pt_in} IN_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 1];
+PI_L1 ${pt_in} IN_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 1];
+PI_L2 ${pt_out} OUT_INT4_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT4;
+PI_L2 ${pt_out} OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
+PI_L2 ${pt_out} OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
+PI_L1 ${pt_out} OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
 %elif config.kernel.in_data_t == 2:
-PI_L2 uint8_t IN_INT2_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN_INT2;
-PI_L2 uint8_t IN_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 2];
-PI_L1 uint8_t IN_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 2];
-PI_L2 uint8_t OUT_INT2_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT2;
-PI_L2 uint8_t OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
-PI_L2 uint8_t OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
-PI_L1 uint8_t OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
+PI_L2 ${pt_in} IN_INT2_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN_INT2;
+PI_L2 ${pt_in} IN_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 2];
+PI_L1 ${pt_in} IN_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 2];
+PI_L2 ${pt_out} OUT_INT2_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT2;
+PI_L2 ${pt_out} OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
+PI_L2 ${pt_out} OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
+PI_L1 ${pt_out} OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
 %endif
 %endif
 
 %if config.kernel.type == 'add':
 %if config.kernel.in_data_t == 8:
-PI_L2 uint8_t IN1_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN1_INT8;
-PI_L1 uint8_t IN1_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)];
+PI_L2 ${pt_in} IN1_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN1_INT8;
+PI_L1 ${pt_in} IN1_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)];
 %elif config.kernel.in_data_t == 4:
-PI_L2 uint8_t IN1_INT4_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN1_INT4;
-PI_L2 uint8_t IN1_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 1];
-PI_L1 uint8_t IN1_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 1];
+PI_L2 ${pt_in} IN1_INT4_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN1_INT4;
+PI_L2 ${pt_in} IN1_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 1];
+PI_L1 ${pt_in} IN1_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 1];
 %elif config.kernel.in_data_t == 2:
-PI_L2 uint8_t IN1_INT2_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN1_INT2;
-PI_L2 uint8_t IN1_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 2];
-PI_L1 uint8_t IN1_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 2];
+PI_L2 ${pt_in} IN1_INT2_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN1_INT2;
+PI_L2 ${pt_in} IN1_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 2];
+PI_L1 ${pt_in} IN1_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 2];
 %endif
 %if config.kernel.out_data_t == 8:
-PI_L2 uint8_t IN2_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN2_INT8;
-PI_L1 uint8_t IN2_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)];
+PI_L2 ${pt_in} IN2_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN2_INT8;
+PI_L1 ${pt_in} IN2_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)];
 %elif config.kernel.out_data_t == 4:
-PI_L2 uint8_t IN2_INT4_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN2_INT4;
-PI_L2 uint8_t IN2_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 1];
-PI_L1 uint8_t IN2_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 1];
+PI_L2 ${pt_in} IN2_INT4_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN2_INT4;
+PI_L2 ${pt_in} IN2_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 1];
+PI_L1 ${pt_in} IN2_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 1];
 %elif config.kernel.out_data_t == 2:
-PI_L2 uint8_t IN2_INT2_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN2_INT2;
-PI_L2 uint8_t IN2_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 2];
-PI_L1 uint8_t IN2_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 2];
+PI_L2 ${pt_in} IN2_INT2_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN2_INT2;
+PI_L2 ${pt_in} IN2_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 2];
+PI_L1 ${pt_in} IN2_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y) >> 2];
 %endif
 %if config.kernel.in_data_t == 8 and (config.kernel.in_data_t >= config.kernel.out_data_t):
-PI_L2 uint8_t OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT8;
-PI_L2 uint8_t OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)];
-PI_L1 uint8_t OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)];
+PI_L2 ${pt_out} OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT8;
+PI_L2 ${pt_out} OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)];
+PI_L1 ${pt_out} OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)];
 %elif config.kernel.in_data_t == 4 and (config.kernel.in_data_t >= config.kernel.out_data_t):
-PI_L2 uint8_t OUT_INT4_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT4;
-PI_L2 uint8_t OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
-PI_L2 uint8_t OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
-PI_L1 uint8_t OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
+PI_L2 ${pt_out} OUT_INT4_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT4;
+PI_L2 ${pt_out} OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
+PI_L2 ${pt_out} OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
+PI_L1 ${pt_out} OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 1];
 %elif config.kernel.in_data_t == 2 and (config.kernel.in_data_t >= config.kernel.out_data_t):
-PI_L2 uint8_t OUT_INT2_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT2;
-PI_L2 uint8_t OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
-PI_L2 uint8_t OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
-PI_L1 uint8_t OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
+PI_L2 ${pt_out} OUT_INT2_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT2;
+PI_L2 ${pt_out} OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
+PI_L2 ${pt_out} OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
+PI_L1 ${pt_out} OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT) >> 2];
 %endif
 %endif
 

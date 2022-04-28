@@ -1,6 +1,12 @@
 <%! import math %>
+<%
+def iu(sgn):
+    return 'i' if sgn else 'u'
+in_w = config.kernel.in_data_t
+out_w = config.kernel.out_data_t
+%>\
 %if config.api == 'PULPNNConvolve':
-#if (KERNEL == ${config.kernel.in_data_t}${config.kernel.out_data_t}${config.kernel.wt_data_t})
+#if (KERNEL == ${in_w}${out_w}${config.kernel.wt_data_t}) && (SIGNED == ${f"{int(config.kernel.in_signed)}{int(config.kernel.out_signed)}"})
 ${config.fn_name}(IN_INT8_L1,
                     IM2COL_L1,
                     BIAS_L1,
@@ -37,7 +43,7 @@ ${config.fn_name}(IN_INT8_L1,
                         );
 #endif
 %elif config.api == 'PULPNNConvolvePointwise':
-#if (KERNEL == ${config.kernel.in_data_t}${config.kernel.out_data_t}${config.kernel.wt_data_t})
+#if (KERNEL == ${in_w}${out_w}${config.kernel.wt_data_t}) && (SIGNED == ${f"{int(config.kernel.in_signed)}{int(config.kernel.out_signed)}"})
 ${config.fn_name}(IN_INT8_L1,
                     IM2COL_L1,
                     BIAS_L1,
@@ -74,7 +80,7 @@ ${config.fn_name}(IN_INT8_L1,
                         );
 #endif
 %elif config.api == 'PULPNNConvolveDepthwise':
-#if (KERNEL == ${config.kernel.in_data_t}${config.kernel.out_data_t}${config.kernel.wt_data_t})
+#if (KERNEL == ${in_w}${out_w}${config.kernel.wt_data_t}) && (SIGNED == ${f"{int(config.kernel.in_signed)}{int(config.kernel.out_signed)}"})
 ${config.fn_name}(IN_INT8_L1_CHW,
                     IM2COL_L1,
                     BIAS_L1,
@@ -112,7 +118,7 @@ ${config.fn_name}(IN_INT8_L1_CHW,
                         );
 #endif
 %elif config.api=="PULPNNMatMul":
-#if (KERNEL == ${config.kernel.out_data_t}${config.kernel.wt_data_t})
+#if (KERNEL == ${in_w}${out_w}${config.kernel.wt_data_t}) && (SIGNED == ${f"{int(config.kernel.in_signed)}{int(config.kernel.out_signed)}"})
 OUT_L1 = ${config.fn_name}(IN_INT8_L1,
                     BIAS_L1,
                     OUT_L1,
@@ -137,7 +143,7 @@ OUT_L1 = ${config.fn_name}(IN_INT8_L1,
                         );
 #endif
 %elif config.api == 'PULPNNLinearNoQuant':
-#if (KERNEL == ${config.kernel.in_data_t}${config.kernel.wt_data_t})
+#if (KERNEL == ${in_w}${config.kernel.wt_data_t}) && (SIGNED == ${f"{int(config.kernel.in_signed)}"})
 ${config.fn_name}(IN_INT8_L1,
                     BIAS_L1,
                     OUT_L1,
@@ -146,7 +152,7 @@ ${config.fn_name}(IN_INT8_L1,
                     CH_IM_OUT);
 #endif
 %elif config.api == 'PULPNNLinearQuant':
-#if (KERNEL == ${config.kernel.in_data_t}${config.kernel.out_data_t}${config.kernel.wt_data_t})
+#if (KERNEL == ${in_w}${out_w}${config.kernel.wt_data_t}) && (SIGNED == ${f"{int(config.kernel.in_signed)}{int(config.kernel.out_signed)}"})
 ${config.fn_name}(IN_INT8_L1,
                     BIAS_L1,
                     OUT_L1,
@@ -170,7 +176,7 @@ ${config.fn_name}(IN_INT8_L1,
                         );
 #endif
 %elif config.api == 'PULPNNMaxPool':
-#if (KERNEL == ${config.kernel.in_data_t})
+#if (KERNEL == ${in_w}) && (SIGNED == ${f"{int(config.kernel.in_signed)}"})
 ${config.fn_name}(IN_INT8_L1,
                     OUT_L1,
                     DIM_IM_IN_X,
@@ -187,8 +193,8 @@ ${config.fn_name}(IN_INT8_L1,
                     POOL_STRIDE,
                     POOL_STRIDE);
 #endif
-%elif config.api == 'PULPNNAvgPool':
-#if (KERNEL == ${config.kernel.in_data_t})
+%elif config.api == 'PULPNNAvgPoolNew':
+#if (KERNEL == ${in_w}${out_w})
 ${config.fn_name}(IN_INT8_L1,
                     OUT_L1,
                     DIM_IM_IN_X,

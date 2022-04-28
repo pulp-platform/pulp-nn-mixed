@@ -25,6 +25,7 @@
 
 #define bitins(dst,not_mask_imm,src,mask_imm,off) __builtin_pulp_binsert(dst,not_mask_imm,src,mask_imm,off)
 #define bitext_u(x,size,off) __builtin_pulp_bextractu(x,size,off)
+#define bitext(x,size,off) __builtin_pulp_bextract(x,size,off)
 
 void __attribute__ ((noinline))  xpulp_nn_avgpool_u2_u4(
   uint8_t * pIn,
@@ -115,12 +116,12 @@ void __attribute__ ((noinline))  xpulp_nn_avgpool_u2_u4(
                   out_large = (sum[0] * lambda + out_add) >> out_shift;
                   out_el = clip4(out_large);
                   out_large = (sum[1] * lambda + out_add) >> out_shift;
-                  out_el = bitins(out_el, (int8_t) 0x0f, (uint8_t) clip4(out_large), (int8_t) 0xf0, 4);
+                  out_el = bitins(out_el, (int8_t) 0x0f, (uint8_t) clip44(out_large), (int8_t) 0xf0, 4);
                   pDst[(ch_cnt << (1)) + 0] = out_el;
                   out_large = (sum[2] * lambda + out_add) >> out_shift;
-                  out_el = bitins(out_el, (int8_t) 0xf0, (uint8_t) clip4(out_large), (int8_t) 0x0f, 0);
+                  out_el = bitins(out_el, (int8_t) 0xf0, (uint8_t) clip44(out_large), (int8_t) 0x0f, 0);
                   out_large = (sum[3] * lambda + out_add) >> out_shift;
-                  out_el = bitins(out_el, (int8_t) 0x0f, (uint8_t) clip4(out_large), (int8_t) 0xf0, 4);
+                  out_el = bitins(out_el, (int8_t) 0x0f, (uint8_t) clip44(out_large), (int8_t) 0xf0, 4);
                   pDst[(ch_cnt << (1)) + 1] = out_el;
                   } else {
                   out_large = sum[0] / kernel_size_tot;

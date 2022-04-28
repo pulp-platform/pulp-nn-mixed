@@ -24,7 +24,7 @@
 void __attribute__((noinline)) xpulp_nn_linear_u4_i32_i8(
                   uint8_t *pIn,
                   int8_t *pBias,
-                  uint8_t *pOut,
+                  int8_t *pOut,
                   int8_t *pWeight,
                   uint16_t dim_vec,
                   uint16_t num_o_neurons)
@@ -62,7 +62,7 @@ void __attribute__((noinline)) xpulp_nn_linear_u4_i32_i8(
 
     asm volatile("mv %0, %1":"=r"(startB):"r"(vecB));
 
-    uint32_t *ptrB  = (uint32_t *) vecB;
+    uint32_t *ptrB  = vecB;
 
     ptrA  = MacLoadInit(1, 0, 0, 0, ptrA);
 
@@ -95,8 +95,8 @@ void __attribute__((noinline)) xpulp_nn_linear_u4_i32_i8(
         pA++;
         int8_t inA2 = *pA;
         pA++;
-        uint8_t inB  = (uint8_t) bitextu((unsigned int) *pB, 4, 0);
-        uint8_t inB2 = (uint8_t) bitextu((unsigned int) *pB, 4, 4);
+        uint8_t inB  = (uint8_t) bitextu((uint32_t) *pB, 4, 0);
+        uint8_t inB2 = (uint8_t) bitextu((uint32_t) *pB, 4, 4);
         pB++;
         sum += inA * inB;
         sum += inA2 * inB2;
