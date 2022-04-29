@@ -19,20 +19,33 @@
 
 #include "pmsis.h"
 #include "pulp_nn_utils.h"
+<%
+act_prec = int(config.kernel.act_prec[0:2])
+act_t = f"int{act_prec}_t"
+def su(sgn):
+    return 's' if sgn else 'u'
+def u_(sgn):
+    return '' if sgn else 'u'
+def s_(sgn):
+    return 's' if sgn else ''
+
+pt_in = f"{u_(config.kernel.in_signed)}int8_t"
+vt_in = f"v4{su(config.kernel.in_signed)}"
+int_t_in = f"{u_(config.kernel.in_signed)}int32_t"
+pt_out = f"{u_(config.kernel.out_signed)}int8_t"
+macload_fn = f"MacLoad{s_(config.kernel.in_signed)}{int(32/config.max_precision)}"
+out_clip_fn = f"clip{s_(config.kernel.out_signed)}{config.kernel.out_data_t}"
+bex = f"bitext{u_(config.kernel.in_signed)}"
+%>
 
 
 void __attribute__((noinline)) ${config.fn_name}(
-                        uint8_t *pIn,
+                        ${pt_in} *pIn,
                         int8_t *pBias,
-                        uint8_t *pOut,
+                        ${pt_out} *pOut,
                         int8_t *pWeight,
-%if config.kernel.act_prec == '32bit':
-                        int32_t *pKappa,
-                        int32_t *pLambda,
-%elif config.kernel.act_prec == '64bit':
-                        int64_t *pKappa,
-                        int64_t *pLambda,
-%endif
+                        ${act_t} *pKappa,
+                        ${act_t} *pLambda,
                         uint16_t out_mult,
                         uint16_t out_shift,
                         uint16_t dim_vec,
@@ -77,7 +90,7 @@ void __attribute__((noinline)) ${config.fn_name}(
   int stop = min(start + chunk + neuron_left, num_o_neurons);
 %endif
 
-  v4u vecB[${int(8/config.less_precision)}];
+  ${vt_in} vecB[${int(8/config.less_precision)}];
   v4s vecA[${int(8/config.less_precision)}];
 %if config.kernel.out_data_t < 8:
   v4s vecA2[${int(8/config.less_precision)}];
@@ -88,21 +101,17 @@ void __attribute__((noinline)) ${config.fn_name}(
 %endif
 
 %if config.kernel.out_data_t == 8:
-  uint8_t *pOutBuffer = (uint8_t *) pOut + start;
+  ${pt_out} *pOutBuffer = (${pt_out} *) pOut + start;
 %elif config.kernel.out_data_t == 4:
-  uint8_t *pOutBuffer = (uint8_t *) pOut + (start >> 1);
+  ${pt_out} *pOutBuffer = (${pt_out} *) pOut + (start >> 1);
 %elif config.kernel.out_data_t == 2:
-  uint8_t *pOutBuffer = (uint8_t *) pOut + (start >> 2);
+  ${pt_out} *pOutBuffer = (${pt_out} *) pOut + (start >> 2);
 %endif
 
   int i;
-%if config.kernel.act_prec == '32bit':
-  int32_t *k1 = pKappa + start;
-  int32_t *lambda1 = pLambda + start;
-%elif config.kernel.act_prec == '64bit':
-  int64_t *k1 = pKappa + start;
-  int64_t *lambda1 = pLambda + start;
-%endif
+
+  ${act_t} *k1 = pKappa + start;
+  ${act_t} *lambda1 = pLambda + start;
 
 %if config.kernel.out_data_t < 8:
   for(i=start; i<stop; i+=${int(8/config.kernel.out_data_t)})
@@ -131,7 +140,7 @@ void __attribute__((noinline)) ${config.fn_name}(
 %endif
     }
 
-    uint8_t *pB = pIn;
+    ${pt_in} *pB = pIn;
     int8_t *pA = pWeight + (i * dim_vec_wt);
 %if config.kernel.out_data_t < 8:
     int8_t *pA2 = pA + dim_vec_wt;
@@ -189,13 +198,13 @@ void __attribute__((noinline)) ${config.fn_name}(
 %if config.kernel.in_data_t < config.kernel.wt_data_t:
     pB  = ${config.unpack_in_fn}(pB , vecB);
 
-    uint32_t *startB;
+    ${int_t_in} *startB;
 
     asm volatile("mv %0, %1":"=r"(startB):"r"(vecB));
 
-    uint32_t *ptrB  = (uint32_t *) vecB;
+    ${int_t_in} *ptrB  = (${int_t_in} *) vecB;
 %else:
-    uint32_t *ptrB  = (uint32_t *) pB ;
+    ${int_t_in} *ptrB  = (${int_t_in} *) pB ;
 %endif
 %else:
     int32_t *ptrA  = (int32_t *) pA ;
@@ -207,7 +216,7 @@ void __attribute__((noinline)) ${config.fn_name}(
 %endif
 %endif
 
-    uint32_t *ptrB  = (uint32_t *) pB ;
+    ${int_t_in} *ptrB  = (${int_t_in} *) pB ;
 %endif
 
     ptrA  = MacLoadInit(1, 0, 0, 0, ptrA);
@@ -228,15 +237,15 @@ void __attribute__((noinline)) ${config.fn_name}(
     for(int j=0; j < (dim_vec >> ${int(math.log2((int(32/config.max_precision))*(int(config.kernel.wt_data_t/config.kernel.in_data_t))))}); j++)
 %endif
     {
-      sum = MacLoad${int(32/config.max_precision)}(1, 0, 0, 0, ptrA, sum);
+      sum = ${macload_fn}(1, 0, 0, 0, ptrA, sum);
       ptrA = MacLoadUpdate(ptrA);
 %if config.kernel.out_data_t < 8:
-      sum2 = MacLoad${int(32/config.max_precision)}(1, 0, 1, 0, ptrA2, sum2);
+      sum2 = ${macload_fn}(1, 0, 1, 0, ptrA2, sum2);
       ptrA2 = MacLoadUpdate(ptrA2);
 %if config.kernel.out_data_t == 2:
-      sum3 = MacLoad${int(32/config.max_precision)}(1, 0, 2, 0, ptrA3, sum3);
+      sum3 = ${macload_fn}(1, 0, 2, 0, ptrA3, sum3);
       ptrA3 = MacLoadUpdate(ptrA3);
-      sum4 = MacLoad${int(32/config.max_precision)}(1, 0, 3, 0, ptrA4, sum4);
+      sum4 = ${macload_fn}(1, 0, 3, 0, ptrA4, sum4);
       ptrA4 = MacLoadUpdate(ptrA4);
 %endif
 %endif
@@ -245,30 +254,30 @@ void __attribute__((noinline)) ${config.fn_name}(
 
 %if config.kernel.in_data_t != config.kernel.wt_data_t:
 %if (int(config.kernel.in_data_t/config.kernel.wt_data_t) == 4) or (int(config.kernel.wt_data_t/config.kernel.in_data_t) == 4):
-      sum = MacLoad${int(32/config.max_precision)}(1, 0, 0, 0, ptrA, sum);
+      sum = ${macload_fn}(1, 0, 0, 0, ptrA, sum);
       ptrA = MacLoadUpdate(ptrA);
 %if config.kernel.out_data_t < 8:
-      sum2 = MacLoad${int(32/config.max_precision)}(1, 0, 1, 0, ptrA2, sum2);
+      sum2 = ${macload_fn}(1, 0, 1, 0, ptrA2, sum2);
       ptrA2 = MacLoadUpdate(ptrA2);
 %if config.kernel.out_data_t == 2:
-      sum3 = MacLoad${int(32/config.max_precision)}(1, 0, 2, 0, ptrA3, sum3);
+      sum3 = ${macload_fn}(1, 0, 2, 0, ptrA3, sum3);
       ptrA3 = MacLoadUpdate(ptrA3);
-      sum4 = MacLoad${int(32/config.max_precision)}(1, 0, 3, 0, ptrA4, sum4);
+      sum4 = ${macload_fn}(1, 0, 3, 0, ptrA4, sum4);
       ptrA4 = MacLoadUpdate(ptrA4);
 %endif
 %endif
 
       ptrB  = MacLoadInit(0, 1, 0, 0, ptrB);
 
-      sum = MacLoad${int(32/config.max_precision)}(1, 0, 0, 0, ptrA, sum);
+      sum = ${macload_fn}(1, 0, 0, 0, ptrA, sum);
       ptrA = MacLoadUpdate(ptrA);
 %if config.kernel.out_data_t < 8:
-      sum2 = MacLoad${int(32/config.max_precision)}(1, 0, 1, 0, ptrA2, sum2);
+      sum2 = ${macload_fn}(1, 0, 1, 0, ptrA2, sum2);
       ptrA2 = MacLoadUpdate(ptrA2);
 %if config.kernel.out_data_t == 2:
-      sum3 = MacLoad${int(32/config.max_precision)}(1, 0, 2, 0, ptrA3, sum3);
+      sum3 = ${macload_fn}(1, 0, 2, 0, ptrA3, sum3);
       ptrA3 = MacLoadUpdate(ptrA3);
-      sum4 = MacLoad${int(32/config.max_precision)}(1, 0, 3, 0, ptrA4, sum4);
+      sum4 = ${macload_fn}(1, 0, 3, 0, ptrA4, sum4);
       ptrA4 = MacLoadUpdate(ptrA4);
 %endif
 %endif
@@ -299,15 +308,15 @@ void __attribute__((noinline)) ${config.fn_name}(
 
       ptrB   = MacLoadAssign(startB);
 %endif
-      sum = MacLoad${int(32/config.max_precision)}(1, 0, 0, 0, ptrA, sum);
+      sum = ${macload_fn}(1, 0, 0, 0, ptrA, sum);
       ptrA = MacLoadUpdate(ptrA);
 %if config.kernel.out_data_t < 8:
-      sum2 = MacLoad${int(32/config.max_precision)}(1, 0, 1, 0, ptrA2, sum2);
+      sum2 = ${macload_fn}(1, 0, 1, 0, ptrA2, sum2);
       ptrA2 = MacLoadUpdate(ptrA2);
 %if config.kernel.out_data_t == 2:
-      sum3 = MacLoad${int(32/config.max_precision)}(1, 0, 2, 0, ptrA3, sum3);
+      sum3 = ${macload_fn}(1, 0, 2, 0, ptrA3, sum3);
       ptrA3 = MacLoadUpdate(ptrA3);
-      sum4 = MacLoad${int(32/config.max_precision)}(1, 0, 3, 0, ptrA4, sum4);
+      sum4 = ${macload_fn}(1, 0, 3, 0, ptrA4, sum4);
       ptrA4 = MacLoadUpdate(ptrA4);
 %endif
 %endif
@@ -350,26 +359,26 @@ void __attribute__((noinline)) ${config.fn_name}(
       {
 %if config.less_precision == 2:
 %if config.kernel.in_data_t == 2:
-        uint8_t inB =  (uint8_t) bitextu((unsigned int) *pB, 2, 0);
-        uint8_t inB2 = (uint8_t) bitextu((unsigned int) *pB, 2, 2);
-        uint8_t inB3 = (uint8_t) bitextu((unsigned int) *pB, 2, 4);
-        uint8_t inB4 = (uint8_t) bitextu((unsigned int) *pB, 2, 6);
+        ${pt_in} inB =  (${pt_in}) ${bex}((${int_t_in}) *pB, 2, 0);
+        ${pt_in} inB2 = (${pt_in}) ${bex}((${int_t_in}) *pB, 2, 2);
+        ${pt_in} inB3 = (${pt_in}) ${bex}((${int_t_in}) *pB, 2, 4);
+        ${pt_in} inB4 = (${pt_in}) ${bex}((${int_t_in}) *pB, 2, 6);
         pB++;
 %elif config.kernel.in_data_t == 4:
-        uint8_t inB =  (uint8_t) bitextu((unsigned int) *pB, 4, 0);
-        uint8_t inB2 = (uint8_t) bitextu((unsigned int) *pB, 4, 4);
+        ${pt_in} inB =  (${pt_in}) ${bex}((${int_t_in}) *pB, 4, 0);
+        ${pt_in} inB2 = (${pt_in}) ${bex}((${int_t_in}) *pB, 4, 4);
         pB++;
-        uint8_t inB3 = (uint8_t) bitextu((unsigned int) *pB, 4, 0);
-        uint8_t inB4 = (uint8_t) bitextu((unsigned int) *pB, 4, 4);
+        ${pt_in} inB3 = (${pt_in}) ${bex}((${int_t_in}) *pB, 4, 0);
+        ${pt_in} inB4 = (${pt_in}) ${bex}((${int_t_in}) *pB, 4, 4);
         pB++;
 %elif config.kernel.in_data_t == 8:
-        uint8_t inB = *pB;
+        ${pt_in} inB = *pB;
         pB++;
-        uint8_t inB2 = *pB;
+        ${pt_in} inB2 = *pB;
         pB++;
-        uint8_t inB3 = *pB;
+        ${pt_in} inB3 = *pB;
         pB++;
-        uint8_t inB4 = *pB;
+        ${pt_in} inB4 = *pB;
         pB++;
 %endif
 %if config.kernel.wt_data_t == 2:
@@ -487,13 +496,13 @@ void __attribute__((noinline)) ${config.fn_name}(
         col_cnt-=4;
 %elif config.less_precision == 4:
 %if config.kernel.in_data_t == 4:
-        uint8_t inB  = (uint8_t) bitextu((unsigned int) *pB, 4, 0);
-        uint8_t inB2 = (uint8_t) bitextu((unsigned int) *pB, 4, 4);
+        ${pt_in} inB  = (${pt_in}) ${bex}((${int_t_in}) *pB, 4, 0);
+        ${pt_in} inB2 = (${pt_in}) ${bex}((${int_t_in}) *pB, 4, 4);
         pB++;
 %elif config.kernel.in_data_t == 8:
-        uint8_t inB = *pB;
+        ${pt_in} inB = *pB;
         pB++;
-        uint8_t inB2 = *pB;
+        ${pt_in} inB2 = *pB;
         pB++;
 %endif
 %if config.kernel.wt_data_t == 4:
@@ -550,7 +559,7 @@ void __attribute__((noinline)) ${config.fn_name}(
 %endif
         col_cnt-=2;
 %elif config.less_precision == 8:
-        uint8_t inB = *pB;
+        ${pt_in} inB = *pB;
         pB++;
         int8_t inA = *pA;
         pA++;
@@ -627,18 +636,18 @@ void __attribute__((noinline)) ${config.fn_name}(
       else
       {
 %if config.kernel.out_data_t == 8:
-        *pOutBuffer = (uint8_t) clip8(sum >> out_shift);
+        *pOutBuffer = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
         pOutBuffer++;
 %elif config.kernel.out_data_t == 4:
-        sum = (uint8_t) clip4(sum >> out_shift);
-        sum2 = (uint8_t) clip4(sum2 >> out_shift);
+        sum = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+        sum2 = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
         *pOutBuffer = bitins(sum, n_mask, sum2, mask, off);
         pOutBuffer++;
 %elif config.kernel.out_data_t == 2:
-        sum = (uint8_t) clip2(sum >> out_shift);
-        sum2 = (uint8_t) clip2(sum2 >> out_shift);
-        sum3 = (uint8_t) clip2(sum3 >> out_shift);
-        sum4 = (uint8_t) clip2(sum4 >> out_shift);
+        sum = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+        sum2 = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
+        sum3 = (${pt_out}) ${out_clip_fn}(sum3 >> out_shift);
+        sum4 = (${pt_out}) ${out_clip_fn}(sum4 >> out_shift);
         sum = bitins(sum, n_mask2, sum2, mask2, off2);
         sum = bitins(sum, n_mask4, sum3, mask4, off4);
         *pOutBuffer = bitins(sum, n_mask6, sum4, mask6, off6);

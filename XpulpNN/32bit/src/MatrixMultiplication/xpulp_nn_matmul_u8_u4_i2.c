@@ -21,6 +21,7 @@
 #include "pulp_nn_utils.h"
 
 
+
 uint8_t * __attribute__((noinline)) xpulp_nn_matmul_u8_u4_i2(
                         uint8_t *pIn,
                         int8_t *pBias,

@@ -20,11 +20,27 @@
 
 #include "pmsis.h"
 #include "pulp_nn_utils.h"
+<%
+act_prec = int(config.kernel.act_prec[0:2])
+act_t = f"int{act_prec}_t"
+def su(sgn):
+    return 's' if sgn else 'u'
+def u_(sgn):
+    return '' if sgn else 'u'
+def s_(sgn):
+    return 's' if sgn else ''
+
+pt_in = f"{u_(config.kernel.in_signed)}int8_t"
+int_t_in = f"{u_(config.kernel.in_signed)}int32_t"
+pt_out = f"{u_(config.kernel.out_signed)}int8_t"
+sumdotp_fn = f"SumDotp{s_(config.kernel.in_signed)}4"
+bex = f"bitext{u_(config.kernel.in_signed)}"
+%>
 
 
 void __attribute__ ((noinline)) ${config.fn_name}(
-  uint8_t * pIn,
-  uint8_t * pOut,
+                                                  ${pt_in} * pIn,
+                                                  ${pt_out} * pOut,
   uint16_t  dim_im_in_x,
   uint16_t  dim_im_in_y,
   uint16_t  ch_im_in,
@@ -65,7 +81,7 @@ void __attribute__ ((noinline)) ${config.fn_name}(
     for (i_x = 0; i_x < dim_im_out_x; i_x++)
     {
       /* for each output pixel */
-      uint8_t     *target = pIn + (i_y * dim_im_in_x + i_x) * ch_im_in_r;
+      ${pt_in}     *target = pIn + (i_y * dim_im_in_x + i_x) * ch_im_in_r;
       uint8_t     *win_start;
       uint8_t     *win_stop;
       if (i_x * stride_x - padding_l < 0)
@@ -112,9 +128,9 @@ void __attribute__ ((noinline)) ${config.fn_name}(
   for (i_y = start2; i_y < stop2; i_y++)
   {
     /* for each output row */
-    uint8_t *target = pOut + i_y * dim_im_out_x * ch_im_in_r;
-    uint8_t *row_start;
-    uint8_t *row_end;
+    ${pt_out} *target = pOut + i_y * dim_im_out_x * ch_im_in_r;
+    ${pt_in} *row_start;
+    ${pt_in} *row_end;
     /* setting the starting row */
     if (i_y * stride_y - padding_t < 0)
     {
@@ -127,7 +143,7 @@ void __attribute__ ((noinline)) ${config.fn_name}(
     /* setting the stopping row */
     if (i_y * stride_y - padding_t + dim_kernel_y >= dim_im_in_y)
     {
-      row_end = pIn + dim_im_in_x * dim_im_in_x * ch_im_in_r;
+      row_end = pIn + dim_im_in_y * dim_im_in_x * ch_im_in_r;
     }
     else
     {
@@ -137,7 +153,7 @@ void __attribute__ ((noinline)) ${config.fn_name}(
     /* copy over the first row */
     for (int i = 0; i< dim_im_out_x * ch_im_in_r; i++)
     {
-      target[i] = row_start[i];
+      target[i] = (${pt_out}) row_start[i];
     }
     /* move over to next row */
     row_start += ch_im_in_r * dim_im_in_x;

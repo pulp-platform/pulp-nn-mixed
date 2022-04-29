@@ -22,7 +22,7 @@
 #include "pulp_nn_kernels.h"
 
 
-void __attribute__((noinline)) xpulp_nn_pointwise_u8_u8_i8(
+void xpulp_nn_pointwise_u8_u8_i8(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
@@ -120,6 +120,7 @@ void __attribute__((noinline)) xpulp_nn_pointwise_u8_u8_i8(
       int i;
       int64_t * k1 = pKappa;
       int64_t * lambda1 = pLambda;
+
       v4s inA;
       v4u inB;
       for(i = 0; i < ch_out; i++)

@@ -24,7 +24,7 @@
 void pulp_nn_linear_u8_i32_i2(
                   uint8_t *pIn,
                   int8_t *pBias,
-                  uint8_t *pOut,
+                  int8_t *pOut,
                   int8_t *pWeight,
                   uint16_t dim_vec,
                   uint16_t num_o_neurons)
@@ -44,7 +44,7 @@ void pulp_nn_linear_u8_i32_i2(
 
     int32_t *pOutBuffer = (int32_t *) pOut + start;
 
-      int lft_neurons = chunk & 0x01;
+    int lft_neurons = chunk & 0x01;
     int stop_even = stop - lft_neurons;
     int i;
 

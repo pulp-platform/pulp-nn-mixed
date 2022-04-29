@@ -87,8 +87,9 @@ void xpulp_nn_depthwise_u4_u4_i2(
   int i_in_ch = (start_channel << 1) * in_image_size;
   int i_wt_ch = start_channel * kernel_size;
 
-  int64_t *k1 = pKappa + core_id * (chunk << 2);
-  int64_t *lambda1 = pLambda + core_id * (chunk << 2);
+
+  int64_t * k1 = pKappa + core_id * (chunk << 2);
+  int64_t * lambda1 = pLambda + core_id * (chunk << 2);
 
   for(int i_ch = start_channel; i_ch < stop_channel; i_ch++)
   {
@@ -164,37 +165,37 @@ void xpulp_nn_depthwise_u4_u4_i2(
           do
           {
             v4u src_in = *((v4u*) (base_ptr + idx));
-            *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 0);
-            *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 4);
+            *pIm2Col = (uint8_t) bitextu((uint32_t) src_in, 4, 0);
+            *pIm2Col2 = (uint8_t) bitextu((uint32_t) src_in, 4, 4);
             pIm2Col++;
             pIm2Col2++;
-            *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 8);
-            *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 12);
+            *pIm2Col = (uint8_t) bitextu((uint32_t) src_in, 4, 8);
+            *pIm2Col2 = (uint8_t) bitextu((uint32_t) src_in, 4, 12);
             pIm2Col++;
             pIm2Col2++;
-            *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 16);
-            *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 20);
+            *pIm2Col = (uint8_t) bitextu((uint32_t) src_in, 4, 16);
+            *pIm2Col2 = (uint8_t) bitextu((uint32_t) src_in, 4, 20);
             pIm2Col++;
             pIm2Col2++;
-            *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 24);
-            *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 28);
+            *pIm2Col = (uint8_t) bitextu((uint32_t) src_in, 4, 24);
+            *pIm2Col2 = (uint8_t) bitextu((uint32_t) src_in, 4, 28);
             pIm2Col++;
             pIm2Col2++;
             src_in = *((v4u*) (base_ptr + idx + in_image_size));
-            *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 4, 0);
-            *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 4, 4);
+            *pIm2Col3 = (uint8_t) bitextu((uint32_t) src_in, 4, 0);
+            *pIm2Col4 = (uint8_t) bitextu((uint32_t) src_in, 4, 4);
             pIm2Col3++;
             pIm2Col4++;
-            *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 4, 8);
-            *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 4, 12);
+            *pIm2Col3 = (uint8_t) bitextu((uint32_t) src_in, 4, 8);
+            *pIm2Col4 = (uint8_t) bitextu((uint32_t) src_in, 4, 12);
             pIm2Col3++;
             pIm2Col4++;
-            *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 4, 16);
-            *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 4, 20);
+            *pIm2Col3 = (uint8_t) bitextu((uint32_t) src_in, 4, 16);
+            *pIm2Col4 = (uint8_t) bitextu((uint32_t) src_in, 4, 20);
             pIm2Col3++;
             pIm2Col4++;
-            *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 4, 24);
-            *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 4, 28);
+            *pIm2Col3 = (uint8_t) bitextu((uint32_t) src_in, 4, 24);
+            *pIm2Col4 = (uint8_t) bitextu((uint32_t) src_in, 4, 28);
             pIm2Col3++;
             pIm2Col4++;
             idx+=4;
@@ -369,37 +370,37 @@ void xpulp_nn_depthwise_u4_u4_i2(
         for (int i=0; i<dim_kernel_x_size_padded; i++)
         {
           v4u src_in = *((v4u*) (base_ptr + idx));
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 0);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 4);
+          *pIm2Col = (uint8_t) bitextu((uint32_t) src_in, 4, 0);
+          *pIm2Col2 = (uint8_t) bitextu((uint32_t) src_in, 4, 4);
           pIm2Col++;
           pIm2Col2++;
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 8);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 12);
+          *pIm2Col = (uint8_t) bitextu((uint32_t) src_in, 4, 8);
+          *pIm2Col2 = (uint8_t) bitextu((uint32_t) src_in, 4, 12);
           pIm2Col++;
           pIm2Col2++;
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 16);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 20);
+          *pIm2Col = (uint8_t) bitextu((uint32_t) src_in, 4, 16);
+          *pIm2Col2 = (uint8_t) bitextu((uint32_t) src_in, 4, 20);
           pIm2Col++;
           pIm2Col2++;
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 24);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 28);
+          *pIm2Col = (uint8_t) bitextu((uint32_t) src_in, 4, 24);
+          *pIm2Col2 = (uint8_t) bitextu((uint32_t) src_in, 4, 28);
           pIm2Col++;
           pIm2Col2++;
           src_in = *((v4u*) (base_ptr + idx + in_image_size));
-          *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 4, 0);
-          *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 4, 4);
+          *pIm2Col3 = (uint8_t) bitextu((uint32_t) src_in, 4, 0);
+          *pIm2Col4 = (uint8_t) bitextu((uint32_t) src_in, 4, 4);
           pIm2Col3++;
           pIm2Col4++;
-          *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 4, 8);
-          *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 4, 12);
+          *pIm2Col3 = (uint8_t) bitextu((uint32_t) src_in, 4, 8);
+          *pIm2Col4 = (uint8_t) bitextu((uint32_t) src_in, 4, 12);
           pIm2Col3++;
           pIm2Col4++;
-          *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 4, 16);
-          *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 4, 20);
+          *pIm2Col3 = (uint8_t) bitextu((uint32_t) src_in, 4, 16);
+          *pIm2Col4 = (uint8_t) bitextu((uint32_t) src_in, 4, 20);
           pIm2Col3++;
           pIm2Col4++;
-          *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 4, 24);
-          *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 4, 28);
+          *pIm2Col3 = (uint8_t) bitextu((uint32_t) src_in, 4, 24);
+          *pIm2Col4 = (uint8_t) bitextu((uint32_t) src_in, 4, 28);
           pIm2Col3++;
           pIm2Col4++;
           idx+=4;
@@ -520,7 +521,7 @@ void xpulp_nn_depthwise_u4_u4_i2(
           else
           {
             sum = (uint8_t) clip4(sum >> out_shift);
-            sum2 = (uint8_t) clip84(sum2 >> out_shift);
+            sum2 = (uint8_t) clip4(sum2 >> out_shift);
             *pOutBuffer = bitins(sum, n_mask, sum2, mask, off);
             sum3 = (uint8_t) clip4(sum3 >> out_shift);
             sum4 = (uint8_t) clip4(sum4 >> out_shift);
@@ -573,37 +574,37 @@ void xpulp_nn_depthwise_u4_u4_i2(
         do
         {
           v4u src_in = *((v4u*) (base_ptr + idx));
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 0);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 4);
+          *pIm2Col = (uint8_t) bitextu((uint32_t) src_in, 4, 0);
+          *pIm2Col2 = (uint8_t) bitextu((uint32_t) src_in, 4, 4);
           pIm2Col++;
           pIm2Col2++;
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 8);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 12);
+          *pIm2Col = (uint8_t) bitextu((uint32_t) src_in, 4, 8);
+          *pIm2Col2 = (uint8_t) bitextu((uint32_t) src_in, 4, 12);
           pIm2Col++;
           pIm2Col2++;
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 16);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 20);
+          *pIm2Col = (uint8_t) bitextu((uint32_t) src_in, 4, 16);
+          *pIm2Col2 = (uint8_t) bitextu((uint32_t) src_in, 4, 20);
           pIm2Col++;
           pIm2Col2++;
-          *pIm2Col = (uint8_t) bitextu((unsigned int) src_in, 4, 24);
-          *pIm2Col2 = (uint8_t) bitextu((unsigned int) src_in, 4, 28);
+          *pIm2Col = (uint8_t) bitextu((uint32_t) src_in, 4, 24);
+          *pIm2Col2 = (uint8_t) bitextu((uint32_t) src_in, 4, 28);
           pIm2Col++;
           pIm2Col2++;
           src_in = *((v4u*) (base_ptr + idx + in_image_size));
-          *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 4, 0);
-          *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 4, 4);
+          *pIm2Col3 = (uint8_t) bitextu((uint32_t) src_in, 4, 0);
+          *pIm2Col4 = (uint8_t) bitextu((uint32_t) src_in, 4, 4);
           pIm2Col3++;
           pIm2Col4++;
-          *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 4, 8);
-          *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 4, 12);
+          *pIm2Col3 = (uint8_t) bitextu((uint32_t) src_in, 4, 8);
+          *pIm2Col4 = (uint8_t) bitextu((uint32_t) src_in, 4, 12);
           pIm2Col3++;
           pIm2Col4++;
-          *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 4, 16);
-          *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 4, 20);
+          *pIm2Col3 = (uint8_t) bitextu((uint32_t) src_in, 4, 16);
+          *pIm2Col4 = (uint8_t) bitextu((uint32_t) src_in, 4, 20);
           pIm2Col3++;
           pIm2Col4++;
-          *pIm2Col3 = (uint8_t) bitextu((unsigned int) src_in, 4, 24);
-          *pIm2Col4 = (uint8_t) bitextu((unsigned int) src_in, 4, 28);
+          *pIm2Col3 = (uint8_t) bitextu((uint32_t) src_in, 4, 24);
+          *pIm2Col4 = (uint8_t) bitextu((uint32_t) src_in, 4, 28);
           pIm2Col3++;
           pIm2Col4++;
           idx+=4;

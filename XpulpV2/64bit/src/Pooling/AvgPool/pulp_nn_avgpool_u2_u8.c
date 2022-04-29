@@ -25,6 +25,7 @@
 
 #define bitins(dst,not_mask_imm,src,mask_imm,off) __builtin_pulp_binsert(dst,not_mask_imm,src,mask_imm,off)
 #define bitext_u(x,size,off) __builtin_pulp_bextractu(x,size,off)
+#define bitext(x,size,off) __builtin_pulp_bextract(x,size,off)
 
 void __attribute__ ((noinline))  pulp_nn_avgpool_u2_u8(
   uint8_t * pIn,

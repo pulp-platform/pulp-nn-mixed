@@ -22,6 +22,8 @@
 #include "pulp_nn_kernels.h"
 
 
+
+
 void __attribute__((noinline)) xpulp_nn_conv_u8_u2_i4_4x4(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
@@ -217,6 +219,7 @@ void __attribute__((noinline)) xpulp_nn_conv_u8_u2_i4_4x4(
       int i;
       int32_t * k1 = pKappa;
       int32_t * lambda1 = pLambda;
+
       v4s inA[2];
       uint8_t out[4];
       uint16_t num_col_im2col = ch_in * dim_kernel_x * dim_kernel_y;
@@ -239,7 +242,7 @@ void __attribute__((noinline)) xpulp_nn_conv_u8_u2_i4_4x4(
         {
           pA = pulp_nn_i4_to_i8(pA,inA);
 
-          ptrA = (uint32_t *)inA;
+          ptrA = (int32_t *)inA;
 
           sum = SumDotp4(*(v4u *)ptrB, *(v4s *)ptrA, sum);
 

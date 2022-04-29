@@ -22,6 +22,7 @@
 ############################################################### Version 1.0 #########################################################
 
 from include import pulp_nn_factory, pulp_nn_init, pulp_nn_struct
+from itertools import product
 import pulp_nn_test_setup
 
 
@@ -47,7 +48,8 @@ def main():
         if pulp_nn_test_setup.SINGLE_KERNEL == 1:
 
             if pulp_nn_test_setup.TYPE_OF_KERNEL == 'matmul':
-                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='matmul', inp=None, out=pulp_nn_test_setup.out_precision, wt=pulp_nn_test_setup.wt_precision, quant=pulp_nn_test_setup.quantization_type, act_prec=a, ext=pulp_nn_test_setup.ISA)
+
+                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='matmul', inp=None, out=pulp_nn_test_setup.out_precision, wt=pulp_nn_test_setup.wt_precision, quant=pulp_nn_test_setup.quantization_type, act_prec=a, ext=pulp_nn_test_setup.ISA, in_signed=pulp_nn_test_setup.in_signed, out_signed=pulp_nn_test_setup.out_signed)
                 matmul=pulp_nn_factory.PULPNNMatMul(kernel=kernel_to_test, layer=layer_to_gen)
                 pulp_nn_factory.copy_file(src_tag='matmul', key=matmul, dest_tag='pulp_nn_matmul')
                 pulp_nn_factory.allocation(path_tag='data_allocation_matm', comp=matmul)
@@ -59,12 +61,12 @@ def main():
                         comp=matmul)
 
             elif pulp_nn_test_setup.TYPE_OF_KERNEL == 'convolution':
-                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='convolution', inp=pulp_nn_test_setup.in_precision, out=pulp_nn_test_setup.out_precision, wt=pulp_nn_test_setup.wt_precision, quant=pulp_nn_test_setup.quantization_type, act_prec=a, ext=pulp_nn_test_setup.ISA)
+                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='convolution', inp=pulp_nn_test_setup.in_precision, out=pulp_nn_test_setup.out_precision, wt=pulp_nn_test_setup.wt_precision, quant=pulp_nn_test_setup.quantization_type, act_prec=a, ext=pulp_nn_test_setup.ISA, in_signed=pulp_nn_test_setup.in_signed, out_signed=pulp_nn_test_setup.out_signed)
                 conv=pulp_nn_factory.PULPNNConvolve(kernel=kernel_to_test, layer=layer_to_gen)
                 if pulp_nn_test_setup.ISA == 'XpulpV2':
-                    kernel_matmul = pulp_nn_factory.PULPNNKernel(name='matmul', inp=None, out=pulp_nn_test_setup.out_precision, wt=pulp_nn_test_setup.wt_precision, quant=pulp_nn_test_setup.quantization_type, act_prec=a, ext=pulp_nn_test_setup.ISA)
+                    kernel_matmul = pulp_nn_factory.PULPNNKernel(name='matmul', inp=None, out=pulp_nn_test_setup.out_precision, wt=pulp_nn_test_setup.wt_precision, quant=pulp_nn_test_setup.quantization_type, act_prec=a, ext=pulp_nn_test_setup.ISA, in_signed=pulp_nn_test_setup.in_signed, out_signed=pulp_nn_test_setup.out_signed)
                 elif pulp_nn_test_setup.ISA == 'XpulpNN':
-                    kernel_matmul = pulp_nn_factory.PULPNNKernel(name='matmul', inp=pulp_nn_test_setup_in_precision, out=pulp_nn_test_setup.out_precision, wt=pulp_nn_test_setup.wt_precision, quant=pulp_nn_test_setup.quantization_type, act_prec=a, ext=pulp_nn_test_setup.ISA)    
+                    kernel_matmul = pulp_nn_factory.PULPNNKernel(name='matmul', inp=pulp_nn_test_setup.in_precision, out=pulp_nn_test_setup.out_precision, wt=pulp_nn_test_setup.wt_precision, quant=pulp_nn_test_setup.quantization_type, act_prec=a, ext=pulp_nn_test_setup.ISA, in_signed=pulp_nn_test_setup.in_signed, out_signed=pulp_nn_test_setup.out_signed)
                 matmul=pulp_nn_factory.PULPNNMatMul(kernel=kernel_matmul, layer=layer_to_gen)
                 pulp_nn_factory.copy_file(src_tag='convolution', key=conv, dest_tag='pulp_nn_convolution')
                 pulp_nn_factory.copy_file(src_tag='matmul', key=matmul, dest_tag='pulp_nn_matmul')
@@ -82,12 +84,12 @@ def main():
                         comp=matmul)
 
             elif pulp_nn_test_setup.TYPE_OF_KERNEL == 'pointwise':
-                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='pointwise', inp=pulp_nn_test_setup.in_precision, out=pulp_nn_test_setup.out_precision, wt=pulp_nn_test_setup.wt_precision, quant=pulp_nn_test_setup.quantization_type, act_prec=a, ext=pulp_nn_test_setup.ISA)
+                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='pointwise', inp=pulp_nn_test_setup.in_precision, out=pulp_nn_test_setup.out_precision, wt=pulp_nn_test_setup.wt_precision, quant=pulp_nn_test_setup.quantization_type, act_prec=a, ext=pulp_nn_test_setup.ISA, in_signed=pulp_nn_test_setup.in_signed, out_signed=pulp_nn_test_setup.out_signed)
                 pw=pulp_nn_factory.PULPNNConvolvePointwise(kernel=kernel_to_test, layer=layer_to_gen)
                 if pulp_nn_test_setup.ISA == 'XpulpV2':
-                    kernel_matmul = pulp_nn_factory.PULPNNKernel(name='matmul', inp=None, out=pulp_nn_test_setup.out_precision, wt=pulp_nn_test_setup.wt_precision, quant=pulp_nn_test_setup.quantization_type, act_prec=a, ext=pulp_nn_test_setup.ISA)
+                    kernel_matmul = pulp_nn_factory.PULPNNKernel(name='matmul', inp=None, out=pulp_nn_test_setup.out_precision, wt=pulp_nn_test_setup.wt_precision, quant=pulp_nn_test_setup.quantization_type, act_prec=a, ext=pulp_nn_test_setup.ISA, in_signed=pulp_nn_test_setup.in_signed, out_signed=pulp_nn_test_setup.out_signed)
                 elif pulp_nn_test_setup.ISA == 'XpulpNN':
-                    kernel_matmul = pulp_nn_factory.PULPNNKernel(name='matmul', inp=pulp_nn_test_setup_in_precision, out=pulp_nn_test_setup.out_precision, wt=pulp_nn_test_setup.wt_precision, quant=pulp_nn_test_setup.quantization_type, act_prec=a, ext=pulp_nn_test_setup.ISA)    
+                    kernel_matmul = pulp_nn_factory.PULPNNKernel(name='matmul', inp=pulp_nn_test_setup.in_precision, out=pulp_nn_test_setup.out_precision, wt=pulp_nn_test_setup.wt_precision, quant=pulp_nn_test_setup.quantization_type, act_prec=a, ext=pulp_nn_test_setup.ISA, in_signed=pulp_nn_test_setup.in_signed, out_signed=pulp_nn_test_setup.out_signed)
                 matmul=pulp_nn_factory.PULPNNMatMul(kernel=kernel_matmul, layer=layer_to_gen)
                 pulp_nn_factory.copy_file(src_tag='pointwise', key=pw, dest_tag='pulp_nn_pointwise')
                 pulp_nn_factory.copy_file(src_tag='matmul', key=matmul, dest_tag='pulp_nn_matmul')
@@ -105,7 +107,7 @@ def main():
                         comp=matmul)
 
             elif pulp_nn_test_setup.TYPE_OF_KERNEL == 'depthwise':
-                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='depthwise', inp=pulp_nn_test_setup.in_precision, out=pulp_nn_test_setup.out_precision, wt=pulp_nn_test_setup.wt_precision, quant=pulp_nn_test_setup.quantization_type, act_prec=a, ext=pulp_nn_test_setup.ISA)
+                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='depthwise', inp=pulp_nn_test_setup.in_precision, out=pulp_nn_test_setup.out_precision, wt=pulp_nn_test_setup.wt_precision, quant=pulp_nn_test_setup.quantization_type, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT, in_signed=pulp_nn_test_setup.in_signed, out_signed=pulp_nn_test_setup.out_signed)
                 dw=pulp_nn_factory.PULPNNConvolveDepthwise(kernel=kernel_to_test, layer=layer_to_gen)
                 pulp_nn_factory.copy_file(src_tag='depthwise', key=dw, dest_tag='pulp_nn_depthwise')
                 pulp_nn_factory.allocation(path_tag='data_allocation_dw', comp=dw)
@@ -117,7 +119,7 @@ def main():
                         comp=dw)
 
             elif pulp_nn_test_setup.TYPE_OF_KERNEL == 'linear_no_quant':
-                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='linear_no_quant', inp=pulp_nn_test_setup.in_precision, out=32, wt=pulp_nn_test_setup.wt_precision, quant=None, act_prec=a, ext=pulp_nn_test_setup.ISA)
+                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='linear_no_quant', inp=pulp_nn_test_setup.in_precision, out=32, wt=pulp_nn_test_setup.wt_precision, quant=None, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT, in_signed=pulp_nn_test_setup.in_signed, out_signed=True)
                 lin_nq=pulp_nn_factory.PULPNNLinearNoQuant(kernel=kernel_to_test, layer=layer_to_gen)
                 pulp_nn_factory.copy_file(src_tag='linear_nq', key=lin_nq, dest_tag='pulp_nn_linear_nq')
                 pulp_nn_factory.allocation(path_tag='data_allocation_ln_nq', comp=lin_nq)
@@ -129,7 +131,7 @@ def main():
                         comp=lin_nq)
 
             elif pulp_nn_test_setup.TYPE_OF_KERNEL == 'linear_quant':
-                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='linear_quant', inp=pulp_nn_test_setup.in_precision, out=pulp_nn_test_setup.out_precision, wt=pulp_nn_test_setup.wt_precision, quant=pulp_nn_test_setup.quantization_type, act_prec=a, ext=pulp_nn_test_setup.ISA)
+                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='linear_quant', inp=pulp_nn_test_setup.in_precision, out=pulp_nn_test_setup.out_precision, wt=pulp_nn_test_setup.wt_precision, quant=pulp_nn_test_setup.quantization_type, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT, in_signed=pulp_nn_test_setup.in_signed, out_signed=pulp_nn_test_setup.out_signed)
                 lin_q=pulp_nn_factory.PULPNNLinearQuant(kernel=kernel_to_test, layer=layer_to_gen)
                 pulp_nn_factory.copy_file(src_tag='linear_q', key=lin_q, dest_tag='pulp_nn_linear_q')
                 pulp_nn_factory.allocation(path_tag='data_allocation_ln_q', comp=lin_q)
@@ -141,7 +143,7 @@ def main():
                         comp=lin_q)
 
             elif pulp_nn_test_setup.TYPE_OF_KERNEL == 'maxpool':
-                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='maxpool', inp=pulp_nn_test_setup.in_precision, out=None, wt=None, quant=None, act_prec=a, ext=pulp_nn_test_setup.ISA)
+                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='maxpool', inp=pulp_nn_test_setup.in_precision, out=None, wt=None, quant=None, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT, in_signed=pulp_nn_test_setup.in_signed, out_signed=pulp_nn_test_setup.in_signed)
                 maxp=pulp_nn_factory.PULPNNMaxPool(kernel=kernel_to_test, layer=layer_to_gen)
                 pulp_nn_factory.copy_file(src_tag='maxpool', key=maxp, dest_tag='pulp_nn_maxpool')
                 pulp_nn_factory.allocation(path_tag='data_allocation_maxp', comp=maxp)
@@ -153,8 +155,8 @@ def main():
                         comp=maxp)
 
             elif pulp_nn_test_setup.TYPE_OF_KERNEL == 'avgpool':
-                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='avgpool', inp=pulp_nn_test_setup.in_precision, out=None, wt=None, quant=None, act_prec=a, ext=pulp_nn_test_setup.ISA)
-                avgp=pulp_nn_factory.PULPNNAvgPool(kernel=kernel_to_test, layer=layer_to_gen)
+                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='avgpool', inp=pulp_nn_test_setup.in_precision, out=pulp_nn_test_setup.out_precision, wt=None, quant=None, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT, in_signed=pulp_nn_test_setup.in_signed, out_signed=pulp_nn_test_setup.out_signed)
+                avgp=pulp_nn_factory.PULPNNAvgPoolNew(kernel=kernel_to_test, layer=layer_to_gen)
                 pulp_nn_factory.copy_file(src_tag='avgpool', key=avgp, dest_tag='pulp_nn_avgpool')
                 pulp_nn_factory.allocation(path_tag='data_allocation_avgp', comp=avgp)
                 pulp_nn_factory.golden(path_tag='golden_model_avgp', comp=avgp)
@@ -165,7 +167,7 @@ def main():
                         comp=avgp)
 
             elif pulp_nn_test_setup.TYPE_OF_KERNEL == 'add':
-                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='add', inp=pulp_nn_test_setup.in_precision, out=pulp_nn_test_setup.out_precision, wt=None, quant=None, act_prec=a, ext=pulp_nn_test_setup.ISA)
+                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='add', inp=pulp_nn_test_setup.in_precision, out=pulp_nn_test_setup.out_precision, wt=None, quant=None, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT)
                 add=pulp_nn_factory.PULPNNAdd(kernel=kernel_to_test, layer=layer_to_gen)
                 pulp_nn_factory.copy_file(src_tag='add', key=add, dest_tag='pulp_nn_add')
                 pulp_nn_factory.allocation(path_tag='data_allocation_add', comp=add)
@@ -183,12 +185,13 @@ def main():
                 for j in pulp_nn_init.PULPNNDataPrecisions:
                     for z in pulp_nn_init.PULPNNWeightsPrecisions:
                         for q in pulp_nn_init.PULPNNQuantizationMethods:
-                            kernel_to_test = pulp_nn_factory.PULPNNKernel(name='matmul', inp=None, out=j, wt=z, quant=q, act_prec=a, ext=pulp_nn_test_setup.ISA)
-                            matmul=pulp_nn_factory.PULPNNMatMul(kernel=kernel_to_test, layer=layer_to_gen)
-                            pulp_nn_factory.copy_file(src_tag='matmul', key=matmul, dest_tag='pulp_nn_matmul')
-                            pulp_nn_factory.allocation(path_tag='data_allocation_matm', comp=matmul)
-                            pulp_nn_factory.golden(path_tag='golden_model_matm', comp=matmul)
-                            pulp_nn_init.PULPNNCALL,pulp_nn_init.PULPNNMAKE,pulp_nn_init.PULPNNINCLUDE=pulp_nn_factory.generation(
+                            for si, so in product([True, False], [True, False]):
+                                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='matmul', inp=None, out=j, wt=z, quant=q, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT, in_signed=si, out_signed=so)
+                                matmul=pulp_nn_factory.PULPNNMatMul(kernel=kernel_to_test, layer=layer_to_gen)
+                                pulp_nn_factory.copy_file(src_tag='matmul', key=matmul, dest_tag='pulp_nn_matmul')
+                                pulp_nn_factory.allocation(path_tag='data_allocation_matm', comp=matmul)
+                                pulp_nn_factory.golden(path_tag='golden_model_matm', comp=matmul)
+                                pulp_nn_init.PULPNNCALL,pulp_nn_init.PULPNNMAKE,pulp_nn_init.PULPNNINCLUDE=pulp_nn_factory.generation(
                                     call=pulp_nn_init.PULPNNCALL,
                                     make=pulp_nn_init.PULPNNMAKE, 
                                     include=pulp_nn_init.PULPNNINCLUDE, 
@@ -199,12 +202,13 @@ def main():
                     for j in pulp_nn_init.PULPNNDataPrecisions:
                         for z in pulp_nn_init.PULPNNWeightsPrecisions:
                             for q in pulp_nn_init.PULPNNQuantizationMethods:
-                                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='convolution', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT)
-                                conv=pulp_nn_factory.PULPNNConvolve(kernel=kernel_to_test, layer=layer_to_gen)                         
-                                pulp_nn_factory.copy_file(src_tag='convolution', key=conv, dest_tag='pulp_nn_convolution')
-                                pulp_nn_factory.allocation(path_tag='data_allocation_conv', comp=conv)
-                                pulp_nn_factory.golden(path_tag='golden_model_conv', comp=conv)
-                                pulp_nn_init.PULPNNCALL,pulp_nn_init.PULPNNMAKE,pulp_nn_init.PULPNNINCLUDE=pulp_nn_factory.generation(
+                                for si, so in product([True, False], [True, False]):
+                                    kernel_to_test = pulp_nn_factory.PULPNNKernel(name='convolution', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT, in_signed=si, out_signed=so)
+                                    conv=pulp_nn_factory.PULPNNConvolve(kernel=kernel_to_test, layer=layer_to_gen) 
+                                    pulp_nn_factory.copy_file(src_tag='convolution', key=conv, dest_tag='pulp_nn_convolution')
+                                    pulp_nn_factory.allocation(path_tag='data_allocation_conv', comp=conv)
+                                    pulp_nn_factory.golden(path_tag='golden_model_conv', comp=conv)
+                                    pulp_nn_init.PULPNNCALL,pulp_nn_init.PULPNNMAKE,pulp_nn_init.PULPNNINCLUDE=pulp_nn_factory.generation(
                                         call=pulp_nn_init.PULPNNCALL,
                                         make=pulp_nn_init.PULPNNMAKE,
                                         include=pulp_nn_init.PULPNNINCLUDE,
@@ -213,20 +217,9 @@ def main():
                     for j in pulp_nn_init.PULPNNDataPrecisions:
                         for z in pulp_nn_init.PULPNNWeightsPrecisions:
                             for q in pulp_nn_init.PULPNNQuantizationMethods:
-                                kernel_matmul = pulp_nn_factory.PULPNNKernel(name='matmul', inp=None, out=j, wt=z, quant=q, act_prec=a, ext=pulp_nn_test_setup.ISA)
-                                matmul=pulp_nn_factory.PULPNNMatMul(kernel=kernel_matmul, layer=layer_to_gen)
-                                pulp_nn_factory.copy_file(src_tag='matmul', key=matmul, dest_tag='pulp_nn_matmul')
-                                dummy0,pulp_nn_init.PULPNNMAKE,dummy1=pulp_nn_factory.generation(
-                                        call=None,
-                                        make=pulp_nn_init.PULPNNMAKE, 
-                                        include=None, 
-                                        comp=matmul)
-                elif pulp_nn_test_setup.ISA == 'XpulpNN':
-                    for i in pulp_nn_init.PULPNNDataPrecisions:
-                        for j in pulp_nn_init.PULPNNDataPrecisions:
-                            for z in pulp_nn_init.PULPNNWeightsPrecisions:
-                                for q in pulp_nn_init.PULPNNQuantizationMethods:
-                                    kernel_matmul = pulp_nn_factory.PULPNNKernel(name='matmul', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT)
+                                for si, so in product([True, False], [True, False]):
+                                    
+                                    kernel_matmul = pulp_nn_factory.PULPNNKernel(name='matmul', inp=None, out=j, wt=z, quant=q, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT, in_signed=si, out_signed=so)
                                     matmul=pulp_nn_factory.PULPNNMatMul(kernel=kernel_matmul, layer=layer_to_gen)
                                     pulp_nn_factory.copy_file(src_tag='matmul', key=matmul, dest_tag='pulp_nn_matmul')
                                     dummy0,pulp_nn_init.PULPNNMAKE,dummy1=pulp_nn_factory.generation(
@@ -234,6 +227,20 @@ def main():
                                             make=pulp_nn_init.PULPNNMAKE, 
                                             include=None, 
                                             comp=matmul)
+                elif pulp_nn_test_setup.ISA == 'XpulpNN':
+                    for i in pulp_nn_init.PULPNNDataPrecisions:
+                        for j in pulp_nn_init.PULPNNDataPrecisions:
+                            for z in pulp_nn_init.PULPNNWeightsPrecisions:
+                                for q in pulp_nn_init.PULPNNQuantizationMethods:
+                                    for si, so in product([True, False], [True, False]):
+                                        kernel_matmul = pulp_nn_factory.PULPNNKernel(name='matmul', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT, in_signed=si, out_signed=so)
+                                        matmul=pulp_nn_factory.PULPNNMatMul(kernel=kernel_matmul, layer=layer_to_gen)
+                                        pulp_nn_factory.copy_file(src_tag='matmul', key=matmul, dest_tag='pulp_nn_matmul')
+                                        dummy0,pulp_nn_init.PULPNNMAKE,dummy1=pulp_nn_factory.generation(
+                                                call=None,
+                                                make=pulp_nn_init.PULPNNMAKE, 
+                                                include=None, 
+                                                comp=matmul)
                 elif pulp_nn_test_setup.ISA == 'XpulpNN-mixed':
                     for i in pulp_nn_init.PULPNNDataPrecisions:
                         for j in pulp_nn_init.PULPNNDataPrecisions:
@@ -253,34 +260,23 @@ def main():
                     for j in pulp_nn_init.PULPNNDataPrecisions:
                         for z in pulp_nn_init.PULPNNWeightsPrecisions:
                             for q in pulp_nn_init.PULPNNQuantizationMethods:
-                                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='pointwise', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=pulp_nn_test_setup.ISA)
-                                pw=pulp_nn_factory.PULPNNConvolvePointwise(kernel=kernel_to_test, layer=layer_to_gen)
-                                pulp_nn_factory.copy_file(src_tag='pointwise', key=pw, dest_tag='pulp_nn_pointwise')
-                                pulp_nn_factory.allocation(path_tag='data_allocation_pw', comp=pw)
-                                pulp_nn_factory.golden(path_tag='golden_model_pw', comp=pw)
-                                pulp_nn_init.PULPNNCALL,pulp_nn_init.PULPNNMAKE,pulp_nn_init.PULPNNINCLUDE=pulp_nn_factory.generation(
-                                        call=pulp_nn_init.PULPNNCALL,
-                                        make=pulp_nn_init.PULPNNMAKE,
-                                        include=pulp_nn_init.PULPNNINCLUDE,
-                                        comp=pw)                            
+                                for si, so in product([True, False], [True, False]):
+                                    kernel_to_test = pulp_nn_factory.PULPNNKernel(name='pointwise', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT, in_signed=si, out_signed=so)
+                                    pw=pulp_nn_factory.PULPNNConvolvePointwise(kernel=kernel_to_test, layer=layer_to_gen)
+                                    pulp_nn_factory.copy_file(src_tag='pointwise', key=pw, dest_tag='pulp_nn_pointwise')
+                                    pulp_nn_factory.allocation(path_tag='data_allocation_pw', comp=pw)
+                                    pulp_nn_factory.golden(path_tag='golden_model_pw', comp=pw)
+                                    pulp_nn_init.PULPNNCALL,pulp_nn_init.PULPNNMAKE,pulp_nn_init.PULPNNINCLUDE=pulp_nn_factory.generation(
+                                            call=pulp_nn_init.PULPNNCALL,
+                                            make=pulp_nn_init.PULPNNMAKE,
+                                            include=pulp_nn_init.PULPNNINCLUDE,
+                                            comp=pw)
                 if pulp_nn_test_setup.ISA == 'XpulpV2':
                     for j in pulp_nn_init.PULPNNDataPrecisions:
                         for z in pulp_nn_init.PULPNNWeightsPrecisions:
                             for q in pulp_nn_init.PULPNNQuantizationMethods:
-                                kernel_matmul = pulp_nn_factory.PULPNNKernel(name='matmul', inp=None, out=j, wt=z, quant=q, act_prec=a, ext=pulp_nn_test_setup.ISA)
-                                matmul=pulp_nn_factory.PULPNNMatMul(kernel=kernel_matmul, layer=layer_to_gen)
-                                pulp_nn_factory.copy_file(src_tag='matmul', key=matmul, dest_tag='pulp_nn_matmul')
-                                dummy0,pulp_nn_init.PULPNNMAKE,dummy1=pulp_nn_factory.generation(
-                                        call=None,
-                                        make=pulp_nn_init.PULPNNMAKE, 
-                                        include=None, 
-                                        comp=matmul)
-                elif pulp_nn_test_setup.ISA == 'XpulpNN':
-                    for i in pulp_nn_init.PULPNNDataPrecisions:
-                        for j in pulp_nn_init.PULPNNDataPrecisions:
-                            for z in pulp_nn_init.PULPNNWeightsPrecisions:
-                                for q in pulp_nn_init.PULPNNQuantizationMethods:
-                                    kernel_matmul = pulp_nn_factory.PULPNNKernel(name='matmul', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT)
+                                for si, so in product([True, False], [True, False]):
+                                    kernel_matmul = pulp_nn_factory.PULPNNKernel(name='matmul', inp=None, out=j, wt=z, quant=q, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT, in_signed=si, out_signed=so)
                                     matmul=pulp_nn_factory.PULPNNMatMul(kernel=kernel_matmul, layer=layer_to_gen)
                                     pulp_nn_factory.copy_file(src_tag='matmul', key=matmul, dest_tag='pulp_nn_matmul')
                                     dummy0,pulp_nn_init.PULPNNMAKE,dummy1=pulp_nn_factory.generation(
@@ -288,6 +284,20 @@ def main():
                                             make=pulp_nn_init.PULPNNMAKE, 
                                             include=None, 
                                             comp=matmul)
+                elif pulp_nn_test_setup.ISA == 'XpulpNN':
+                    for i in pulp_nn_init.PULPNNDataPrecisions:
+                        for j in pulp_nn_init.PULPNNDataPrecisions:
+                            for z in pulp_nn_init.PULPNNWeightsPrecisions:
+                                for q in pulp_nn_init.PULPNNQuantizationMethods:
+                                    for si, so in product([True, False], [True, False]):
+                                        kernel_matmul = pulp_nn_factory.PULPNNKernel(name='matmul', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT, in_signed=si, out_signed=so)
+                                        matmul=pulp_nn_factory.PULPNNMatMul(kernel=kernel_matmul, layer=layer_to_gen)
+                                        pulp_nn_factory.copy_file(src_tag='matmul', key=matmul, dest_tag='pulp_nn_matmul')
+                                        dummy0,pulp_nn_init.PULPNNMAKE,dummy1=pulp_nn_factory.generation(
+                                                call=None,
+                                                make=pulp_nn_init.PULPNNMAKE, 
+                                                include=None, 
+                                                comp=matmul)
                 elif pulp_nn_test_setup.ISA == 'XpulpNN-mixed':
                     for i in pulp_nn_init.PULPNNDataPrecisions:
                         for j in pulp_nn_init.PULPNNDataPrecisions:
@@ -307,64 +317,68 @@ def main():
                     for j in pulp_nn_init.PULPNNDataPrecisions:
                         for z in pulp_nn_init.PULPNNWeightsPrecisions:
                             for q in pulp_nn_init.PULPNNQuantizationMethods:
-                                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='depthwise', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=pulp_nn_test_setup.ISA)
-                                dw=pulp_nn_factory.PULPNNConvolveDepthwise(kernel=kernel_to_test, layer=layer_to_gen)
-                                pulp_nn_factory.copy_file(src_tag='depthwise', key=dw, dest_tag='pulp_nn_depthwise')
-                                pulp_nn_factory.allocation(path_tag='data_allocation_dw', comp=dw)
-                                pulp_nn_factory.golden(path_tag='golden_model_dw', comp=dw)
-                                pulp_nn_init.PULPNNCALL,pulp_nn_init.PULPNNMAKE,pulp_nn_init.PULPNNINCLUDE=pulp_nn_factory.generation(
-                                        call=pulp_nn_init.PULPNNCALL,
-                                        make=pulp_nn_init.PULPNNMAKE,
-                                        include=pulp_nn_init.PULPNNINCLUDE,
-                                        comp=dw)
+                                for si, so in product([True, False], [True, False]):
+                                    kernel_to_test = pulp_nn_factory.PULPNNKernel(name='depthwise', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT, in_signed=si, out_signed=so)
+                                    dw=pulp_nn_factory.PULPNNConvolveDepthwise(kernel=kernel_to_test, layer=layer_to_gen)
+                                    pulp_nn_factory.copy_file(src_tag='depthwise', key=dw, dest_tag='pulp_nn_depthwise')
+                                    pulp_nn_factory.allocation(path_tag='data_allocation_dw', comp=dw)
+                                    pulp_nn_factory.golden(path_tag='golden_model_dw', comp=dw)
+                                    pulp_nn_init.PULPNNCALL,pulp_nn_init.PULPNNMAKE,pulp_nn_init.PULPNNINCLUDE=pulp_nn_factory.generation(
+                                            call=pulp_nn_init.PULPNNCALL,
+                                            make=pulp_nn_init.PULPNNMAKE,
+                                            include=pulp_nn_init.PULPNNINCLUDE,
+                                            comp=dw)
 
             elif pulp_nn_test_setup.TYPE_OF_KERNEL == 'linear_no_quant':
                 for i in pulp_nn_init.PULPNNDataPrecisions:
                     for z in pulp_nn_init.PULPNNWeightsPrecisions:
-                        kernel_to_test = pulp_nn_factory.PULPNNKernel(name='linear_no_quant', inp=i, out=32, wt=z, quant=None, act_prec=a, ext=pulp_nn_test_setup.ISA)
-                        lin_nq=pulp_nn_factory.PULPNNLinearNoQuant(kernel=kernel_to_test, layer=layer_to_gen)
-                        pulp_nn_factory.copy_file(src_tag='linear_nq', key=lin_nq, dest_tag='pulp_nn_linear_nq')
-                        pulp_nn_factory.allocation(path_tag='data_allocation_ln_nq', comp=lin_nq)
-                        pulp_nn_factory.golden(path_tag='golden_model_ln_nq', comp=lin_nq)
-                        pulp_nn_init.PULPNNCALL,pulp_nn_init.PULPNNMAKE,pulp_nn_init.PULPNNINCLUDE=pulp_nn_factory.generation(
-                                call=pulp_nn_init.PULPNNCALL,
-                                make=pulp_nn_init.PULPNNMAKE,
-                                include=pulp_nn_init.PULPNNINCLUDE,
-                                comp=lin_nq)
+                        for si in [True, False]:
+                            kernel_to_test = pulp_nn_factory.PULPNNKernel(name='linear_no_quant', inp=i, out=32, wt=z, quant=None, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT, in_signed=si, out_signed=True)
+                            lin_nq=pulp_nn_factory.PULPNNLinearNoQuant(kernel=kernel_to_test, layer=layer_to_gen)
+                            pulp_nn_factory.copy_file(src_tag='linear_nq', key=lin_nq, dest_tag='pulp_nn_linear_nq')
+                            pulp_nn_factory.allocation(path_tag='data_allocation_ln_nq', comp=lin_nq)
+                            pulp_nn_factory.golden(path_tag='golden_model_ln_nq', comp=lin_nq)
+                            pulp_nn_init.PULPNNCALL,pulp_nn_init.PULPNNMAKE,pulp_nn_init.PULPNNINCLUDE=pulp_nn_factory.generation(
+                                    call=pulp_nn_init.PULPNNCALL,
+                                    make=pulp_nn_init.PULPNNMAKE,
+                                    include=pulp_nn_init.PULPNNINCLUDE,
+                                    comp=lin_nq)
 
             elif pulp_nn_test_setup.TYPE_OF_KERNEL == 'linear_quant':
                 for i in pulp_nn_init.PULPNNDataPrecisions:
                     for j in pulp_nn_init.PULPNNDataPrecisions:
                         for z in pulp_nn_init.PULPNNWeightsPrecisions:
                             for q in pulp_nn_init.PULPNNQuantizationMethods:
-                                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='linear_quant', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=pulp_nn_test_setup.ISA)
-                                lin_q=pulp_nn_factory.PULPNNLinearQuant(kernel=kernel_to_test, layer=layer_to_gen)
-                                pulp_nn_factory.copy_file(src_tag='linear_q', key=lin_q, dest_tag='pulp_nn_linear_q')
-                                pulp_nn_factory.allocation(path_tag='data_allocation_ln_q', comp=lin_q)
-                                pulp_nn_factory.golden(path_tag='golden_model_ln_q', comp=lin_q)
-                                pulp_nn_init.PULPNNCALL,pulp_nn_init.PULPNNMAKE,pulp_nn_init.PULPNNINCLUDE=pulp_nn_factory.generation(
-                                        call=pulp_nn_init.PULPNNCALL,
-                                        make=pulp_nn_init.PULPNNMAKE,
-                                        include=pulp_nn_init.PULPNNINCLUDE,
-                                        comp=lin_q)
+                                for si, so in product([True, False], [True, False]):
+                                    kernel_to_test = pulp_nn_factory.PULPNNKernel(name='linear_quant', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT, in_signed=si, out_signed=so)
+                                    lin_q=pulp_nn_factory.PULPNNLinearQuant(kernel=kernel_to_test, layer=layer_to_gen)
+                                    pulp_nn_factory.copy_file(src_tag='linear_q', key=lin_q, dest_tag='pulp_nn_linear_q')
+                                    pulp_nn_factory.allocation(path_tag='data_allocation_ln_q', comp=lin_q)
+                                    pulp_nn_factory.golden(path_tag='golden_model_ln_q', comp=lin_q)
+                                    pulp_nn_init.PULPNNCALL,pulp_nn_init.PULPNNMAKE,pulp_nn_init.PULPNNINCLUDE=pulp_nn_factory.generation(
+                                            call=pulp_nn_init.PULPNNCALL,
+                                            make=pulp_nn_init.PULPNNMAKE,
+                                            include=pulp_nn_init.PULPNNINCLUDE,
+                                            comp=lin_q)
 
             elif pulp_nn_test_setup.TYPE_OF_KERNEL == 'maxpool':
                 for i in pulp_nn_init.PULPNNDataPrecisions:
-                    kernel_to_test = pulp_nn_factory.PULPNNKernel(name='maxpool', inp=i, out=None, wt=None, quant=None, act_prec=a, ext=pulp_nn_test_setup.ISA)
-                    maxp=pulp_nn_factory.PULPNNMaxPool(kernel=kernel_to_test, layer=layer_to_gen)
-                    pulp_nn_factory.copy_file(src_tag='maxpool', key=maxp, dest_tag='pulp_nn_maxpool')
-                    pulp_nn_factory.allocation(path_tag='data_allocation_maxp', comp=maxp)
-                    pulp_nn_factory.golden(path_tag='golden_model_maxp', comp=maxp)
-                    pulp_nn_init.PULPNNCALL,pulp_nn_init.PULPNNMAKE,pulp_nn_init.PULPNNINCLUDE=pulp_nn_factory.generation(
-                            call=pulp_nn_init.PULPNNCALL,
-                            make=pulp_nn_init.PULPNNMAKE,
-                            include=pulp_nn_init.PULPNNINCLUDE,
-                            comp=maxp)
+                    for si in [True, False]:
+                        kernel_to_test = pulp_nn_factory.PULPNNKernel(name='maxpool', inp=i, out=None, wt=None, quant=None, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT, in_signed=si, out_signed=si)
+                        maxp=pulp_nn_factory.PULPNNMaxPool(kernel=kernel_to_test, layer=layer_to_gen)
+                        pulp_nn_factory.copy_file(src_tag='maxpool', key=maxp, dest_tag='pulp_nn_maxpool')
+                        pulp_nn_factory.allocation(path_tag='data_allocation_maxp', comp=maxp)
+                        pulp_nn_factory.golden(path_tag='golden_model_maxp', comp=maxp)
+                        pulp_nn_init.PULPNNCALL,pulp_nn_init.PULPNNMAKE,pulp_nn_init.PULPNNINCLUDE=pulp_nn_factory.generation(
+                                call=pulp_nn_init.PULPNNCALL,
+                                make=pulp_nn_init.PULPNNMAKE,
+                                include=pulp_nn_init.PULPNNINCLUDE,
+                                comp=maxp)
 
             elif pulp_nn_test_setup.TYPE_OF_KERNEL == 'avgpool':
                 for i in pulp_nn_init.PULPNNDataPrecisions:
-                    kernel_to_test = pulp_nn_factory.PULPNNKernel(name='avgpool', inp=i, out=None, wt=None, quant=None, act_prec=a, ext=pulp_nn_test_setup.ISA)
-                    avg=pulp_nn_factory.PULPNNAvgPool(kernel=kernel_to_test, layer=layer_to_gen)
+                    kernel_to_test = pulp_nn_factory.PULPNNKernel(name='avgpool', inp=i, out=None, wt=None, quant=None, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT)
+                    avg=pulp_nn_factory.PULPNNAvgPoolNew(kernel=kernel_to_test, layer=layer_to_gen)
                     pulp_nn_factory.copy_file(src_tag='avgpool', key=avg, dest_tag='pulp_nn_avgpool')
                     pulp_nn_factory.allocation(path_tag='data_allocation_avgp', comp=avg)
                     pulp_nn_factory.golden(path_tag='golden_model_avgp', comp=avg)
@@ -378,7 +392,7 @@ def main():
                 for i in pulp_nn_init.PULPNNDataPrecisions:
                     for j in pulp_nn_init.PULPNNDataPrecisions:
                         if j <= i:
-                            kernel_to_test = pulp_nn_factory.PULPNNKernel(name='add', inp=i, out=j, wt=None, quant=None, act_prec=a, ext=pulp_nn_test_setup.ISA)
+                            kernel_to_test = pulp_nn_factory.PULPNNKernel(name='add', inp=i, out=j, wt=None, quant=None, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT,)
                             add=pulp_nn_factory.PULPNNAdd(kernel=kernel_to_test, layer=layer_to_gen)
                             pulp_nn_factory.copy_file(src_tag='add', key=add, dest_tag='pulp_nn_add')
                             pulp_nn_factory.allocation(path_tag='data_allocation_add', comp=add)

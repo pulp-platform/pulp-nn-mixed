@@ -19,12 +19,28 @@
 
 #include "pmsis.h"
 #include "pulp_nn_utils.h"
+<%
+act_prec = int(config.kernel.act_prec[0:2])
+act_t = f"int{act_prec}_t"
+def su(sgn):
+    return 's' if sgn else 'u'
+def u_(sgn):
+    return '' if sgn else 'u'
+def s_(sgn):
+    return 's' if sgn else ''
 
+pt_in = f"{u_(config.kernel.in_signed)}int8_t"
+vt_in = f"v4{su(config.kernel.in_signed)}"
+int_t_in = f"{u_(config.kernel.in_signed)}int32_t"
+pt_out = f"{u_(config.kernel.out_signed)}int8_t"
+sumdotp_fn = f"SumDotp{s_(config.kernel.in_signed)}4"
+bex = f"bitext{u_(config.kernel.in_signed)}"
+%>
 
 void ${config.fn_name}(
-                  uint8_t *pIn,
+                  ${pt_in} *pIn,
                   int8_t *pBias,
-                  uint8_t *pOut,
+                  ${pt_out} *pOut,
                   int8_t *pWeight,
                   uint16_t dim_vec,
                   uint16_t num_o_neurons)
@@ -51,22 +67,22 @@ void ${config.fn_name}(
     int stop = min(start + chunk, num_o_neurons);
 
 %if config.less_precision == 8:
-    v4u vecA;
+    ${vt_in} vecA;
     v4s vecB;
     v4s vecB2;
 %elif config.less_precision == 4:
-    v4u vecA[2];
+    ${vt_in} vecA[2];
     v4s vecB[2];
     v4s vecB2[2];
 %elif config.less_precision == 2:
-    v4u vecA[4];
+    ${vt_in} vecA[4];
     v4s vecB[4];
     v4s vecB2[4];
 %endif
 
     int32_t *pOutBuffer = (int32_t *) pOut + start;
 
-      int lft_neurons = chunk & 0x01;
+    int lft_neurons = chunk & 0x01;
     int stop_even = stop - lft_neurons;
     int i;
 
@@ -75,7 +91,7 @@ void ${config.fn_name}(
         int sum = 0;
         int sum2 = 0;
 
-        uint8_t *pA = pIn;
+        ${pt_in} *pA = pIn;
         int8_t *pB = pWeight + (i * dim_vec_wt);
         int8_t *pB2 = pB + dim_vec_wt;
 
@@ -88,16 +104,16 @@ void ${config.fn_name}(
 %endif
         {
 %if config.less_precision == 8:
-               vecA = *((v4u*)pA);
+               vecA = *((${vt_in}*)pA);
                vecB = *((v4s*)pB);
                vecB2 = *((v4s*)pB2);
-             sum = SumDotp4(vecA, vecB, sum);
-             sum2 = SumDotp4(vecA, vecB2, sum2);
+             sum = ${sumdotp_fn}(vecA, vecB, sum);
+             sum2 = ${sumdotp_fn}(vecA, vecB2, sum2);
 %elif config.less_precision == 4:
 %if config.kernel.in_data_t == 8:
-             vecA[0] = *((v4u*)pA);
+             vecA[0] = *((${vt_in}*)pA);
              pA+=4;
-             vecA[1] = *((v4u*)pA);
+             vecA[1] = *((${vt_in}*)pA);
 %else:
              ${config.unpack_in_fn}(pA,vecA);
 %endif
@@ -107,24 +123,24 @@ void ${config.fn_name}(
             pB+=4;
             pB2+=4;
             vecB[1] = *((v4s*)pB);
-                    vecB2[1] = *((v4s*)pB2);
+            vecB2[1] = *((v4s*)pB2);
 %else:
             ${config.unpack_wt_fn}(pB,vecB);
             ${config.unpack_wt_fn}(pB2,vecB2);
 %endif
-                sum = SumDotp4(vecA[0], vecB[0], sum);
-                  sum = SumDotp4(vecA[1], vecB[1], sum);
-                  sum2 = SumDotp4(vecA[0], vecB2[0], sum2);
-                  sum2 = SumDotp4(vecA[1], vecB2[1], sum2);
+                sum = ${sumdotp_fn}(vecA[0], vecB[0], sum);
+                  sum = ${sumdotp_fn}(vecA[1], vecB[1], sum);
+                  sum2 = ${sumdotp_fn}(vecA[0], vecB2[0], sum2);
+                  sum2 = ${sumdotp_fn}(vecA[1], vecB2[1], sum2);
 %elif config.less_precision == 2:
 %if config.kernel.in_data_t == 8:
-            vecA[0] = *((v4u*)pA);
+            vecA[0] = *((${vt_in}*)pA);
             pA+=4;
-            vecA[1] = *((v4u*)pA);
+            vecA[1] = *((${vt_in}*)pA);
             pA+=4;
-            vecA[2] = *((v4u*)pA);
+            vecA[2] = *((${vt_in}*)pA);
             pA+=4;
-            vecA[3] = *((v4u*)pA);
+            vecA[3] = *((${vt_in}*)pA);
 %elif config.kernel.in_data_t == 4:
                   ${config.unpack_in_fn}(pA,vecA);
                   pA+=4;
@@ -158,14 +174,14 @@ void ${config.fn_name}(
             ${config.unpack_wt_fn}(pB,vecB);
             ${config.unpack_wt_fn}(pB2,vecB2);
 %endif
-                sum = SumDotp4(vecA[0], vecB[0], sum);
-                  sum = SumDotp4(vecA[1], vecB[1], sum);
-                  sum = SumDotp4(vecA[2], vecB[2], sum);
-                  sum = SumDotp4(vecA[3], vecB[3], sum);
-                  sum2 = SumDotp4(vecA[0], vecB2[0], sum2);
-                  sum2 = SumDotp4(vecA[1], vecB2[1], sum2);
-                  sum2 = SumDotp4(vecA[2], vecB2[2], sum2);
-                  sum2 = SumDotp4(vecA[3], vecB2[3], sum2);
+                sum = ${sumdotp_fn}(vecA[0], vecB[0], sum);
+                  sum = ${sumdotp_fn}(vecA[1], vecB[1], sum);
+                  sum = ${sumdotp_fn}(vecA[2], vecB[2], sum);
+                  sum = ${sumdotp_fn}(vecA[3], vecB[3], sum);
+                  sum2 = ${sumdotp_fn}(vecA[0], vecB2[0], sum2);
+                  sum2 = ${sumdotp_fn}(vecA[1], vecB2[1], sum2);
+                  sum2 = ${sumdotp_fn}(vecA[2], vecB2[2], sum2);
+                  sum2 = ${sumdotp_fn}(vecA[3], vecB2[3], sum2);
 %endif
                   pA+=4;
                   pB+=4;
@@ -182,26 +198,26 @@ void ${config.fn_name}(
             {
 %if config.less_precision == 2:
 %if config.kernel.in_data_t == 2:
-                  uint8_t inA = (uint8_t) bitext((unsigned int) *pA, 2, 0);
-                  uint8_t inA2 = (uint8_t) bitext((unsigned int) *pA, 2, 2);
-                  uint8_t inA3 = (uint8_t) bitext((unsigned int) *pA, 2, 4);
-                  uint8_t inA4 = (uint8_t) bitext((unsigned int) *pA, 2, 6);
+                  ${pt_in} inA = (${pt_in}) ${bex}((${int_t_in}) *pA, 2, 0);
+                  ${pt_in} inA2 = (${pt_in}) ${bex}((${int_t_in}) *pA, 2, 2);
+                  ${pt_in} inA3 = (${pt_in}) ${bex}((${int_t_in}) *pA, 2, 4);
+                  ${pt_in} inA4 = (${pt_in}) ${bex}((${int_t_in}) *pA, 2, 6);
                   pA++;
 %elif config.kernel.in_data_t == 4:
-                  uint8_t inA = (uint8_t) bitext((unsigned int) *pA, 4, 0);
-                  uint8_t inA2 = (uint8_t) bitext((unsigned int) *pA, 4, 4);
+                  ${pt_in} inA = (${pt_in}) ${bex}((${int_t_in}) *pA, 4, 0);
+                  ${pt_in} inA2 = (${pt_in}) ${bex}((${int_t_in}) *pA, 4, 4);
                   pA++;
-                  uint8_t inA3 = (uint8_t) bitext((unsigned int) *pA, 4, 0);
-                  uint8_t inA4 = (uint8_t) bitext((unsigned int) *pA, 4, 4);
+                  ${pt_in} inA3 = (${pt_in}) ${bex}((${int_t_in}) *pA, 4, 0);
+                  ${pt_in} inA4 = (${pt_in}) ${bex}((${int_t_in}) *pA, 4, 4);
                   pA++;
 %elif config.kernel.in_data_t == 8:
-                  uint8_t inA = *pA;
+                  ${pt_in} inA = *pA;
                   pA++;
-                  uint8_t inA2 = *pA;
+                  ${pt_in} inA2 = *pA;
                   pA++;
-                  uint8_t inA3 = *pA;
+                  ${pt_in} inA3 = *pA;
                   pA++;
-                  uint8_t inA4 = *pA;
+                  ${pt_in} inA4 = *pA;
                   pA++;
 %endif
 %if config.kernel.wt_data_t == 2:
@@ -256,13 +272,13 @@ void ${config.fn_name}(
             sum2 += inA4 * inB8;
 %elif config.less_precision == 4:
 %if config.kernel.in_data_t == 4:
-                  uint8_t inA = (uint8_t) bitext((unsigned int) *pA, 4, 0);
-                  uint8_t inA2 = (uint8_t) bitext((unsigned int) *pA, 4, 4);
+                  ${pt_in} inA = (${pt_in}) ${bex}((${int_t_in}) *pA, 4, 0);
+                  ${pt_in} inA2 = (${pt_in}) ${bex}((${int_t_in}) *pA, 4, 4);
                   pA++;
 %elif config.kernel.in_data_t == 8:
-                  uint8_t inA = *pA;
+                  ${pt_in} inA = *pA;
                   pA++;
-                  uint8_t inA2 = *pA;
+                  ${pt_in} inA2 = *pA;
                   pA++;
 %endif
 %if config.kernel.wt_data_t == 4:
@@ -287,7 +303,7 @@ void ${config.fn_name}(
             sum2 += inA * inB5;
             sum2 += inA2 * inB6;
 %elif config.less_precision == 8:
-                  uint8_t inA = *pA;
+                  ${pt_in} inA = *pA;
                   pA++;
                   int8_t inB = *pB;
                   pB++;
@@ -307,7 +323,7 @@ void ${config.fn_name}(
     {
         int sum = 0;
 
-        uint8_t *pA = pIn;
+        ${pt_in} *pA = pIn;
         int8_t *pB = pWeight + (i * dim_vec_wt);
 
 %if config.less_precision == 8:
@@ -319,14 +335,14 @@ void ${config.fn_name}(
 %endif
         {
 %if config.less_precision == 8:
-            vecA = *((v4u*)pA);
+            vecA = *((${vt_in}*)pA);
             vecB = *((v4s*)pB);
-            sum = SumDotp4(vecA, vecB, sum);
+            sum = ${sumdotp_fn}(vecA, vecB, sum);
 %elif config.less_precision == 4:
 %if config.kernel.in_data_t == 8:
-            vecA[0] = *((v4u*)pA);
+            vecA[0] = *((${vt_in}*)pA);
             pA+=4;
-            vecA[1] = *((v4u*)pA);
+            vecA[1] = *((${vt_in}*)pA);
 %else:
             ${config.unpack_in_fn}(pA,vecA);
 %endif
@@ -337,17 +353,17 @@ void ${config.fn_name}(
 %else:
             ${config.unpack_wt_fn}(pB,vecB);
 %endif
-            sum = SumDotp4(vecA[0], vecB[0], sum);
-              sum = SumDotp4(vecA[1], vecB[1], sum);
+            sum = ${sumdotp_fn}(vecA[0], vecB[0], sum);
+              sum = ${sumdotp_fn}(vecA[1], vecB[1], sum);
 %elif config.less_precision == 2:
 %if config.kernel.in_data_t == 8:
-            vecA[0] = *((v4u*)pA);
+            vecA[0] = *((${vt_in}*)pA);
             pA+=4;
-            vecA[1] = *((v4u*)pA);
+            vecA[1] = *((${vt_in}*)pA);
             pA+=4;
-            vecA[2] = *((v4u*)pA);
+            vecA[2] = *((${vt_in}*)pA);
             pA+=4;
-            vecA[3] = *((v4u*)pA);
+            vecA[3] = *((${vt_in}*)pA);
 %elif config.kernel.in_data_t == 4:
               ${config.unpack_in_fn}(pA,vecA);
               pA+=4;
@@ -370,10 +386,10 @@ void ${config.fn_name}(
 %elif config.kernel.wt_data_t == 2:
            ${config.unpack_wt_fn}(pB,vecB);
 %endif
-           sum = SumDotp4(vecA[0], vecB[0], sum);
-             sum = SumDotp4(vecA[1], vecB[1], sum);
-             sum = SumDotp4(vecA[2], vecB[2], sum);
-             sum = SumDotp4(vecA[3], vecB[3], sum);
+           sum = ${sumdotp_fn}(vecA[0], vecB[0], sum);
+             sum = ${sumdotp_fn}(vecA[1], vecB[1], sum);
+             sum = ${sumdotp_fn}(vecA[2], vecB[2], sum);
+             sum = ${sumdotp_fn}(vecA[3], vecB[3], sum);
 %endif
            pA+=4;
            pB+=4;
@@ -389,26 +405,26 @@ void ${config.fn_name}(
             {
 %if config.less_precision == 2:
 %if config.kernel.in_data_t == 2:
-                  uint8_t inA = (uint8_t) bitext((unsigned int) *pA, 2, 0);
-                  uint8_t inA2 = (uint8_t) bitext((unsigned int) *pA, 2, 2);
-                  uint8_t inA3 = (uint8_t) bitext((unsigned int) *pA, 2, 4);
-                  uint8_t inA4 = (uint8_t) bitext((unsigned int) *pA, 2, 6);
+                  ${pt_in} inA = (${pt_in}) ${bex}((${int_t_in}) *pA, 2, 0);
+                  ${pt_in} inA2 = (${pt_in}) ${bex}((${int_t_in}) *pA, 2, 2);
+                  ${pt_in} inA3 = (${pt_in}) ${bex}((${int_t_in}) *pA, 2, 4);
+                  ${pt_in} inA4 = (${pt_in}) ${bex}((${int_t_in}) *pA, 2, 6);
                   pA++;
 %elif config.kernel.in_data_t == 4:
-                  uint8_t inA = (uint8_t) bitext((unsigned int) *pA, 4, 0);
-                  uint8_t inA2 = (uint8_t) bitext((unsigned int) *pA, 4, 4);
+                  ${pt_in} inA = (${pt_in}) ${bex}((${int_t_in}) *pA, 4, 0);
+                  ${pt_in} inA2 = (${pt_in}) ${bex}((${int_t_in}) *pA, 4, 4);
                   pA++;
-                  uint8_t inA3 = (uint8_t) bitext((unsigned int) *pA, 4, 0);
-                  uint8_t inA4 = (uint8_t) bitext((unsigned int) *pA, 4, 4);
+                  ${pt_in} inA3 = (${pt_in}) ${bex}((${int_t_in}) *pA, 4, 0);
+                  ${pt_in} inA4 = (${pt_in}) ${bex}((${int_t_in}) *pA, 4, 4);
                   pA++;
 %elif config.kernel.in_data_t == 8:
-                  uint8_t inA = *pA;
+                  ${pt_in} inA = *pA;
                   pA++;
-                  uint8_t inA2 = *pA;
+                  ${pt_in} inA2 = *pA;
                   pA++;
-                  uint8_t inA3 = *pA;
+                  ${pt_in} inA3 = *pA;
                   pA++;
-                  uint8_t inA4 = *pA;
+                  ${pt_in} inA4 = *pA;
                   pA++;
 %endif
 %if config.kernel.wt_data_t == 2:
@@ -440,13 +456,13 @@ void ${config.fn_name}(
             sum += inA4 * inB4;
 %elif config.less_precision == 4:
 %if config.kernel.in_data_t == 4:
-                  uint8_t inA = (uint8_t) bitext((unsigned int) *pA, 4, 0);
-                  uint8_t inA2 = (uint8_t) bitext((unsigned int) *pA, 4, 4);
+                  ${pt_in} inA = (${pt_in}) ${bex}((${int_t_in}) *pA, 4, 0);
+                  ${pt_in} inA2 = (${pt_in}) ${bex}((${int_t_in}) *pA, 4, 4);
                   pA++;
 %elif config.kernel.in_data_t == 8:
-                  uint8_t inA = *pA;
+                  ${pt_in} inA = *pA;
                   pA++;
-                  uint8_t inA2 = *pA;
+                  ${pt_in} inA2 = *pA;
                   pA++;
 %endif
 %if config.kernel.wt_data_t == 4:
@@ -462,7 +478,7 @@ void ${config.fn_name}(
             sum += inA * inB;
             sum += inA2 * inB2;
 %elif config.less_precision == 8:
-                  uint8_t inA = *pA;
+                  ${pt_in} inA = *pA;
                   pA++;
                   int8_t inB = *pB;
                   pB++;

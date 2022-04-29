@@ -24,15 +24,22 @@
 import numpy as np
 act_prec = int(config.kernel.act_prec[0:2])
 act_t = f"int{act_prec}_t"
+out_clip_fn = f"clip{'s' if config.kernel.out_signed else ''}{config.kernel.out_data_t}"
+pt_in = f"{'' if config.kernel.in_signed else 'u'}int8_t"
+sum_t = f"{'' if config.kernel.in_signed else 'u'}int32_t"
+pt_out = f"{'' if config.kernel.out_signed else 'u'}int8_t"
+bext = f"bitext{'' if config.kernel.in_signed else '_u'}"
+int_t = f"{('' if config.kernel.in_signed else 'unsigned ') + 'int'}"
 %>
 
 
 #define bitins(dst,not_mask_imm,src,mask_imm,off) __builtin_pulp_binsert(dst,not_mask_imm,src,mask_imm,off)
 #define bitext_u(x,size,off) __builtin_pulp_bextractu(x,size,off)
+#define bitext(x,size,off) __builtin_pulp_bextract(x,size,off)
 
 void __attribute__ ((noinline))  ${config.fn_name}(
-  uint8_t * pIn,
-  uint8_t * pOut,
+  ${pt_in} * pIn,
+  ${pt_out} * pOut,
   ${act_t} lambda,
   uint16_t out_shift,
   ${act_t} out_add,
@@ -93,7 +100,7 @@ byte_chan_shift_diff = byte_chan_shift_out - byte_chan_shift_in
   uint32_t kernel_size_tot = dim_kernel_x * dim_kernel_y;
   int ch_im_in_r = ch_im_in >> ${byte_chan_shift_in};
   int ch_im_out_r = ch_im_in >> ${byte_chan_shift_out};
-  uint32_t sum[${els_per_byte_in}] = {0};
+  ${sum_t} sum[${els_per_byte_in}] = {0};
   for (i_y = start; i_y < stop; i_y++)
     {
         for (i_x = 0; i_x < dim_im_out_x; i_x++)
@@ -121,7 +128,7 @@ byte_chan_shift_diff = byte_chan_shift_out - byte_chan_shift_in
             pDst = &pOut[ch_im_out_r * (i_x + i_y * dim_im_out_x)];
             int k_x, k_y;
 % if wr_not_in_every_iter:
-            uint8_t out_el = 0;
+            ${pt_out} out_el = 0;
 % endif
 
             for (int ch_cnt = 0; ch_cnt < ch_im_in_r; ch_cnt++)
@@ -130,19 +137,19 @@ byte_chan_shift_diff = byte_chan_shift_out - byte_chan_shift_in
               sum[${sum_idx}] = 0;
 % endfor
 % if not wr_not_in_every_iter:
-              uint8_t out_el = 0;
+              ${pt_out} out_el = 0;
 % endif
                 for (k_y = k_y_start; k_y < k_y_end; k_y++)
                 {
                     for (k_x = k_x_start; k_x < k_x_end; k_x++)
                     {
                         pTmpInner = pTmp + (ch_im_in_r * (k_x + k_y * dim_im_in_x));
-                        uint8_t cur_chans = *pTmpInner;
+                        ${pt_in} cur_chans = *pTmpInner;
                         % for c in range(els_per_byte_in):
 <%
 cur_mask_shift = c * dw_in
 %>
-                        sum[${c}] += (uint32_t) bitext_u((unsigned int) cur_chans, ${dw_in}, ${cur_mask_shift});
+                        sum[${c}] += (${sum_t}) ${bext}((${int_t}) cur_chans, ${dw_in}, ${cur_mask_shift});
                         % endfor
                     }
                 }
@@ -157,14 +164,14 @@ cur_mask_shift = c * dw_in
                       % if c==0 and not wr_not_in_every_iter:
                   out_el = clip${dw_out}(out_large);
                       % else:
-                  out_el = bitins(out_el, (int8_t) ${out_mask_n_strings[c % els_per_byte_out]}, (uint8_t) clip${dw_out}(out_large), (int8_t) ${out_mask_strings[c % els_per_byte_out]}, ${(c % els_per_byte_out) * dw_out});
+                  out_el = bitins(out_el, (int8_t) ${out_mask_n_strings[c % els_per_byte_out]}, (${pt_out}) ${out_clip_fn}${dw_out}(out_large), (int8_t) ${out_mask_strings[c % els_per_byte_out]}, ${(c % els_per_byte_out) * dw_out});
                       % endif
                     % endif
                     % if (c % els_per_byte_out) == els_per_byte_out-1:
                   pDst[(ch_cnt ${">>" if byte_chan_shift_diff >= 0 else "<<"} (${byte_chan_shift_diff if byte_chan_shift_diff >= 0 else -byte_chan_shift_diff})) + ${c >> byte_chan_shift_out}] = out_el;
                     % endif
                     % else:
-                  out_el |= (clip${config.kernel.out_data_t}(out_large) << (in_iter_cnt * ${els_per_byte_in * config.kernel.out_data_t} + ${c * config.kernel.out_data_t}));
+                    out_el |= (${out_clip_fn}${config.kernel.out_data_t}(out_large) << (in_iter_cnt * ${els_per_byte_in * config.kernel.out_data_t} + ${c * config.kernel.out_data_t}));
                     % endif
                   % endfor
                   } else {
@@ -172,19 +179,19 @@ cur_mask_shift = c * dw_in
                   out_large = sum[${c}] / kernel_size_tot;
                   % if not wr_not_in_every_iter:
                     % if els_per_byte_out == 1:
-                  out_el = clip${dw_out}(out_large);
+                  out_el = ${out_clip_fn}(out_large);
                     % else:
                         % if c % els_per_byte_out == 0:
-                  out_el = clip${dw_out}(out_large);
+                  out_el = ${out_clip_fn}(out_large);
                         % else:
-                  out_el = bitins(out_el, (int8_t) ${out_mask_n_strings[c % els_per_byte_out]}, (uint8_t) clip${dw_out}(out_large), (int8_t) ${out_mask_strings[c % els_per_byte_out]}, ${(c % els_per_byte_out) * dw_out});
+                  out_el = bitins(out_el, (int8_t) ${out_mask_n_strings[c % els_per_byte_out]}, (${pt_out}) ${out_clip_fn}(out_large), (int8_t) ${out_mask_strings[c % els_per_byte_out]}, ${(c % els_per_byte_out) * dw_out});
                         % endif
                     % endif
                     % if (c % els_per_byte_out) == els_per_byte_out-1:
                   pDst[(ch_cnt ${">>" if byte_chan_shift_diff>=0 else "<<"} (${byte_chan_shift_diff if byte_chan_shift_diff>=0 else -byte_chan_shift_diff})) + ${c >> byte_chan_shift_out}] = out_el;
                     % endif
                   % else :
-                  out_el |= (clip${config.kernel.out_data_t}(out_large) << (in_iter_cnt * ${els_per_byte_in * config.kernel.out_data_t} + ${c * config.kernel.out_data_t}));
+                  out_el |= (${out_clip_fn}(out_large) << (in_iter_cnt * ${els_per_byte_in * config.kernel.out_data_t} + ${c * config.kernel.out_data_t}));
                   % endif
                   % endfor
                 }

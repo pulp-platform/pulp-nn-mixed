@@ -21,6 +21,7 @@
 #include "pulp_nn_utils.h"
 
 
+
 void __attribute__((noinline)) xpulp_nn_linear_u4_u2_i8(
                         uint8_t *pIn,
                         int8_t *pBias,
@@ -67,6 +68,7 @@ void __attribute__((noinline)) xpulp_nn_linear_u4_u2_i8(
   uint8_t *pOutBuffer = (uint8_t *) pOut + (start >> 2);
 
   int i;
+
   int32_t *k1 = pKappa + start;
   int32_t *lambda1 = pLambda + start;
 
@@ -147,8 +149,8 @@ void __attribute__((noinline)) xpulp_nn_linear_u4_u2_i8(
       pB-=4;
       do
       {
-        uint8_t inB  = (uint8_t) bitextu((unsigned int) *pB, 4, 0);
-        uint8_t inB2 = (uint8_t) bitextu((unsigned int) *pB, 4, 4);
+        uint8_t inB  = (uint8_t) bitextu((uint32_t) *pB, 4, 0);
+        uint8_t inB2 = (uint8_t) bitextu((uint32_t) *pB, 4, 4);
         pB++;
         int8_t inA = *pA;
         pA++;

@@ -84,8 +84,9 @@ void xpulp_nn_depthwise_u8_u8_i8(
   int i_in_ch = start_channel * in_image_size;
   int i_wt_ch = start_channel * kernel_size;
 
-  int64_t *k1 = pKappa + core_id * chunk;
-  int64_t *lambda1 = pLambda + core_id * chunk;
+
+  int64_t * k1 = pKappa + core_id * (chunk << 0);
+  int64_t * lambda1 = pLambda + core_id * (chunk << 0);
 
   for(int i_ch = start_channel; i_ch < stop_channel; i_ch++)
   {

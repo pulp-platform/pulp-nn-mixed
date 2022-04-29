@@ -22,6 +22,8 @@
 #include "pulp_nn_kernels.h"
 
 
+
+
 void __attribute__((noinline)) xpulp_nn_conv_u2_u8_i2(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
@@ -206,6 +208,8 @@ void __attribute__((noinline)) xpulp_nn_conv_u2_u8_i2(
       int i;
       int32_t * k1 = pKappa;
       int32_t * lambda1 = pLambda;
+
+      uint8_t out[1];
       uint16_t num_col_im2col = ch_in * dim_kernel_x * dim_kernel_y;
       uint16_t num_col_im2col_w = PACK_INT2_SIZE(ch_in) * dim_kernel_x * dim_kernel_y;
 
@@ -242,16 +246,16 @@ void __attribute__((noinline)) xpulp_nn_conv_u2_u8_i2(
           do
           {
             int8_t inA1 = (int8_t) bitext((int) *pA, 2, 0);
-            uint8_t inB1 = (uint8_t) bitextu((unsigned int) *pB, 2, 0);
+            uint8_t inB1 = (uint8_t) bitextu((uint32_t) *pB, 2, 0);
             sum += inA1 * inB1;
             inA1 = (int8_t) bitext((int) *pA, 2, 2);
-            inB1 = (uint8_t) bitextu((unsigned int) *pB, 2, 2);
+            inB1 = (uint8_t) bitextu((uint32_t) *pB, 2, 2);
             sum += inA1 * inB1;
             inA1 = (int8_t) bitext((int) *pA, 2, 4);
-            inB1 = (uint8_t) bitextu((unsigned int) *pB, 2, 4);
+            inB1 = (uint8_t) bitextu((uint32_t) *pB, 2, 4);
             sum += inA1 * inB1;
             inA1 = (int8_t) bitext((int) *pA, 2, 6);
-            inB1 = (uint8_t) bitextu((unsigned int) *pB, 2, 6);
+            inB1 = (uint8_t) bitextu((uint32_t) *pB, 2, 6);
             sum += inA1 * inB1;
 
             pA++;
