@@ -89,7 +89,7 @@ void xpulp_nn_depthwise_i2_u4_i8(
 
 
   int32_t * k1 = pKappa + core_id * (chunk << 2);
-  int32_t * lambda1 = plambda + core_id * (chunk << 2);
+  int32_t * lambda1 = pLambda + core_id * (chunk << 2);
 
   for(int i_ch = start_channel; i_ch < stop_channel; i_ch++)
   {
@@ -506,7 +506,7 @@ void xpulp_nn_depthwise_i2_u4_i8(
           else
           {
             sum = (uint8_t) clip4(sum >> out_shift);
-            sum2 = (uint8_t) clip44(sum2 >> out_shift);
+            sum2 = (uint8_t) clip4(sum2 >> out_shift);
             *pOutBuffer = bitins(sum, n_mask, sum2, mask, off);
             sum3 = (uint8_t) clip4(sum3 >> out_shift);
             sum4 = (uint8_t) clip4(sum4 >> out_shift);

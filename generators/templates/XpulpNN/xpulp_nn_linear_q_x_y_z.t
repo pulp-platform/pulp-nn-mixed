@@ -636,7 +636,7 @@ void __attribute__((noinline)) ${config.fn_name}(
       else
       {
 %if config.kernel.out_data_t == 8:
-        *pOutBuffer = (${pt_out}) clip8(sum >> out_shift);
+        *pOutBuffer = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
         pOutBuffer++;
 %elif config.kernel.out_data_t == 4:
         sum = (${pt_out}) ${out_clip_fn}(sum >> out_shift);

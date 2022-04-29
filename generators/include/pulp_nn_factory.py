@@ -188,8 +188,8 @@ class PULPNNConvolve(PULPNNFactory):
                                                                            sgn_str(kernel.in_signed),
                                                                            sgn_str(kernel.out_signed))
             self.zeromem_fn = "xpulp_nn_zero_mem_u{0}".format(str(self.max_precision))
-            self.im2col_fn = "xpulp_nn_im2col_{2}{0}_to_{3}{1}".format(str(self.kernel.in_data_t), str(self.max_precision),
-                                                                       sgn_str(kernel.in_signed), sgn_str(kernel.out_signed))
+            self.im2col_fn = "xpulp_nn_im2col_{2}{0}_to_{2}{1}".format(str(self.kernel.in_data_t), str(self.max_precision),
+                                                                       sgn_str(kernel.in_signed))
             self.mat_mul_fn = "xpulp_nn_matmul_{5}{0}_{6}{1}_i{2}{3}{4}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
                                                                                 str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""),
                                                                                 str("_" + self.kernel.matmul_fmt if self.kernel.matmul_fmt == '4x4' else ""),
@@ -630,7 +630,7 @@ class PULPNNReLu(nn.Module):
         self.SgnO = SgnO
 
     def forward(self, input):
-        output = (input * self.out_mult) >> self.out_shift
+        output = torch.floor((input * self.out_mult) >> self.out_shift)
         out = clip8(output, self.BitO, self.SgnO)
         return out
 
@@ -639,13 +639,13 @@ class PULPNNShiftClip(nn.Module):
         super(PULPNNShiftClip, self).__init__()
         self.BitO = BitO
         if out_shift == None:
-            self.out_shift = max(self.BitO - max((BitI - BitW), (BitW - BitI)), max((BitI - BitW), (BitW - BitI)) - self.BitO)
+            self.out_shift = torch.Tensor(max(self.BitO - max((BitI - BitW), (BitW - BitI)), max((BitI - BitW), (BitW - BitI)) - self.BitO))
         else:
-            self.out_shift = out_shift
+            self.out_shift = torch.Tensor([out_shift])
         self.SgnO = SgnO
 
     def forward(self, input):
-        output = input >> self.out_shift
+        output = torch.floor(input >> self.out_shift)
         out = clip8(output, self.BitO, self.SgnO)
         return out
 
@@ -995,7 +995,7 @@ def matmul_mixed_tests_generator(layer, kernel):
 
             if kernel.quantization == 'shift_clip':
                 # Setting shift and clip quantization parameters
-                net[1].out_shift = out_shift
+                net[1].out_shift = torch.Tensor([out_shift])
                 str_out += '#define OUT_MULT '+ str(out_mult) +'\n'
                 str_out += '#define OUT_SHIFT '+ str(int(net[1].out_shift.item()))+'\n'
             else:
@@ -1102,9 +1102,6 @@ def convolution_mixed_tests_generator(layer, kernel):
     # Running the network
     y = net(x)
 
-    #if kernel.in_signed and kernel.out_signed and kernel.in_data_t == 8 and kernel.out_data_t == 8:
-    #    import ipdb; ipdb.set_trace()
-
     str_out += str_tensor(x, 'IN_INT'+ str(kernel.in_data_t))
     str_out += str_tensor(torch.Tensor(y), 'OUT_INT' + str(kernel.out_data_t))
 
@@ -1165,15 +1162,14 @@ def linear_mixed_tests_generator(layer, kernel):
         else:
             # Setting relu parameters
             if layer.relu == True:
-                net[1].out_mult = out_mult
-                net[1].out_shift = out_shift
+                net[1].out_mult = torch.Tensor([out_mult])
+                net[1].out_shift = torch.Tensor([out_shift])
                 str_out += '#define OUT_MULT '+ str(int(net[1].out_mult.item()))+'\n'
                 str_out += '#define OUT_SHIFT '+ str(int(net[1].out_shift.item()))+'\n'
             else:
-
                 if kernel.quantization == 'shift_clip':
                     # Setting shift and clip quantization parameters
-                    net[1].out_shift = out_shift
+                    net[1].out_shift = torch.Tensor([out_shift])
                     str_out += '#define OUT_MULT '+ str(out_mult) +'\n'
                     str_out += '#define OUT_SHIFT '+ str(int(net[1].out_shift.item()))+'\n'
                 else:

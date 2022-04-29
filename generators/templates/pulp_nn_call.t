@@ -194,7 +194,7 @@ ${config.fn_name}(IN_INT8_L1,
                     POOL_STRIDE);
 #endif
 %elif config.api == 'PULPNNAvgPoolNew':
-#if (KERNEL == ${in_w}${out_w})
+#if (KERNEL == ${in_w}${out_w}) && (SIGNED == ${f"{int(config.kernel.in_signed)}{int(config.kernel.out_signed)}"})
 ${config.fn_name}(IN_INT8_L1,
                     OUT_L1,
                     DIM_IM_IN_X,

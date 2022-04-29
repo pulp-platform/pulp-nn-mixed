@@ -115,7 +115,7 @@ void __attribute__((noinline)) xpulp_nn_linear_i4_i8_i4(
       }
       else
       {
-        *pOutBuffer = (int8_t) clip8(sum >> out_shift);
+        *pOutBuffer = (int8_t) clips8(sum >> out_shift);
         pOutBuffer++;
       }
     }
