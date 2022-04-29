@@ -24,7 +24,7 @@
 <%
 import numpy as np
 act_prec = int(config.kernel.act_prec[0:2])
-act_t = f"uint{act_prec}_t"
+act_t = f"int{act_prec}_t"
 %>
 
 void __attribute__ ((noinline)) ${config.fn_name}(
@@ -94,7 +94,9 @@ byte_chan_shift_in2 = int(np.log2(els_per_byte_in2))
 byte_chan_shift_out = int(np.log2(els_per_byte_out))
 %>
 
-    int ch_im_out_r = ch_im_in << ${byte_chan_shift_out}
+    int ch_im_in1 = ch_im_in << ${byte_chan_shift_in1};
+    int ch_im_in2 = ch_im_in << ${byte_chan_shift_in2};
+    int ch_im_out_r = ch_im_in << ${byte_chan_shift_out};
 
     int start = min(chunck * core_id, dim_im_in_y);
     int stop = min(start + chunck, dim_im_in_y);

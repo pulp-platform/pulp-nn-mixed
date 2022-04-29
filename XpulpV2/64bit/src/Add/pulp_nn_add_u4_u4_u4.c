@@ -27,14 +27,14 @@ void __attribute__ ((noinline)) pulp_nn_add_u4_u4_u4(
     uint8_t * pIn1,
     uint8_t * pIn2,
     uint8_t * pOut,
-    uint64_t in_mult1,
-    uint64_t in_add1,
+    int64_t in_mult1,
+    int64_t in_add1,
     uint16_t in_shift1,
-    uint64_t in_mult2,
-    uint64_t in_add2,
+    int64_t in_mult2,
+    int64_t in_add2,
     uint16_t in_shift2,
-    uint64_t out_mult,
-    uint64_t out_add,
+    int64_t out_mult,
+    int64_t out_add,
     uint16_t out_shift,
     uint16_t dim_im_in_x,
     uint16_t dim_im_in_y,
@@ -52,12 +52,15 @@ void __attribute__ ((noinline)) pulp_nn_add_u4_u4_u4(
     int  Log2Core = log2(n_cores);
     int chunck = (dim_im_in_y >> Log2Core) + ((dim_im_in_y & (NUM_CORES-1))!=0);
 
-    uint64_t sum1, sum2, sum3, sum4;
+    int64_t sum1, sum2, sum3, sum4;
+    int32_t sum_out1, sum_out2, sum_out3, sum_out4;
     uint8_t out1, out2, out3, out4;
 
 
 
-    int ch_im_out_r = ch_im_in << 1
+    int ch_im_in1 = ch_im_in << 1;
+    int ch_im_in2 = ch_im_in << 1;
+    int ch_im_out_r = ch_im_in << 1;
 
     int start = min(chunck * core_id, dim_im_in_y);
     int stop = min(start + chunck, dim_im_in_y);
@@ -86,15 +89,20 @@ void __attribute__ ((noinline)) pulp_nn_add_u4_u4_u4(
         sum4 = (((*target1_ext + 3 ) * in1_mult + in1_add) >> in1_shift) + (((*target2_ext + 3 ) * in2_mult + in2_add) >> in2_shift);
 
         if (out_requant_flag) {
-          out1 = (out1 * out_mult + out_add) >> out_shift;
-          out2 = (out2 * out_mult + out_add) >> out_shift;
-          out3 = (out3 * out_mult + out_add) >> out_shift;
-          out4 = (out4 * out_mult + out_add) >> out_shift;
+          sum_out1 = (sum1 * out_mult + out_add) >> out_shift;
+          sum_out2 = (sum2 * out_mult + out_add) >> out_shift;
+          sum_out3 = (sum3 * out_mult + out_add) >> out_shift;
+          sum_out4 = (sum4 * out_mult + out_add) >> out_shift;
+        } else {
+          sum_out1 = sum1;
+          sum_out2 = sum2;
+          sum_out3 = sum3;
+          sum_out4 = sum4;
         }
-        out1 = clip4(out1);
-        out2 = clip4(out2);
-        out3 = clip4(out3);
-        out4 = clip4(out4);
+        out1 = clip4(sum_out1);
+        out2 = clip4(sum_out2);
+        out3 = clip4(sum_out3);
+        out4 = clip4(sum_out4);
 
         
 

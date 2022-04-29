@@ -142,23 +142,6 @@ void ${config.fn_name}(
                         uint16_t  padding_r,
                         uint16_t  stride_x,
                         uint16_t  stride_y);
-%elif config.api=="PULPNNAvgPool":
-void ${config.fn_name}(
-                        uint8_t * pIn,
-                        uint8_t * pOut,
-                        uint16_t  dim_im_in_x,
-                        uint16_t  dim_im_in_y,
-                        uint16_t  ch_im_in,
-                        uint16_t  dim_im_out_x,
-                        uint16_t  dim_im_out_y,
-                        uint16_t  dim_kernel_x,
-                        uint16_t  dim_kernel_y,
-                        uint16_t  padding_t,
-                        uint16_t  padding_b,
-                        uint16_t  padding_l,
-                        uint16_t  padding_r,
-                        uint16_t  stride_x,
-                        uint16_t  stride_y);
 %elif config.api=="PULPNNAdd":
 void ${config.fn_name}(
                         uint8_t * pIn1,
