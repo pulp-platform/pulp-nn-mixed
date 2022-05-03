@@ -1210,7 +1210,7 @@ void ${config.fn_name}(
             *(pOutBuffer + 3) = (${pt_out}) ${out_clip_fn}(sum4 >> out_shift);
   %elif config.kernel.out_data_t == 4:
             sum = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
-            sum2 = (${pt_out}) ${out_clip_fn}4(sum2 >> out_shift);
+            sum2 = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
             *pOutBuffer = bitins(sum, n_mask, sum2, mask, off);
             sum3 = (${pt_out}) ${out_clip_fn}(sum3 >> out_shift);
             sum4 = (${pt_out}) ${out_clip_fn}(sum4 >> out_shift);

@@ -255,7 +255,7 @@ void test()
     }
 #endif /* WEIGHTS */
 %endif
-%if config.layer.bn == True:
+%if config.layer.bn == True and config.kernel.type not in ['add', 'avgpool']:
     for(int i=0; i<CH_IM_OUT; i++)
     {
       KAPPA_L1[i] = KAPPA_L2[i];
@@ -441,15 +441,13 @@ ${config.call}
 #endif /* OUTPUT */
       if(OUT_L2[i] != OUT_INT8_L2[i])
       {
-%if config.kernel.type == 'maxpool':
+%if config.kernel.type in ['maxpool', 'avgpool']:
 #if defined(VERBOSE_CHECK) && defined(VERBOSE_PERF)
 #else
 #ifdef VERBOSE_CHECK
         printf("error at index %d, %d instead of %d\n", i, OUT_L2[i], OUT_INT8_L2[i]);
 #endif
 #endif /* VERBOSE */
-%elif config.kernel.type == 'avgpool':
-
 %else:
 #ifdef VERBOSE_CHECK
         printf("error at index %d, %d instead of %d\n", i, OUT_L2[i], OUT_INT8_L2[i]);
@@ -460,8 +458,6 @@ ${config.call}
     }
 %if config.kernel.type == 'maxpool':
     printf("errors: %d\nNOTE: Errors detection may not work if you have used perf=1. Pooling kernels overwrites the inputs located in L1\n", errors);
-%elif config.kernel.type == 'avgpool':
-    printf("Errors detection must be done inside the kernel, before output compression\n");
 %else:
     printf("errors: %d\n", errors);
 %endif

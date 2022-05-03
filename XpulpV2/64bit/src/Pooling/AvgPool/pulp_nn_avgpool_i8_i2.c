@@ -110,10 +110,10 @@ void __attribute__ ((noinline))  pulp_nn_avgpool_i8_i2(
                 int64_t out_large;
                 if (flag_requant) {
                   out_large = (sum[0] * lambda + out_add) >> out_shift;
-                    out_el |= (clips22(out_large) << (in_iter_cnt * 2 + 0));
+                    out_el |= ((clips2(out_large) & 0x03) << (in_iter_cnt * 2 + 0));
                   } else {
                   out_large = sum[0] / kernel_size_tot;
-                  out_el |= (clips2(out_large) << (in_iter_cnt * 2 + 0));
+                  out_el |= ((clips2(out_large) & 0x03) << (in_iter_cnt * 2 + 0));
                 }
                 if (in_iter_cnt++ == 3) {
                     pDst[(ch_cnt >> (2))] = out_el;

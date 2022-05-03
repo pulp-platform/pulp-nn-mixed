@@ -513,7 +513,7 @@ void pulp_nn_depthwise_u2_u4_i2(
           else
           {
             sum = (uint8_t) clip4(sum >> out_shift);
-            sum2 = (uint8_t) clip44(sum2 >> out_shift);
+            sum2 = (uint8_t) clip4(sum2 >> out_shift);
             *pOutBuffer = bitins(sum, n_mask, sum2, mask, off);
             sum3 = (uint8_t) clip4(sum3 >> out_shift);
             sum4 = (uint8_t) clip4(sum4 >> out_shift);

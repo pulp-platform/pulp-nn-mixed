@@ -197,6 +197,9 @@ ${config.fn_name}(IN_INT8_L1,
 #if (KERNEL == ${in_w}${out_w}) && (SIGNED == ${f"{int(config.kernel.in_signed)}{int(config.kernel.out_signed)}"})
 ${config.fn_name}(IN_INT8_L1,
                     OUT_L1,
+                    ${"OUT_MULT" if config.layer.bn else "1"},
+                    ${"OUT_SHIFT" if config.layer.bn else "0"},
+                    ${"OUT_ADD" if config.layer.bn else "0"},
                     DIM_IM_IN_X,
                     DIM_IM_IN_Y,
                     CH_IM_IN,
@@ -209,7 +212,8 @@ ${config.fn_name}(IN_INT8_L1,
                     PADDING_X_LEFT,
                     PADDING_X_RIGHT,
                     POOL_STRIDE,
-                    POOL_STRIDE);
+                    POOL_STRIDE,
+                    ${int(config.layer.bn)});
 #endif
 %elif config.api == 'PULPNNAdd':
 #if (KERNEL == ${config.in1_data_t}${config.in2_data_t})

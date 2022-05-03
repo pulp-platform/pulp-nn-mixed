@@ -51,7 +51,7 @@ pt_out = f"{u_(config.kernel.out_signed)}int8_t"
 #define POOL_STRIDE ${config.layer.pool_stride}
 %endif
 
-%if config.kernel.type != 'add':
+%if config.kernel.type not in ['add', 'avgpool']:
 %if config.layer.bn == True:
 PI_L2 int32_t KAPPA_L2[CH_IM_OUT] = KAPPA;
 PI_L1 int32_t KAPPA_L1[CH_IM_OUT];
@@ -103,7 +103,7 @@ PI_L1 int8_t BIAS_L1[CH_IM_OUT] = BIAS;
 %else:
 PI_L1 int8_t BIAS_L1[CH_IM_OUT] = {0};
 %endif
-%elif config.kernel.type == 'convolution' or config.kernel.type == 'pointwise':
+%elif config.kernel.type in ['convolution', 'pointwise', 'avgpool']:
 %if config.kernel.in_data_t == 2:
 PI_L2 ${pt_in} IN_INT2_L2[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN)] = IN_INT2;
 PI_L1 ${pt_in} IN_INT8_L1[(DIM_IM_IN_X * DIM_IM_IN_Y * CH_IM_IN) >> 2];
@@ -129,6 +129,7 @@ PI_L2 ${pt_out} OUT_INT8_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)] = OUT_INT
 PI_L2 ${pt_out} OUT_L2[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)];
 PI_L1 ${pt_out} OUT_L1[(DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT)];
 %endif
+%if  config.kernel.type in ['convolution', 'pointwise']:
 %if config.kernel.wt_data_t == 2:
 PI_L2 int8_t WEIGHT_INT2_L2[(DIM_KERNEL_X * DIM_KERNEL_Y * CH_IM_IN * CH_IM_OUT)] = WEIGHT_INT2;
 PI_L1 int8_t WEIGHT_INT8_L1[(DIM_KERNEL_X * DIM_KERNEL_Y * CH_IM_IN * CH_IM_OUT) >> 2];
@@ -186,6 +187,7 @@ PI_L1 ${pt_in} IM2COL_L1[(((CH_IM_IN >> 2) * DIM_KERNEL_X * DIM_KERNEL_Y) << 2) 
 PI_L1 int8_t BIAS_L1[CH_IM_OUT] = BIAS;
 %else:
 PI_L1 int8_t BIAS_L1[CH_IM_OUT] = {0};
+%endif
 %endif
 %elif config.kernel.type == 'depthwise':
 %if config.kernel.in_data_t == 2:
@@ -321,7 +323,7 @@ PI_L1 int8_t BIAS_L1[CH_IM_OUT] = BIAS;
 %else:
 PI_L1 int8_t BIAS_L1[CH_IM_OUT] = {0};
 %endif
-%elif config.kernel.type == 'maxpool' or config.kernel.type == 'avgpool':
+%elif config.kernel.type == 'maxpool':
 %if config.kernel.in_data_t == 8:
 PI_L2 ${pt_in} IN_INT8_L2[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)] = IN_INT8;
 PI_L1 ${pt_in} IN_INT8_L1[(CH_IM_IN * DIM_IM_IN_X * DIM_IM_IN_Y)];

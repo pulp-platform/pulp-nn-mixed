@@ -54,18 +54,18 @@ out_t = f"{iu(config.kernel.out_signed)}{config.kernel.out_data_t}"
 #include "DataAllocationLinearQuant/data_allocation_${in_t}_${out_t}_${config.kernel.wt_data_t}.h"
 #endif
 %elif config.api == 'PULPNNMaxPool':
-#if (KERNEL == ${config.kernel.in_data_t})
+#if (KERNEL == ${config.kernel.in_data_t}) && (SIGNED== ${int(config.kernel.in_signed)})
 #define INPUT ${config.kernel.in_data_t}
 #define OUTPUT ${config.kernel.in_data_t}
-#include "GoldenModelMaxPool/golden_${config.kernel.in_data_t}.h"
+#include "GoldenModelMaxPool/golden_${in_t}.h"
 #include "DataAllocationMaxPool/data_allocation_${in_t}.h"
 #endif
-%elif config.api == 'PULPNNAvgPool':
-#if (KERNEL == ${config.kernel.in_data_t})
+%elif config.api == 'PULPNNAvgPoolNew':
+#if (KERNEL == ${in_w}${out_w}) && (SIGNED == ${f"{int(config.kernel.in_signed)}{int(config.kernel.out_signed)}"})
 #define INPUT ${config.kernel.in_data_t}
-#define OUTPUT ${config.kernel.in_data_t}
-#include "GoldenModelAvgPool/golden_${config.kernel.in_data_t}.h"
-#include "DataAllocationAvgPool/data_allocation_${in_t}.h"
+#define OUTPUT ${config.kernel.out_data_t}
+#include "GoldenModelAvgPool/golden_${in_t}_${out_t}.h"
+#include "DataAllocationAvgPool/data_allocation_${in_t}_${out_t}.h"
 #endif
 %elif config.api == 'PULPNNAdd':
 #if (KERNEL == ${config.in1_data_t}${config.in2_data_t})

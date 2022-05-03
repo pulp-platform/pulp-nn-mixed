@@ -585,7 +585,7 @@ class PULPNNBatchNorm(nn.Module):
         self.k = torch.Tensor(1, Cin, 1, 1).uniform_(0, (2**(8)))
         self.k = torch.round(self.k)
         th = int(
-            (2**(BitA + BitW + np.log2(int(Cin / groups) * Kh * Kw) + 8 - 2 - 1)))
+            (2**(BitA + BitW + np.log2(int(Cin / groups) * Kh * Kw) + 4 - 2 - 1)))
         if th > 2**24:
             th = 2**24
         self.l = torch.Tensor(1, Cin, 1, 1).random_(-th, th)
@@ -607,7 +607,7 @@ class PULPNN1DBatchNorm(nn.Module):
         self.k = torch.Tensor(1, Cin).uniform_(-(2**8), (2**(8)))
         self.k = torch.round(self.k)
         th = int(
-            (2**(BitA + BitW + np.log2(int(Cin / groups)) + 8 - 2 - 1)))
+            (2**(BitA + BitW + np.log2(int(Cin / groups)) + 4 - 2 - 1)))
         if th > 2**30:
             th = 2**30
         self.l = torch.Tensor(1, Cin).random_(-th, th)
@@ -639,7 +639,7 @@ class PULPNNShiftClip(nn.Module):
         super(PULPNNShiftClip, self).__init__()
         self.BitO = BitO
         if out_shift == None:
-            self.out_shift = torch.Tensor(max(self.BitO - max((BitI - BitW), (BitW - BitI)), max((BitI - BitW), (BitW - BitI)) - self.BitO))
+            self.out_shift = torch.Tensor([max(self.BitO - max((BitI - BitW), (BitW - BitI)), max((BitI - BitW), (BitW - BitI)) - self.BitO)])
         else:
             self.out_shift = torch.Tensor([out_shift])
         self.SgnO = SgnO
@@ -1203,6 +1203,7 @@ def pooling_mixed_tests_generator(layer, kernel):
     #                                     ")")
     torch.manual_seed(5)
     random.seed(5)
+    str_out = ""
     if kernel.in_signed:
         upper_in_clip = 2**(kernel.in_data_t-1)
         lower_in_clip = -upper_in_clip
@@ -1212,13 +1213,34 @@ def pooling_mixed_tests_generator(layer, kernel):
     # Setting input activations
     x = torch.Tensor(1,layer.ch_in,layer.dim_in_y,layer.dim_in_x).random_(lower_in_clip, upper_in_clip)
     # Setting the network
-    net = nn.MaxPool2d(layer.pool_kernel, layer.pool_stride) if kernel.type=='maxpool' else nn.AvgPool2d(layer.pool_kernel, layer.pool_stride)
+    if kernel.type == "maxpool":
+        net = nn.MaxPool2d(layer.pool_kernel, layer.pool_stride)
+    else:
+        layers = [nn.AvgPool2d(layer.pool_kernel, layer.pool_stride)]
+        layers.append(PULPNNBatchNorm(Cin = layer.ch_out, Kh = layer.pool_kernel, Kw =layer.pool_kernel, BitA = kernel.in_data_t, BitW = 0, BitO=kernel.out_data_t, SgnO=kernel.out_signed))
+        # only a single multiply, add, shift
+        layers[1].k = layers[1].k.squeeze()[0:1].clone()
+        layers[1].l = layers[1].l.squeeze()[0:1].clone()
+        net = nn.Sequential(*layers)
+        if layer.bn:
+            str_out += f"#define OUT_MULT ({int(net[1].k.item())})\n"
+            str_out += f"#define OUT_ADD ({int(net[1].l.item())})\n"
+            str_out += f"#define OUT_SHIFT ({int(net[1].d.item())})\n"
+            # when BN is enabled, we fold the division by kernel size into the
+            # multiplication, so the model layer must take this into account
+            net[1].k *= (layer.pool_kernel**2)
+        else:
+            # when no BN is used, we use the BN layer just to floor the test
+            # network's output
+            net[1].k.fill_(1.)
+            net[1].l.fill_(0.)
+            net[1].d.fill_(0.)
 
     # Running the network
     y = net(x)
 
-    str_out = str_tensor(x, 'IN_INT'+ str(kernel.in_data_t))
-    str_out += str_tensor(torch.Tensor(y), 'OUT_INT' + str(kernel.in_data_t))
+    str_out += str_tensor(x, 'IN_INT'+ str(kernel.in_data_t))
+    str_out += str_tensor(torch.Tensor(y), 'OUT_INT' + str(kernel.out_data_t))
 
     return str_out
 

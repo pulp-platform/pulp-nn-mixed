@@ -143,7 +143,7 @@ def main():
                         comp=lin_q)
 
             elif pulp_nn_test_setup.TYPE_OF_KERNEL == 'maxpool':
-                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='maxpool', inp=pulp_nn_test_setup.in_precision, out=None, wt=None, quant=None, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT, in_signed=pulp_nn_test_setup.in_signed, out_signed=pulp_nn_test_setup.in_signed)
+                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='maxpool', inp=pulp_nn_test_setup.in_precision, out=pulp_nn_test_setup.in_precision, wt=None, quant=None, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT, in_signed=pulp_nn_test_setup.in_signed, out_signed=pulp_nn_test_setup.in_signed)
                 maxp=pulp_nn_factory.PULPNNMaxPool(kernel=kernel_to_test, layer=layer_to_gen)
                 pulp_nn_factory.copy_file(src_tag='maxpool', key=maxp, dest_tag='pulp_nn_maxpool')
                 pulp_nn_factory.allocation(path_tag='data_allocation_maxp', comp=maxp)
@@ -155,7 +155,7 @@ def main():
                         comp=maxp)
 
             elif pulp_nn_test_setup.TYPE_OF_KERNEL == 'avgpool':
-                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='avgpool', inp=pulp_nn_test_setup.in_precision, out=pulp_nn_test_setup.out_precision, wt=None, quant=None, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT, in_signed=pulp_nn_test_setup.in_signed, out_signed=pulp_nn_test_setup.out_signed)
+                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='avgpool', inp=pulp_nn_test_setup.in_precision, out=pulp_nn_test_setup.out_precision, wt=None, quant=pulp_nn_test_setup.quantization_type, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT, in_signed=pulp_nn_test_setup.in_signed, out_signed=pulp_nn_test_setup.out_signed)
                 avgp=pulp_nn_factory.PULPNNAvgPoolNew(kernel=kernel_to_test, layer=layer_to_gen)
                 pulp_nn_factory.copy_file(src_tag='avgpool', key=avgp, dest_tag='pulp_nn_avgpool')
                 pulp_nn_factory.allocation(path_tag='data_allocation_avgp', comp=avgp)
@@ -218,7 +218,6 @@ def main():
                         for z in pulp_nn_init.PULPNNWeightsPrecisions:
                             for q in pulp_nn_init.PULPNNQuantizationMethods:
                                 for si, so in product([True, False], [True, False]):
-                                    
                                     kernel_matmul = pulp_nn_factory.PULPNNKernel(name='matmul', inp=None, out=j, wt=z, quant=q, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT, in_signed=si, out_signed=so)
                                     matmul=pulp_nn_factory.PULPNNMatMul(kernel=kernel_matmul, layer=layer_to_gen)
                                     pulp_nn_factory.copy_file(src_tag='matmul', key=matmul, dest_tag='pulp_nn_matmul')
@@ -364,7 +363,7 @@ def main():
             elif pulp_nn_test_setup.TYPE_OF_KERNEL == 'maxpool':
                 for i in pulp_nn_init.PULPNNDataPrecisions:
                     for si in [True, False]:
-                        kernel_to_test = pulp_nn_factory.PULPNNKernel(name='maxpool', inp=i, out=None, wt=None, quant=None, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT, in_signed=si, out_signed=si)
+                        kernel_to_test = pulp_nn_factory.PULPNNKernel(name='maxpool', inp=i, out=i, wt=None, quant=None, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT, in_signed=si, out_signed=si)
                         maxp=pulp_nn_factory.PULPNNMaxPool(kernel=kernel_to_test, layer=layer_to_gen)
                         pulp_nn_factory.copy_file(src_tag='maxpool', key=maxp, dest_tag='pulp_nn_maxpool')
                         pulp_nn_factory.allocation(path_tag='data_allocation_maxp', comp=maxp)
@@ -376,17 +375,19 @@ def main():
                                 comp=maxp)
 
             elif pulp_nn_test_setup.TYPE_OF_KERNEL == 'avgpool':
-                for i in pulp_nn_init.PULPNNDataPrecisions:
-                    kernel_to_test = pulp_nn_factory.PULPNNKernel(name='avgpool', inp=i, out=None, wt=None, quant=None, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT)
-                    avg=pulp_nn_factory.PULPNNAvgPoolNew(kernel=kernel_to_test, layer=layer_to_gen)
-                    pulp_nn_factory.copy_file(src_tag='avgpool', key=avg, dest_tag='pulp_nn_avgpool')
-                    pulp_nn_factory.allocation(path_tag='data_allocation_avgp', comp=avg)
-                    pulp_nn_factory.golden(path_tag='golden_model_avgp', comp=avg)
-                    pulp_nn_init.PULPNNCALL,pulp_nn_init.PULPNNMAKE,pulp_nn_init.PULPNNINCLUDE=pulp_nn_factory.generation(
-                            call=pulp_nn_init.PULPNNCALL,
-                            make=pulp_nn_init.PULPNNMAKE,
-                            include=pulp_nn_init.PULPNNINCLUDE,
-                            comp=avg)
+                for i, o in product(pulp_nn_init.PULPNNDataPrecisions, pulp_nn_init.PULPNNDataPrecisions):
+                    for si, so in product([True, False], [True, False]):
+                        for q in pulp_nn_init.PULPNNQuantizationMethods:
+                            kernel_to_test = pulp_nn_factory.PULPNNKernel(name='avgpool', inp=i, out=o, wt=None, quant=q, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT, in_signed=si, out_signed=so)
+                            avg=pulp_nn_factory.PULPNNAvgPoolNew(kernel=kernel_to_test, layer=layer_to_gen)
+                            pulp_nn_factory.copy_file(src_tag='avgpool', key=avg, dest_tag='pulp_nn_avgpool')
+                            pulp_nn_factory.allocation(path_tag='data_allocation_avgp', comp=avg)
+                            pulp_nn_factory.golden(path_tag='golden_model_avgp', comp=avg)
+                            pulp_nn_init.PULPNNCALL,pulp_nn_init.PULPNNMAKE,pulp_nn_init.PULPNNINCLUDE=pulp_nn_factory.generation(
+                                call=pulp_nn_init.PULPNNCALL,
+                                make=pulp_nn_init.PULPNNMAKE,
+                                include=pulp_nn_init.PULPNNINCLUDE,
+                                comp=avg)
 
             elif pulp_nn_test_setup.TYPE_OF_KERNEL == 'add':
                 for i in pulp_nn_init.PULPNNDataPrecisions:

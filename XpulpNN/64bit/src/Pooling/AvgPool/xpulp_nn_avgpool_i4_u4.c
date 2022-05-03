@@ -110,7 +110,7 @@ void __attribute__ ((noinline))  xpulp_nn_avgpool_i4_u4(
                   out_large = (sum[0] * lambda + out_add) >> out_shift;
                   out_el = clip4(out_large);
                   out_large = (sum[1] * lambda + out_add) >> out_shift;
-                  out_el = bitins(out_el, (int8_t) 0x0f, (uint8_t) clip44(out_large), (int8_t) 0xf0, 4);
+                  out_el = bitins(out_el, (int8_t) 0x0f, (uint8_t) clip4(out_large), (int8_t) 0xf0, 4);
                   pDst[(ch_cnt >> (0)) + 0] = out_el;
                   } else {
                   out_large = sum[0] / kernel_size_tot;

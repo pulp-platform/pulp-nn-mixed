@@ -30,6 +30,8 @@ sum_t = f"{'' if config.kernel.in_signed else 'u'}int32_t"
 pt_out = f"{'' if config.kernel.out_signed else 'u'}int8_t"
 bext = f"bitext{'' if config.kernel.in_signed else '_u'}"
 int_t = f"{('' if config.kernel.in_signed else 'unsigned ') + 'int'}"
+els_per_out_byte = 8//config.kernel.out_data_t
+out_base_mask = 255 >> (8-config.kernel.out_data_t) 
 %>
 
 
@@ -159,19 +161,19 @@ cur_mask_shift = c * dw_in
                   out_large = (sum[${c}] * lambda + out_add) >> out_shift;
                   % if not wr_not_in_every_iter:
                     % if els_per_byte_out == 1:
-                  out_el = clip${dw_out}(out_large);
+                  out_el = ${out_clip_fn}(out_large);
                     % else:
                       % if c==0 and not wr_not_in_every_iter:
-                  out_el = clip${dw_out}(out_large);
+                  out_el = ${out_clip_fn}(out_large);
                       % else:
-                  out_el = bitins(out_el, (int8_t) ${out_mask_n_strings[c % els_per_byte_out]}, (${pt_out}) ${out_clip_fn}${dw_out}(out_large), (int8_t) ${out_mask_strings[c % els_per_byte_out]}, ${(c % els_per_byte_out) * dw_out});
+                  out_el = bitins(out_el, (int8_t) ${out_mask_n_strings[c % els_per_byte_out]}, (${pt_out}) ${out_clip_fn}(out_large), (int8_t) ${out_mask_strings[c % els_per_byte_out]}, ${(c % els_per_byte_out) * dw_out});
                       % endif
                     % endif
                     % if (c % els_per_byte_out) == els_per_byte_out-1:
                   pDst[(ch_cnt ${">>" if byte_chan_shift_diff >= 0 else "<<"} (${byte_chan_shift_diff if byte_chan_shift_diff >= 0 else -byte_chan_shift_diff})) + ${c >> byte_chan_shift_out}] = out_el;
                     % endif
                     % else:
-                    out_el |= (${out_clip_fn}${config.kernel.out_data_t}(out_large) << (in_iter_cnt * ${els_per_byte_in * config.kernel.out_data_t} + ${c * config.kernel.out_data_t}));
+                    out_el |= (${"(" if config.kernel.out_signed else ""}${out_clip_fn}(out_large) ${f"& 0x{out_base_mask:02x})" if config.kernel.out_signed else ""} << (in_iter_cnt * ${els_per_byte_in * config.kernel.out_data_t} + ${c * config.kernel.out_data_t}));
                     % endif
                   % endfor
                   } else {
@@ -191,7 +193,7 @@ cur_mask_shift = c * dw_in
                   pDst[(ch_cnt ${">>" if byte_chan_shift_diff>=0 else "<<"} (${byte_chan_shift_diff if byte_chan_shift_diff>=0 else -byte_chan_shift_diff})) + ${c >> byte_chan_shift_out}] = out_el;
                     % endif
                   % else :
-                  out_el |= (${out_clip_fn}(out_large) << (in_iter_cnt * ${els_per_byte_in * config.kernel.out_data_t} + ${c * config.kernel.out_data_t}));
+                  out_el |= (${"(" if config.kernel.out_signed else ""}${out_clip_fn}(out_large) ${f"& 0x{out_base_mask:02x})" if config.kernel.out_signed else ""} << (in_iter_cnt * ${els_per_byte_in * config.kernel.out_data_t} + ${c * config.kernel.out_data_t}));
                   % endif
                   % endfor
                 }
