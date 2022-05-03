@@ -192,7 +192,7 @@ void ${config.fn_name}(
 
 
   ${act_t} * k1 = pKappa + core_id * (chunk << ${4//config.less_precision});
-  ${act_t} * lambda1 = plambda + core_id * (chunk << ${4//config.less_precision});
+  ${act_t} * lambda1 = pLambda + core_id * (chunk << ${4//config.less_precision});
 
   for(int i_ch = start_channel; i_ch < stop_channel; i_ch++)
   {

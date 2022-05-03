@@ -82,7 +82,7 @@ void __attribute__ ((noinline)) xpulp_nn_add_i2_u4_i2(
         *((v4s*)target1_ext) = pulp_nn_i2_to_i8_r(target1);
         target1+=1;
 
-        *((v4u*)target2_ext) = pulp_nn_i4_to_i8_r(target2);
+        *((v4u*)target2_ext) = pulp_nn_u4_to_u8_r(target2);
 
         target2+=2;
 #ifdef ADD_VERBOSE

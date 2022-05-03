@@ -567,7 +567,7 @@ class PULPNNQuantAdd(PULPNNFactory):
         self.api = self.__class__.__name__
         self.unpack_in1_fn = "pulp_nn_{0}{1}_to_{0}8_r".format(sgn_str(kernel.in_signed[0]),
                                                                str(self.in1_data_t))
-        self.unpack_in2_fn = "pulp_nn_{0}{1}_to_{0}8_r".format(sgn_str(kernel.in_signed[0]),
+        self.unpack_in2_fn = "pulp_nn_{0}{1}_to_{0}8_r".format(sgn_str(kernel.in_signed[1]),
                                                                str(self.in2_data_t))
         self.max_precision = max([self.in1_data_t, self.in2_data_t])
 
@@ -1248,6 +1248,37 @@ def add_mixed_tests_generator(layer, kernel):
     # print("Add Mixed Test Generator (type: " + str(kernel.type) +
     #                                 ", ISA: " + str(kernel.extentions) +
     #                                 ")")
+    torch.manual_seed(5)
+    random.seed(5)
+    # Setting input activations
+    x1 = torch.Tensor(1,layer.ch_in,layer.dim_in_y,layer.dim_in_x).random_(0,(2**(kernel.in_data_t) - 1))
+    x2 = torch.Tensor(1,layer.ch_in,layer.dim_in_y,layer.dim_in_x).random_(0,(2**(kernel.out_data_t) - 1))
+
+    # Setting scaling parameters
+    m1 = 5
+    m2 = 5
+    out_shift = 3
+
+    # Running the network
+    y = clip8(((x1 * m1)+(x2 * m2)) >> out_shift, kernel.in_data_t if kernel.in_data_t > kernel.out_data_t else kernel.out_data_t)
+
+    str_out = '#define OUT_MULT1 ' + str(m1) +'\n'
+    str_out += '#define OUT_MULT2 ' + str(m2) +'\n'
+    str_out += '#define OUT_SHIFT '+ str(out_shift) +'\n'
+
+    str_out += str_tensor(x1, 'IN1_INT'+ str(kernel.in_data_t))
+    str_out += str_tensor(x2, 'IN2_INT'+ str(kernel.out_data_t))
+    str_out += str_tensor(torch.Tensor(y), 'OUT_INT' + str(kernel.in_data_t if kernel.in_data_t > kernel.out_data_t else kernel.out_data_t))
+
+    return str_out
+
+
+def quant_add_mixed_tests_generator(layer, kernel):
+    # print("Add Mixed Test Generator (type: " + str(kernel.type) +
+    #                                 ", ISA: " + str(kernel.extentions) +
+    #                                 ")")
+
+    
     torch.manual_seed(5)
     random.seed(5)
     # Setting input activations

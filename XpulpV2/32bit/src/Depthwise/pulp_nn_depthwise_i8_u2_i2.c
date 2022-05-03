@@ -97,7 +97,7 @@ void pulp_nn_depthwise_i8_u2_i2(
 
 
   int32_t * k1 = pKappa + core_id * (chunk << 2);
-  int32_t * lambda1 = plambda + core_id * (chunk << 2);
+  int32_t * lambda1 = pLambda + core_id * (chunk << 2);
 
   for(int i_ch = start_channel; i_ch < stop_channel; i_ch++)
   {
