@@ -226,7 +226,7 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i2_u2_i2(
         pB2++;
 
         col_cnt_im2col-=4;
-      } while(col_cnt_im2col);
+      } while(col_cnt_im2col > 0);
       pA-=num_col_im2col_w;
     }
     if (flag_batch_norm && flag_relu)

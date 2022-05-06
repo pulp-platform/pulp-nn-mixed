@@ -158,7 +158,7 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_u2_u4_i8(
         sum8 += inA4 * inB2;
 
         col_cnt_im2col--;
-      } while(col_cnt_im2col);
+      } while(col_cnt_im2col > 0);
       pA-=num_col_im2col_w;
     }
     if (flag_batch_norm && flag_relu)

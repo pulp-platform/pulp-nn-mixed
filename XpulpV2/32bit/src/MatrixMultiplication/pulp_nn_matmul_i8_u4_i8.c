@@ -114,7 +114,7 @@ uint8_t *pulp_nn_matmul_i8_u4_i8(
       pB2+=4;
     }
     uint16_t col_cnt_im2col = num_col_im2col & 0x3;
-    while (col_cnt_im2col)
+    while (col_cnt_im2col > 0)
     {
       int8_t inA = *pA++;
       int8_t inA2 = *pA2++;
