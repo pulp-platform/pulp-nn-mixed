@@ -1760,7 +1760,7 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
         col_cnt_im2col--;
 %endif
 %endif
-      } while(col_cnt_im2col);
+      } while(col_cnt_im2col > 0);
 %if config.kernel.wt_data_t >= config.kernel.in_data_t:
       pA-=num_col_im2col_w;
 %endif

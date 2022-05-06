@@ -496,7 +496,7 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i8_i4_i2(
         pA++;
 
         col_cnt_im2col-=4;
-      } while(col_cnt_im2col);
+      } while(col_cnt_im2col > 0);
     }
     if (flag_batch_norm && flag_relu)
     {

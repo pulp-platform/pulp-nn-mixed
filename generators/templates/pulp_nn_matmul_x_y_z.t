@@ -751,7 +751,7 @@ ${pt_out} *${config.fn_name}(
 %else:
     uint16_t col_cnt_im2col = num_col_im2col & 0x3;
 %endif
-    while(col_cnt_im2col)
+    while(col_cnt_im2col > 0)
     {
 %if config.kernel.wt_data_t == 2:
       int8_t inA = (int8_t) bitext((int) *pA, 2, 0);

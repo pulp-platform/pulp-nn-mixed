@@ -322,7 +322,7 @@ uint8_t *pulp_nn_matmul_i8_u8_i2(
       pB2+=16;
     }
     uint16_t col_cnt_im2col = num_col_im2col & 0xf;
-    while(col_cnt_im2col)
+    while(col_cnt_im2col > 0)
     {
       int8_t inA = (int8_t) bitext((int) *pA, 2, 0);
       uint8_t inB = *pB++;
