@@ -53,6 +53,12 @@ void pulp_nn_linear_u4_i32_i4(
         int sum = 0;
         int sum2 = 0;
 
+        if (pBias != NULL)
+        {
+          sum = *(int32_t *)(pBias + 4*i);
+          sum2 = *(int32_t *)(pBias + 4*i + 4);
+        }
+
         uint8_t *pA = pIn;
         int8_t *pB = pWeight + (i * dim_vec_wt);
         int8_t *pB2 = pB + dim_vec_wt;
@@ -96,7 +102,10 @@ void pulp_nn_linear_u4_i32_i4(
     if (lft_neurons && (stop - start) > 0)
     {
         int sum = 0;
-
+        if (pBias != NULL)
+        {
+          sum = *(int32_t *)(pBias + 4*i);
+        }
         uint8_t *pA = pIn;
         int8_t *pB = pWeight + (i * dim_vec_wt);
 
