@@ -25,7 +25,7 @@ SINGLE_KERNEL		= 0
 
 # -> XpulpV2, XpulpNN, XpulpNN-mixed
 
-ISA 				= 'XpulpV2'
+ISA 				= 'XpulpNN'
 
 # Select from the supported ones:
 
@@ -83,16 +83,16 @@ DIM_IM_IN_X 		= 8
 DIM_IM_IN_Y 		= 8
 CH_IM_IN 			= 16
 # if pooling, output dimensions must be relative to kernel and stride sizes
-DIM_IM_OUT_X 		= 8
-DIM_IM_OUT_Y 		= 8
+DIM_IM_OUT_X 		= 4
+DIM_IM_OUT_Y 		= 4
 CH_IM_OUT 			= 16
 # if is not linear
 DIM_KERNEL_X 		= 3 # 1 if is pointwise, free otherwise
 DIM_KERNEL_Y 		= 3 # 1 if is pointwise, free otherwise
-PADDING_Y_TOP 		= 1 # 0 if is pointwise, free otherwise
-PADDING_Y_BOTTOM 	= 1 # 0 if is pointwise, free otherwise
-PADDING_X_LEFT 		= 1 # 0 if is pointwise, free otherwise
-PADDING_X_RIGHT 	= 1 # 0 if is pointwise, free otherwise
+PADDING_Y_TOP 		= 0 # 0 if is pointwise, free otherwise
+PADDING_Y_BOTTOM 	= 0 # 0 if is pointwise, free otherwise
+PADDING_X_LEFT 		= 0 # 0 if is pointwise, free otherwise
+PADDING_X_RIGHT 	= 0 # 0 if is pointwise, free otherwise
 STRIDE_X 			= 1
 STRIDE_Y 			= 1
 # Other parameters
