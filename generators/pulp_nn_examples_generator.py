@@ -183,7 +183,7 @@ def main():
                 for j in pulp_nn_init.PULPNNDataPrecisions:
                     for z in pulp_nn_init.PULPNNWeightsPrecisions:
                         for q in pulp_nn_init.PULPNNQuantizationMethods:
-                            kernel_to_test = pulp_nn_factory.PULPNNKernel(name='matmul', inp=None, out=j, wt=z, quant=q, act_prec=a, ext=pulp_nn_test_setup.ISA)
+                            kernel_to_test = pulp_nn_factory.PULPNNKernel(name='matmul', inp=None, out=j, wt=z, quant=q, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT)
                             matmul=pulp_nn_factory.PULPNNMatMul(kernel=kernel_to_test, layer=layer_to_gen)
                             pulp_nn_factory.copy_file(src_tag='matmul', key=matmul, dest_tag='pulp_nn_matmul')
                             pulp_nn_factory.allocation(path_tag='data_allocation_matm', comp=matmul)
@@ -253,7 +253,7 @@ def main():
                     for j in pulp_nn_init.PULPNNDataPrecisions:
                         for z in pulp_nn_init.PULPNNWeightsPrecisions:
                             for q in pulp_nn_init.PULPNNQuantizationMethods:
-                                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='pointwise', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=pulp_nn_test_setup.ISA)
+                                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='pointwise', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt=pulp_nn_test_setup.MATMUL_FMT)
                                 pw=pulp_nn_factory.PULPNNConvolvePointwise(kernel=kernel_to_test, layer=layer_to_gen)
                                 pulp_nn_factory.copy_file(src_tag='pointwise', key=pw, dest_tag='pulp_nn_pointwise')
                                 pulp_nn_factory.allocation(path_tag='data_allocation_pw', comp=pw)
@@ -307,7 +307,7 @@ def main():
                     for j in pulp_nn_init.PULPNNDataPrecisions:
                         for z in pulp_nn_init.PULPNNWeightsPrecisions:
                             for q in pulp_nn_init.PULPNNQuantizationMethods:
-                                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='depthwise', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=pulp_nn_test_setup.ISA)
+                                kernel_to_test = pulp_nn_factory.PULPNNKernel(name='depthwise', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=pulp_nn_test_setup.ISA, mm_fmt='')
                                 dw=pulp_nn_factory.PULPNNConvolveDepthwise(kernel=kernel_to_test, layer=layer_to_gen)
                                 pulp_nn_factory.copy_file(src_tag='depthwise', key=dw, dest_tag='pulp_nn_depthwise')
                                 pulp_nn_factory.allocation(path_tag='data_allocation_dw', comp=dw)

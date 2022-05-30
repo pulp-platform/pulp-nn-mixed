@@ -162,6 +162,18 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
       sum6 = sum2;
       sum7 = sum3;
       sum8 = sum4;
+
+%if config.kernel.matmul_fmt == '4x4':
+      sum9 = sum;
+      sum10 = sum2;
+      sum11 = sum3;
+      sum12 = sum4;
+
+      sum13 = sum;
+      sum14 = sum2;
+      sum15 = sum3;
+      sum16 = sum4;
+%endif
     }
 <%! import math %>
     for(int j=0; j<(num_col_im2col >> ${int(math.log2(((int(32/config.max_precision))*(int(config.max_precision/config.kernel.wt_data_t)))))}); j++)
@@ -328,6 +340,7 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
       ptrB3 = MacLoadUpdate(ptrB3);
 %endif
 
+%if config.kernel.matmul_fmt == '4x2':      
       pA  = ${config.unpack_wt_fn}(pA , vecA); 
       pA2 = ${config.unpack_wt_fn}(pA2, vecA2);
       pA3 = ${config.unpack_wt_fn}(pA3, vecA3);
@@ -338,7 +351,6 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
       ptrA3  = MacLoadAssign(vecA3);
       ptrA4  = MacLoadAssign(vecA4);
 
-%if config.kernel.matmul_fmt == '4x2':
       sum5  = MacLoad${int(32/config.max_precision)}(1, 0, 0, 1, ptrA, sum5);
       ptrA  = MacLoadUpdate(ptrA);
 
@@ -356,6 +368,16 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
       sum7 = MacLoad${int(32/config.max_precision)}(0, 0, 2, 1, ptrA3, sum7);
       sum8 = MacLoad${int(32/config.max_precision)}(0, 1, 3, 1, ptrB4, sum8);
       ptrB4 = MacLoadUpdate(ptrB4);
+
+      pA  = ${config.unpack_wt_fn}(pA , vecA); 
+      pA2 = ${config.unpack_wt_fn}(pA2, vecA2);
+      pA3 = ${config.unpack_wt_fn}(pA3, vecA3);
+      pA4 = ${config.unpack_wt_fn}(pA4, vecA4);
+
+      ptrA   = MacLoadAssign(vecA);
+      ptrA2  = MacLoadAssign(vecA2);
+      ptrA3  = MacLoadAssign(vecA3);
+      ptrA4  = MacLoadAssign(vecA4);
 
       sum9  = MacLoad${int(32/config.max_precision)}(0, 0, 0, 0, ptrA, sum9);
       sum10 = MacLoad${int(32/config.max_precision)}(0, 0, 1, 0, ptrA2, sum10);
@@ -400,6 +422,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 %endif
       pB+=loop_cnt_im2col_a;
       pB2+=loop_cnt_im2col_a;
+%if config.kernel.matmul_fmt == '4x4':
+      pB3+=loop_cnt_im2col_a;
+      pB4+=loop_cnt_im2col_a;
+%endif
 
       do
       {
@@ -412,6 +438,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         uint8_t inB = *pB++;
         uint8_t inB2 = *pB2++;
+%if config.kernel.matmul_fmt == '4x4':
+        uint8_t inB3 = *pB3++;
+        uint8_t inB4 = *pB4++;
+%endif
 
         sum += inA * inB;
         sum2 += inA2 * inB;
@@ -422,6 +452,18 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
         sum6 += inA2 * inB2;
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum9 += inA * inB3;
+        sum10 += inA2 * inB3;
+        sum11 += inA3 * inB3;
+        sum12 += inA4 * inB3;
+
+        sum13 += inA * inB4;
+        sum14 += inA2 * inB4;
+        sum15 += inA3 * inB4;
+        sum16 += inA4 * inB4;
+%endif
 
         inA = (int8_t) bitext((int) *pA, 2, 2);
         inA2 = (int8_t) bitext((int) *pA2, 2, 2);
@@ -430,6 +472,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         inB = *pB++;
         inB2 = *pB2++;
+%if config.kernel.matmul_fmt == '4x4':
+        inB3 = *pB3++;
+        inB4 = *pB4++;
+%endif
 
         sum += inA * inB;
         sum2 += inA2 * inB;
@@ -440,6 +486,18 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
         sum6 += inA2 * inB2;
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum9 += inA * inB3;
+        sum10 += inA2 * inB3;
+        sum11 += inA3 * inB3;
+        sum12 += inA4 * inB3;
+
+        sum13 += inA * inB4;
+        sum14 += inA2 * inB4;
+        sum15 += inA3 * inB4;
+        sum16 += inA4 * inB4;
+%endif
 
         inA = (int8_t) bitext((int) *pA, 2, 4);
         inA2 = (int8_t) bitext((int) *pA2, 2, 4);
@@ -448,6 +506,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         inB = *pB++;
         inB2 = *pB2++;
+%if config.kernel.matmul_fmt == '4x4':
+        inB3 = *pB3++;
+        inB4 = *pB4++;
+%endif
 
         sum += inA * inB;
         sum2 += inA2 * inB;
@@ -458,6 +520,18 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
         sum6 += inA2 * inB2;
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum9 += inA * inB3;
+        sum10 += inA2 * inB3;
+        sum11 += inA3 * inB3;
+        sum12 += inA4 * inB3;
+
+        sum13 += inA * inB4;
+        sum14 += inA2 * inB4;
+        sum15 += inA3 * inB4;
+        sum16 += inA4 * inB4;
+%endif
 
         inA = (int8_t) bitext((int) *pA, 2, 6);
         inA2 = (int8_t) bitext((int) *pA2, 2, 6);
@@ -466,6 +540,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         inB = *pB++;
         inB2 = *pB2++;
+%if config.kernel.matmul_fmt == '4x4':
+        inB3 = *pB3++;
+        inB4 = *pB4++;
+%endif
 
         sum += inA * inB;
         sum2 += inA2 * inB;
@@ -476,6 +554,18 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
         sum6 += inA2 * inB2;
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum9 += inA * inB3;
+        sum10 += inA2 * inB3;
+        sum11 += inA3 * inB3;
+        sum12 += inA4 * inB3;
+
+        sum13 += inA * inB4;
+        sum14 += inA2 * inB4;
+        sum15 += inA3 * inB4;
+        sum16 += inA4 * inB4;
+%endif
 
         pA++;
         pA2++;
@@ -491,6 +581,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         uint8_t inB = *pB++;
         uint8_t inB2 = *pB2++;
+%if config.kernel.matmul_fmt == '4x4':
+        uint8_t inB3 = *pB3++;
+        uint8_t inB4 = *pB4++;
+%endif
 
         sum += inA * inB;
         sum2 += inA2 * inB;
@@ -501,6 +595,18 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
         sum6 += inA2 * inB2;
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum9 += inA * inB3;
+        sum10 += inA2 * inB3;
+        sum11 += inA3 * inB3;
+        sum12 += inA4 * inB3;
+
+        sum13 += inA * inB4;
+        sum14 += inA2 * inB4;
+        sum15 += inA3 * inB4;
+        sum16 += inA4 * inB4;
+%endif
 
         inA = (int8_t) bitext((int) *pA, 4, 4);
         inA2 = (int8_t) bitext((int) *pA2, 4, 4);
@@ -509,6 +615,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         inB = *pB++;
         inB2 = *pB2++;
+%if config.kernel.matmul_fmt == '4x4':
+        inB3 = *pB3++;
+        inB4 = *pB4++;
+%endif
 
         sum += inA * inB;
         sum2 += inA2 * inB;
@@ -519,6 +629,18 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
         sum6 += inA2 * inB2;
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum9 += inA * inB3;
+        sum10 += inA2 * inB3;
+        sum11 += inA3 * inB3;
+        sum12 += inA4 * inB3;
+
+        sum13 += inA * inB4;
+        sum14 += inA2 * inB4;
+        sum15 += inA3 * inB4;
+        sum16 += inA4 * inB4;
+%endif
 
         pA++;
         pA2++;
@@ -534,6 +656,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         uint8_t inB = *pB++;
         uint8_t inB2 = *pB2++;
+%if config.kernel.matmul_fmt == '4x4':
+        uint8_t inB3 = *pB3++;
+        uint8_t inB4 = *pB4++;
+%endif
         asm volatile("": : :"memory");
         sum += inA * inB;
         sum2 += inA2 * inB;
@@ -544,6 +670,18 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
         sum6 += inA2 * inB2;
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum9 += inA * inB3;
+        sum10 += inA2 * inB3;
+        sum11 += inA3 * inB3;
+        sum12 += inA4 * inB3;
+
+        sum13 += inA * inB4;
+        sum14 += inA2 * inB4;
+        sum15 += inA3 * inB4;
+        sum16 += inA4 * inB4;
+%endif
 
         col_cnt_im2col--;
 %endif
@@ -556,6 +694,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         uint8_t inB = (uint8_t)bitextu((unsigned int) *pB, 4, 0);
         uint8_t inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 0);
+%if config.kernel.matmul_fmt == '4x4':
+        uint8_t inB3 = (uint8_t)bitextu((unsigned int) *pB3, 4, 0);
+        uint8_t inB4 = (uint8_t)bitextu((unsigned int) *pB4, 4, 0);
+%endif
 
         sum += inA * inB;
         sum2 += inA2 * inB;
@@ -566,6 +708,18 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
         sum6 += inA2 * inB2;
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum9 += inA * inB3;
+        sum10 += inA2 * inB3;
+        sum11 += inA3 * inB3;
+        sum12 += inA4 * inB3;
+
+        sum13 += inA * inB4;
+        sum14 += inA2 * inB4;
+        sum15 += inA3 * inB4;
+        sum16 += inA4 * inB4;
+%endif
 
         inA = (int8_t) bitext((int) *pA, 2, 2);
         inA2 = (int8_t) bitext((int) *pA2, 2, 2);
@@ -574,6 +728,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         inB = (uint8_t)bitextu((unsigned int) *pB, 4, 4);
         inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 4);
+%if config.kernel.matmul_fmt == '4x4':
+        inB3 = (uint8_t)bitextu((unsigned int) *pB3, 4, 4);
+        inB4 = (uint8_t)bitextu((unsigned int) *pB4, 4, 4);
+%endif
 
         sum += inA * inB;
         sum2 += inA2 * inB;
@@ -585,8 +743,24 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
 
+%if config.kernel.matmul_fmt == '4x4':
+        sum9 += inA * inB3;
+        sum10 += inA2 * inB3;
+        sum11 += inA3 * inB3;
+        sum12 += inA4 * inB3;
+
+        sum13 += inA * inB4;
+        sum14 += inA2 * inB4;
+        sum15 += inA3 * inB4;
+        sum16 += inA4 * inB4;
+%endif
+
         pB++;
         pB2++;
+%if config.kernel.matmul_fmt == '4x4':
+        pB3++;
+        pB4++;
+%endif
 
         inA = (int8_t) bitext((int) *pA, 2, 4);
         inA2 = (int8_t) bitext((int) *pA2, 2, 4);
@@ -595,6 +769,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         inB = (uint8_t)bitextu((unsigned int) *pB, 4, 0);
         inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 0);
+%if config.kernel.matmul_fmt == '4x4':
+        inB3 = (uint8_t)bitextu((unsigned int) *pB3, 4, 0);
+        inB4 = (uint8_t)bitextu((unsigned int) *pB4, 4, 0);
+%endif
 
         sum += inA * inB;
         sum2 += inA2 * inB;
@@ -605,6 +783,18 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
         sum6 += inA2 * inB2;
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum9 += inA * inB3;
+        sum10 += inA2 * inB3;
+        sum11 += inA3 * inB3;
+        sum12 += inA4 * inB3;
+
+        sum13 += inA * inB4;
+        sum14 += inA2 * inB4;
+        sum15 += inA3 * inB4;
+        sum16 += inA4 * inB4;
+%endif
 
         inA = (int8_t) bitext((int) *pA, 2, 6);
         inA2 = (int8_t) bitext((int) *pA2, 2, 6);
@@ -613,6 +803,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         inB = (uint8_t)bitextu((unsigned int) *pB, 4, 4);
         inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 4);
+%if config.kernel.matmul_fmt == '4x4':
+        inB3 = (uint8_t)bitextu((unsigned int) *pB3, 4, 4);
+        inB4 = (uint8_t)bitextu((unsigned int) *pB4, 4, 4);
+%endif
 
         sum += inA * inB;
         sum2 += inA2 * inB;
@@ -624,6 +818,18 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
 
+%if config.kernel.matmul_fmt == '4x4':
+        sum9 += inA * inB3;
+        sum10 += inA2 * inB3;
+        sum11 += inA3 * inB3;
+        sum12 += inA4 * inB3;
+
+        sum13 += inA * inB4;
+        sum14 += inA2 * inB4;
+        sum15 += inA3 * inB4;
+        sum16 += inA4 * inB4;
+%endif
+
         pA++;
         pA2++;
         pA3++;
@@ -631,6 +837,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         pB++;
         pB2++;
+%if config.kernel.matmul_fmt == '4x4':
+        pB3++;
+        pB4++;
+%endif
 
         col_cnt_im2col-=4;
 %elif config.kernel.wt_data_t == 4:
@@ -641,6 +851,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         uint8_t inB = (uint8_t)bitextu((unsigned int) *pB, 4, 0);
         uint8_t inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 0);
+%if config.kernel.matmul_fmt == '4x4':
+        uint8_t inB3 = (uint8_t)bitextu((unsigned int) *pB3, 4, 0);
+        uint8_t inB4 = (uint8_t)bitextu((unsigned int) *pB4, 4, 0);
+%endif
 
         sum += inA * inB;
         sum2 += inA2 * inB;
@@ -651,6 +865,18 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
         sum6 += inA2 * inB2;
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum9 += inA * inB3;
+        sum10 += inA2 * inB3;
+        sum11 += inA3 * inB3;
+        sum12 += inA4 * inB3;
+
+        sum13 += inA * inB4;
+        sum14 += inA2 * inB4;
+        sum15 += inA3 * inB4;
+        sum16 += inA4 * inB4;
+%endif
 
         inA = (int8_t) bitext((int) *pA, 4, 4);
         inA2 = (int8_t) bitext((int) *pA2, 4, 4);
@@ -659,6 +885,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         inB = (uint8_t)bitextu((unsigned int) *pB, 4, 4);
         inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 4);
+%if config.kernel.matmul_fmt == '4x4':
+        inB3 = (uint8_t)bitextu((unsigned int) *pB3, 4, 4);
+        inB4 = (uint8_t)bitextu((unsigned int) *pB4, 4, 4);
+%endif
 
         sum += inA * inB;
         sum2 += inA2 * inB;
@@ -670,6 +900,18 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
 
+%if config.kernel.matmul_fmt == '4x4':
+        sum9 += inA * inB3;
+        sum10 += inA2 * inB3;
+        sum11 += inA3 * inB3;
+        sum12 += inA4 * inB3;
+
+        sum13 += inA * inB4;
+        sum14 += inA2 * inB4;
+        sum15 += inA3 * inB4;
+        sum16 += inA4 * inB4;
+%endif
+
         pA++;
         pA2++;
         pA3++;
@@ -677,6 +919,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         pB++;
         pB2++;
+%if config.kernel.matmul_fmt == '4x4':
+        pB3++;
+        pB4++;
+%endif
 
         col_cnt_im2col-=2;
 %else:
@@ -687,6 +933,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         uint8_t inB = *pB++;
         uint8_t inB2 = *pB2++;
+%if config.kernel.matmul_fmt == '4x4':
+        uint8_t inB3 = *pB3++;
+        uint8_t inB4 = *pB4++;
+%endif
         asm volatile("": : :"memory");
         sum += inA * inB;
         sum2 += inA2 * inB;
@@ -697,6 +947,18 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
         sum6 += inA2 * inB2;
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum9 += inA * inB3;
+        sum10 += inA2 * inB3;
+        sum11 += inA3 * inB3;
+        sum12 += inA4 * inB3;
+
+        sum13 += inA * inB4;
+        sum14 += inA2 * inB4;
+        sum15 += inA3 * inB4;
+        sum16 += inA4 * inB4;
+%endif
 
         col_cnt_im2col--;
 %endif
@@ -709,6 +971,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         uint8_t inB = (uint8_t)bitextu((unsigned int) *pB, 2, 0);
         uint8_t inB2 = (uint8_t)bitextu((unsigned int) *pB2, 2, 0);
+%if config.kernel.matmul_fmt == '4x4':
+        uint8_t inB3 = (uint8_t)bitextu((unsigned int) *pB3, 2, 0);
+        uint8_t inB4 = (uint8_t)bitextu((unsigned int) *pB4, 2, 0);
+%endif
 
         sum += inA * inB;
         sum2 += inA2 * inB;
@@ -719,6 +985,18 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
         sum6 += inA2 * inB2;
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum9 += inA * inB3;
+        sum10 += inA2 * inB3;
+        sum11 += inA3 * inB3;
+        sum12 += inA4 * inB3;
+
+        sum13 += inA * inB4;
+        sum14 += inA2 * inB4;
+        sum15 += inA3 * inB4;
+        sum16 += inA4 * inB4;
+%endif
 
         inA = (int8_t) bitext((int) *pA, 2, 2);
         inA2 = (int8_t) bitext((int) *pA2, 2, 2);
@@ -727,6 +1005,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         inB = (uint8_t)bitextu((unsigned int) *pB, 2, 2);
         inB2 = (uint8_t)bitextu((unsigned int) *pB2, 2, 2);
+%if config.kernel.matmul_fmt == '4x4':
+        inB3 = (uint8_t)bitextu((unsigned int) *pB3, 2, 2);
+        inB4 = (uint8_t)bitextu((unsigned int) *pB4, 2, 2);
+%endif
 
         sum += inA * inB;
         sum2 += inA2 * inB;
@@ -737,6 +1019,18 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
         sum6 += inA2 * inB2;
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum9 += inA * inB3;
+        sum10 += inA2 * inB3;
+        sum11 += inA3 * inB3;
+        sum12 += inA4 * inB3;
+
+        sum13 += inA * inB4;
+        sum14 += inA2 * inB4;
+        sum15 += inA3 * inB4;
+        sum16 += inA4 * inB4;
+%endif
 
         inA = (int8_t) bitext((int) *pA, 2, 4);
         inA2 = (int8_t) bitext((int) *pA2, 2, 4);
@@ -745,6 +1039,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         inB = (uint8_t)bitextu((unsigned int) *pB, 2, 4);
         inB2 = (uint8_t)bitextu((unsigned int) *pB2, 2, 4);
+%if config.kernel.matmul_fmt == '4x4':
+        inB3 = (uint8_t)bitextu((unsigned int) *pB3, 2, 4);
+        inB4 = (uint8_t)bitextu((unsigned int) *pB4, 2, 4);
+%endif
 
         sum += inA * inB;
         sum2 += inA2 * inB;
@@ -755,6 +1053,18 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
         sum6 += inA2 * inB2;
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum9 += inA * inB3;
+        sum10 += inA2 * inB3;
+        sum11 += inA3 * inB3;
+        sum12 += inA4 * inB3;
+
+        sum13 += inA * inB4;
+        sum14 += inA2 * inB4;
+        sum15 += inA3 * inB4;
+        sum16 += inA4 * inB4;
+%endif
 
         inA = (int8_t) bitext((int) *pA, 2, 6);
         inA2 = (int8_t) bitext((int) *pA2, 2, 6);
@@ -763,6 +1073,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         inB = (uint8_t)bitextu((unsigned int) *pB, 2, 6);
         inB2 = (uint8_t)bitextu((unsigned int) *pB2, 2, 6);
+%if config.kernel.matmul_fmt == '4x4':
+        inB3 = (uint8_t)bitextu((unsigned int) *pB3, 2, 6);
+        inB4 = (uint8_t)bitextu((unsigned int) *pB4, 2, 6);
+%endif
 
         sum += inA * inB;
         sum2 += inA2 * inB;
@@ -774,6 +1088,18 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
 
+%if config.kernel.matmul_fmt == '4x4':
+        sum9 += inA * inB3;
+        sum10 += inA2 * inB3;
+        sum11 += inA3 * inB3;
+        sum12 += inA4 * inB3;
+
+        sum13 += inA * inB4;
+        sum14 += inA2 * inB4;
+        sum15 += inA3 * inB4;
+        sum16 += inA4 * inB4;
+%endif
+
         pA++;
         pA2++;
         pA3++;
@@ -781,6 +1107,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         pB++;
         pB2++;
+%if config.kernel.matmul_fmt == '4x4':
+        pB3++;
+        pB4++;
+%endif
 
         col_cnt_im2col-=4;
 %elif config.kernel.wt_data_t == 4:
@@ -791,6 +1121,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         uint8_t inB = (uint8_t)bitextu((unsigned int) *pB, 4, 0);
         uint8_t inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 0);
+%if config.kernel.matmul_fmt == '4x4':
+        uint8_t inB3 = (uint8_t)bitextu((unsigned int) *pB3, 4, 0);
+        uint8_t inB4 = (uint8_t)bitextu((unsigned int) *pB4, 4, 0);
+%endif
 
         sum += inA * inB;
         sum2 += inA2 * inB;
@@ -801,6 +1135,18 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
         sum6 += inA2 * inB2;
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum9 += inA * inB3;
+        sum10 += inA2 * inB3;
+        sum11 += inA3 * inB3;
+        sum12 += inA4 * inB3;
+
+        sum13 += inA * inB4;
+        sum14 += inA2 * inB4;
+        sum15 += inA3 * inB4;
+        sum16 += inA4 * inB4;
+%endif
 
         inA = (int8_t) bitext((int) *pA, 4, 4);
         inA2 = (int8_t) bitext((int) *pA2, 4, 4);
@@ -809,6 +1155,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         inB = (uint8_t)bitextu((unsigned int) *pB, 4, 4);
         inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 4);
+%if config.kernel.matmul_fmt == '4x4':
+        inB3 = (uint8_t)bitextu((unsigned int) *pB3, 4, 4);
+        inB4 = (uint8_t)bitextu((unsigned int) *pB4, 4, 4);
+%endif
 
         sum += inA * inB;
         sum2 += inA2 * inB;
@@ -820,6 +1170,18 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
 
+%if config.kernel.matmul_fmt == '4x4':
+        sum9 += inA * inB3;
+        sum10 += inA2 * inB3;
+        sum11 += inA3 * inB3;
+        sum12 += inA4 * inB3;
+
+        sum13 += inA * inB4;
+        sum14 += inA2 * inB4;
+        sum15 += inA3 * inB4;
+        sum16 += inA4 * inB4;
+%endif
+
         pA++;
         pA2++;
         pA3++;
@@ -827,6 +1189,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         pB++;
         pB2++;
+%if config.kernel.matmul_fmt == '4x4':
+        pB3++;
+        pB4++;
+%endif
 
         col_cnt_im2col-=2;
 %else:
@@ -837,6 +1203,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         uint8_t inB = *pB++;
         uint8_t inB2 = *pB2++;
+%if config.kernel.matmul_fmt == '4x4':
+        uint8_t inB3 = *pB3++;
+        uint8_t inB4 = *pB4++;
+%endif
         asm volatile("": : :"memory");
         sum += inA * inB;
         sum2 += inA2 * inB;
@@ -847,6 +1217,18 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
         sum6 += inA2 * inB2;
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum9 += inA * inB3;
+        sum10 += inA2 * inB3;
+        sum11 += inA3 * inB3;
+        sum12 += inA4 * inB3;
+
+        sum13 += inA * inB4;
+        sum14 += inA2 * inB4;
+        sum15 += inA3 * inB4;
+        sum16 += inA4 * inB4;
+%endif
 
         col_cnt_im2col--;
 %endif
@@ -1412,9 +1794,17 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
   {
     uint8_t *pB = pIn;
     uint8_t *pB2 = (pB + num_col_im2col_a);
+%if config.kernel.matmul_fmt == '4x4':
+    uint8_t *pB3 = (pB2 + num_col_im2col_a);
+    uint8_t *pB4 = (pB3 + num_col_im2col_a);
+%endif
 
     uint32_t *ptrB  = (uint32_t *) pB;
     uint32_t *ptrB2 = (uint32_t *) pB2;
+%if config.kernel.matmul_fmt == '4x4':
+    uint32_t *ptrB3 = (uint32_t *) pB3;
+    uint32_t *ptrB4 = (uint32_t *) pB4;
+%endif
 
 %if config.kernel.wt_data_t < config.kernel.in_data_t:
     pA  = ${config.unpack_wt_fn}(pA , vecA);
@@ -1438,24 +1828,48 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
       sum = ((int) (*pBias++));    
     }
     int sum2 = sum;
+%if config.kernel.matmul_fmt == '4x4':
+    int sum3 = sum;
+    int sum4 = sum;
+%endif
 
 %if config.kernel.out_data_t == 4:
     uint8_t out[2];
     uint8_t out2[2];
+%if config.kernel.matmul_fmt == '4x4':
+    uint8_t out3[2];
+    uint8_t out4[2];
+%endif
 %endif
     for(int j=0; j < (num_col_im2col >> ${int(math.log2(((int(32/config.max_precision))*(int(config.max_precision/config.kernel.wt_data_t)))))}); j++)
     {
       ptrB2 = MacLoadInit(0, 1, 0, 1, ptrB2);
 
+%if config.kernel.matmul_fmt == '4x2':
       sum  = MacLoad${int(32/config.max_precision)}(0, 1, 0, 0, ptrB, sum);
       ptrB = MacLoadUpdate(ptrB);
 
       sum2 = MacLoad${int(32/config.max_precision)}(1, 0, 0, 1, ptrA, sum2);
       ptrA = MacLoadUpdate(ptrA);
+%elif config.kernel.matmul_fmt == '4x4':
+      sum  = MacLoad${int(32/config.max_precision)}(0, 1, 0, 0, ptrB3, sum);
+      ptrB3 = MacLoadUpdate(ptrB3);
+
+      sum2 = MacLoad${int(32/config.max_precision)}(0, 1, 0, 1, ptrB4, sum2);
+      ptrB4 = MacLoadUpdate(ptrB4);
+
+      sum3 = MacLoad${int(32/config.max_precision)}(0, 1, 0, 0, ptrB, sum3);
+      ptrB = MacLoadUpdate(ptrB);
+
+      sum4 = MacLoad${int(32/config.max_precision)}(1, 0, 0, 1, ptrA, sum4);
+      ptrA = MacLoadUpdate(ptrA);
+
+%endif
 %if config.kernel.wt_data_t < config.kernel.in_data_t:
 %if (config.kernel.in_data_t/config.kernel.wt_data_t) == 4:
       ptrB2 = MacLoadInit(0, 1, 0, 1, ptrB2);
 
+%if config.kernel.matmul_fmt == '4x2':
       sum  = MacLoad${int(32/config.max_precision)}(0, 1, 0, 0, ptrB, sum);
       ptrB = MacLoadUpdate(ptrB);
 
@@ -1469,9 +1883,37 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
       sum2 = MacLoad${int(32/config.max_precision)}(1, 0, 0, 1, ptrA, sum2);
       ptrA = MacLoadUpdate(ptrA);
+%elif config.kernel.matmul_fmt == '4x4':
+      sum  = MacLoad${int(32/config.max_precision)}(0, 1, 0, 0, ptrB3, sum);
+      ptrB3 = MacLoadUpdate(ptrB3);
+
+      sum2 = MacLoad${int(32/config.max_precision)}(0, 1, 0, 1, ptrB4, sum2);
+      ptrB4 = MacLoadUpdate(ptrB4);
+
+      sum3 = MacLoad${int(32/config.max_precision)}(0, 1, 0, 0, ptrB, sum3);
+      ptrB = MacLoadUpdate(ptrB);
+
+      sum4 = MacLoad${int(32/config.max_precision)}(1, 0, 0, 1, ptrA, sum4);
+      ptrA = MacLoadUpdate(ptrA);
+
+      ptrB2 = MacLoadInit(0, 1, 0, 1, ptrB2);
+
+      sum  = MacLoad${int(32/config.max_precision)}(0, 1, 0, 0, ptrB3, sum);
+      ptrB3 = MacLoadUpdate(ptrB3);
+
+      sum2 = MacLoad${int(32/config.max_precision)}(0, 1, 0, 1, ptrB4, sum2);
+      ptrB4 = MacLoadUpdate(ptrB4);
+
+      sum3 = MacLoad${int(32/config.max_precision)}(0, 1, 0, 0, ptrB, sum3);
+      ptrB = MacLoadUpdate(ptrB);
+
+      sum4 = MacLoad${int(32/config.max_precision)}(1, 0, 0, 1, ptrA, sum4);
+      ptrA = MacLoadUpdate(ptrA);            
+%endif
 %endif
       ptrB2  = MacLoadInit(0, 1, 0, 1, ptrB2);
 
+%if config.kernel.matmul_fmt == '4x2':
       sum  = MacLoad${int(32/config.max_precision)}(0, 1, 0, 0, ptrB, sum);   
       ptrB = MacLoadUpdate(ptrB);
 
@@ -1481,6 +1923,23 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
       sum2  = MacLoad${int(32/config.max_precision)}(1, 0, 0, 1, ptrA, sum2);
       ptrA  = MacLoadUpdate(ptrA);
+%elif config.kernel.matmul_fmt == '4x4':
+      sum  = MacLoad${int(32/config.max_precision)}(0, 1, 0, 0, ptrB3, sum);
+      ptrB3 = MacLoadUpdate(ptrB3);
+
+      sum2 = MacLoad${int(32/config.max_precision)}(0, 1, 0, 1, ptrB4, sum2);
+      ptrB4 = MacLoadUpdate(ptrB4);
+
+      sum3 = MacLoad${int(32/config.max_precision)}(0, 1, 0, 0, ptrB, sum3);
+      ptrB = MacLoadUpdate(ptrB);
+
+      pA = ${config.unpack_wt_fn}(pA , vecA);
+
+      ptrA = MacLoadAssign(vecA);
+
+      sum4 = MacLoad${int(32/config.max_precision)}(1, 0, 0, 1, ptrA, sum4);
+      ptrA = MacLoadUpdate(ptrA);
+%endif
 %endif
     }
 %if config.kernel.wt_data_t < config.kernel.in_data_t:
@@ -1502,6 +1961,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 %endif
       pB+=loop_cnt_im2col_a;
       pB2+=loop_cnt_im2col_a;
+%if config.kernel.matmul_fmt == '4x4':
+      pB3+=loop_cnt_im2col_a;
+      pB4+=loop_cnt_im2col_a;
+%endif
 
       do
       {
@@ -1511,37 +1974,77 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         uint8_t inB = *pB++;
         uint8_t inB2 = *pB2++;
+%if config.kernel.matmul_fmt == '4x4':
+        uint8_t inB3 = *pB3++;
+        uint8_t inB4 = *pB4++;
+%endif
 
         sum += inA * inB;
 
         sum2 += inA * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum3 += inA * inB3;
+
+        sum4 += inA * inB4;
+%endif
 
         inA = (int8_t) bitext((int) *pA, 2, 2);
 
         inB = *pB++;
         inB2 = *pB2++;
+%if config.kernel.matmul_fmt == '4x4':
+        inB3 = *pB3++;
+        inB4 = *pB4++;
+%endif
 
         sum += inA * inB;
 
         sum2 += inA * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum3 += inA * inB3;
+
+        sum4 += inA * inB4;
+%endif
 
         inA = (int8_t) bitext((int) *pA, 2, 4);
 
         inB = *pB++;
         inB2 = *pB2++;
+%if config.kernel.matmul_fmt == '4x4':
+        inB3 = *pB3++;
+        inB4 = *pB4++;
+%endif
 
         sum += inA * inB;
 
         sum2 += inA * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum3 += inA * inB3;
+
+        sum4 += inA * inB4;
+%endif
 
         inA = (int8_t) bitext((int) *pA, 2, 6);
 
         inB = *pB++;
         inB2 = *pB2++;
+%if config.kernel.matmul_fmt == '4x4':
+        inB3 = *pB3++;
+        inB4 = *pB4++;
+%endif
 
         sum += inA * inB;
 
         sum2 += inA * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum3 += inA * inB3;
+
+        sum4 += inA * inB4;
+%endif
 
         pA++;
 
@@ -1551,19 +2054,39 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         uint8_t inB = *pB++;
         uint8_t inB2 = *pB2++;
+%if config.kernel.matmul_fmt == '4x4':
+        uint8_t inB3 = *pB3++;
+        uint8_t inB4 = *pB4++;
+%endif
 
         sum += inA * inB;
 
         sum2 += inA * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum3 += inA * inB3;
+
+        sum4 += inA * inB4;
+%endif
 
         inA = (int8_t) bitext((int) *pA, 4, 4);
 
         inB = *pB++;
         inB2 = *pB2++;
+%if config.kernel.matmul_fmt == '4x4':
+        inB3 = *pB3++;
+        inB4 = *pB4++;
+%endif
 
         sum += inA * inB;
 
         sum2 += inA * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum3 += inA * inB3;
+
+        sum4 += inA * inB4;
+%endif
 
         pA++;
 
@@ -1573,10 +2096,20 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         uint8_t inB = *pB++;
         uint8_t inB2 = *pB2++;
+%if config.kernel.matmul_fmt == '4x4':
+        uint8_t inB3 = *pB3++;
+        uint8_t inB4 = *pB4++;
+%endif
         asm volatile("": : :"memory");
         sum += inA * inB;
 
         sum2 += inA * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum3 += inA * inB3;
+
+        sum4 += inA * inB4;
+%endif
 
         col_cnt_im2col--;
 %endif
@@ -1586,45 +2119,93 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         uint8_t inB = (uint8_t)bitextu((unsigned int) *pB, 4, 0);
         uint8_t inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 0);
+%if config.kernel.matmul_fmt == '4x4':
+        uint8_t inB3 = (uint8_t)bitextu((unsigned int) *pB3, 4, 0);
+        uint8_t inB4 = (uint8_t)bitextu((unsigned int) *pB4, 4, 0);
+%endif
 
         sum += inA * inB;
 
         sum2 += inA * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum3 += inA * inB3;
+
+        sum4 += inA * inB4;
+%endif
 
         inA = (int8_t) bitext((int) *pA, 2, 2);
 
         inB = (uint8_t)bitextu((unsigned int) *pB, 4, 4);
         inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 4);
+%if config.kernel.matmul_fmt == '4x4':
+        inB3 = (uint8_t)bitextu((unsigned int) *pB3, 4, 4);
+        inB4 = (uint8_t)bitextu((unsigned int) *pB4, 4, 4);
+%endif
 
         sum += inA * inB;
 
         sum2 += inA * inB2;
 
+%if config.kernel.matmul_fmt == '4x4':
+        sum3 += inA *inB3;
+
+        sum4 += inA * inB4;
+%endif
+
         pB++;
         pB2++;
+%if config.kernel.matmul_fmt == '4x4':
+        pB3++;
+        pB4++;
+%endif
 
         inA = (int8_t) bitext((int) *pA, 2, 4);
 
         inB = (uint8_t)bitextu((unsigned int) *pB, 4, 0);
         inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 0);
+%if config.kernel.matmul_fmt == '4x4':
+        inB3 = (uint8_t)bitextu((unsigned int) *pB3, 4, 0);
+        inB4 = (uint8_t)bitextu((unsigned int) *pB4, 4, 0);
+%endif
 
         sum += inA * inB;
 
         sum2 += inA * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum3 += inA * inB3;
+
+        sum4 += inA * inB4;
+%endif
 
         inA = (int8_t) bitext((int) *pA, 2, 6);
 
         inB = (uint8_t)bitextu((unsigned int) *pB, 4, 4);
         inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 4);
+%if config.kernel.matmul_fmt == '4x4':
+        inB3 = (uint8_t)bitextu((unsigned int) *pB3, 4, 4);
+        inB4 = (uint8_t)bitextu((unsigned int) *pB4, 4, 4);
+%endif
 
         sum += inA * inB;
 
         sum2 += inA * inB2;
 
+%if config.kernel.matmul_fmt == '4x4':
+        sum3 += inA * inB3;
+
+        sum4 += inA * inB4;
+%endif
+
         pA++;
 
         pB++;
         pB2++;
+%if config.kernel.matmul_fmt == '4x4':
+        pB3++;
+        pB4++;
+%endif
 
         col_cnt_im2col-=4;
 %elif config.kernel.wt_data_t == 4:
@@ -1632,24 +2213,48 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         uint8_t inB = (uint8_t)bitextu((unsigned int) *pB, 4, 0);
         uint8_t inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 0);
+%if config.kernel.matmul_fmt == '4x4':
+        uint8_t inB3 = (uint8_t)bitextu((unsigned int) *pB3, 4, 0);
+        uint8_t inB4 = (uint8_t)bitextu((unsigned int) *pB4, 4, 0);
+%endif
 
         sum += inA * inB;
 
         sum2 += inA * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum3 += inA * inB3;
+
+        sum4 += inA * inB4;
+%endif
 
         inA = (int8_t) bitext((int) *pA, 4, 4);
 
         inB = (uint8_t)bitextu((unsigned int) *pB, 4, 4);
         inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 4);
+%if config.kernel.matmul_fmt == '4x4':
+        inB3 = (uint8_t)bitextu((unsigned int) *pB3, 4, 4);
+        inB4 = (uint8_t)bitextu((unsigned int) *pB4, 4, 4);
+%endif
 
         sum += inA * inB;
 
         sum2 += inA * inB2;
 
+%if config.kernel.matmul_fmt == '4x4':
+        sum3 += inA * inB3;
+
+        sum4 += inA * inB4;
+%endif
+
         pA++;
 
         pB++;
         pB2++;
+%if config.kernel.matmul_fmt == '4x4':
+        pB3++;
+        pB4++;
+%endif
 
         col_cnt_im2col-=2;
 %else:
@@ -1657,10 +2262,20 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         uint8_t inB = *pB++;
         uint8_t inB2 = *pB2++;
+%if config.kernel.matmul_fmt == '4x4':
+        uint8_t inB3 = *pB3++;
+        uint8_t inB4 = *pB4++;
+%endif
         asm volatile("": : :"memory");
         sum += inA * inB;
 
         sum2 += inA * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum3 += inA * inB3;
+
+        sum4 += inA * inB4;
+%endif
 
         col_cnt_im2col--;
 %endif
@@ -1670,42 +2285,86 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         uint8_t inB = (uint8_t)bitextu((unsigned int) *pB, 2, 0);
         uint8_t inB2 = (uint8_t)bitextu((unsigned int) *pB2, 2, 0);
+%if config.kernel.matmul_fmt == '4x4':
+        uint8_t inB3 = (uint8_t)bitextu((unsigned int) *pB3, 2, 0);
+        uint8_t inB4 = (uint8_t)bitextu((unsigned int) *pB4, 2, 0);
+%endif
 
         sum += inA * inB;
 
         sum2 += inA * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum3 += inA * inB3;
+
+        sum4 += inA * inB4;
+%endif
 
         inA = (int8_t) bitext((int) *pA, 2, 2);
 
         inB = (uint8_t)bitextu((unsigned int) *pB, 2, 2);
         inB2 = (uint8_t)bitextu((unsigned int) *pB2, 2, 2);
+%if config.kernel.matmul_fmt == '4x4':
+        inB3 = (uint8_t)bitextu((unsigned int) *pB3, 2, 2);
+        inB4 = (uint8_t)bitextu((unsigned int) *pB4, 2, 2);
+%endif
 
         sum += inA * inB;
 
         sum2 += inA * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum3 += inA * inB3;
+
+        sum4 += inA * inB4;
+%endif
 
         inA = (int8_t) bitext((int) *pA, 2, 4);
 
         inB = (uint8_t)bitextu((unsigned int) *pB, 2, 4);
         inB2 = (uint8_t)bitextu((unsigned int) *pB2, 2, 4);
+%if config.kernel.matmul_fmt == '4x4':
+        inB3 = (uint8_t)bitextu((unsigned int) *pB3, 2, 4);
+        inB4 = (uint8_t)bitextu((unsigned int) *pB4, 2, 4);
+%endif
 
         sum += inA * inB;
 
         sum2 += inA * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum3 += inA * inB3;
+
+        sum4 += inA * inB4;
+%endif
 
         inA = (int8_t) bitext((int) *pA, 2, 6);
 
         inB = (uint8_t)bitextu((unsigned int) *pB, 2, 6);
         inB2 = (uint8_t)bitextu((unsigned int) *pB2, 2, 6);
+%if config.kernel.matmul_fmt == '4x4':
+        inB3 = (uint8_t)bitextu((unsigned int) *pB3, 2, 6);
+        inB4 = (uint8_t)bitextu((unsigned int) *pB4, 2, 6);
+%endif
 
         sum += inA * inB;
 
         sum2 += inA * inB2;
 
+%if config.kernel.matmul_fmt == '4x4':
+        sum3 += inA * inB3;
+
+        sum4 += inA * inB4;
+%endif
+
         pA++;
 
         pB++;
         pB2++;
+%if config.kernel.matmul_fmt == '4x4':
+        pB3++;
+        pB4++;
+%endif
 
         col_cnt_im2col-=4;
 %elif config.kernel.wt_data_t == 4:
@@ -1713,24 +2372,48 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         uint8_t inB = (uint8_t)bitextu((unsigned int) *pB, 4, 0);
         uint8_t inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 0);
+%if config.kernel.matmul_fmt == '4x4':
+        uint8_t inB3 = (uint8_t)bitextu((unsigned int) *pB3, 4, 0);
+        uint8_t inB4 = (uint8_t)bitextu((unsigned int) *pB4, 4, 0);
+%endif
 
         sum += inA * inB;
 
         sum2 += inA * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum3 += inA * inB3;
+
+        sum4 += inA * inB4;
+%endif
 
         inA = (int8_t) bitext((int) *pA, 4, 4);
 
         inB = (uint8_t)bitextu((unsigned int) *pB, 4, 0);
         inB2 = (uint8_t)bitextu((unsigned int) *pB2, 4, 0);
+%if config.kernel.matmul_fmt == '4x4':
+        inB3 = (uint8_t)bitextu((unsigned int) *pB3, 4, 0);
+        inB4 = (uint8_t)bitextu((unsigned int) *pB4, 4, 0);
+%endif
 
         sum += inA * inB;
 
         sum2 += inA * inB2;
 
+%if config.kernel.matmul_fmt == '4x4':
+        sum3 += inA * inB3;
+
+        sum4 += inA * inB4;
+%endif
+
         pA++;
 
         pB++;
         pB2++;
+%if config.kernel.matmul_fmt == '4x4':
+        pB3++;
+        pB4++;
+%endif
 
         col_cnt_im2col-=2;
 %else:
@@ -1738,10 +2421,20 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
         uint8_t inB = *pB++;
         uint8_t inB2 = *pB2++;
+%if config.kernel.matmul_fmt == '4x4':
+        uint8_t inB3 = *pB3++;
+        uint8_t inB4 = *pB4++;
+%endif
         asm volatile("": : :"memory");
         sum += inA * inB;
 
         sum2 += inA * inB2;
+
+%if config.kernel.matmul_fmt == '4x4':
+        sum3 += inA * inB3;
+
+        sum4 += inA * inB4;
+%endif
 
         col_cnt_im2col--;
 %endif
@@ -1759,20 +2452,38 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
       pOut++;
       *pOut2 = ${config.bn_fn}(sum2, *pKappa, *pLambda, out_shift);
       pOut2++;
+%if config.kernel.matmul_fmt == '4x4':
+      *pOut3 = ${config.bn_fn}(sum3, *pKappa, *pLambda, out_shift);
+      pOut3++;
+      *pOut4 = ${config.bn_fn}(sum4, *pKappa, *pLambda, out_shift);
+      pOut4++;
+%endif
       pKappa++;
       pLambda++;
 %elif config.kernel.out_data_t == 4:
       uint8_t i_o = i & 0x01;
       out[i_o] = ${config.bn_fn}(sum, *pKappa, *pLambda, out_shift);
       out2[i_o] = ${config.bn_fn}(sum2, *pKappa, *pLambda, out_shift);
+%if config.kernel.matmul_fmt == '4x4':
+      out3[i_o] = ${config.bn_fn}(sum3, *pKappa, *pLambda, out_shift);
+      out4[i_o] = ${config.bn_fn}(sum4, *pKappa, *pLambda, out_shift);
+%endif
       pKappa++;
       pLambda++;
       if(i_o == 0x01)
       {
         *pOut = bitins(out[0], n_mask, out[1], mask, off);
         *pOut2 = bitins(out2[0], n_mask, out2[1], mask, off);
+%if config.kernel.matmul_fmt == '4x4':
+        *pOut3 = bitins(out3[0], n_mask, out3[1], mask, off);
+        *pOut4 = bitins(out4[0], n_mask, out4[1], mask, off);
+%endif
         pOut++;
         pOut2++;
+%if config.kernel.matmul_fmt == '4x4':
+        pOut3++;
+        pOut4++;
+%endif
       }
 %endif
     }
@@ -1785,16 +2496,34 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
         pOut++;
         *pOut2 = ${config.relu_fn}(sum2, out_mult, out_shift);
         pOut2++;
+%if config.kernel.matmul_fmt == '4x4':
+        *pOut3 = ${config.relu_fn}(sum3, out_mult, out_shift);
+        pOut3++;
+        *pOut4 = ${config.relu_fn}(sum4, out_mult, out_shift);
+        pOut4++;
+%endif
 %elif config.kernel.out_data_t == 4:
         uint8_t i_o = i & 0x01;
         out[i_o] = ${config.relu_fn}(sum, out_mult, out_shift);
         out2[i_o] = ${config.relu_fn}(sum2, out_mult, out_shift);
+%if config.kernel.matmul_fmt == '4x4':
+        out3[i_o] = ${config.relu_fn}(sum3, out_mult, out_shift);
+        out4[i_o] = ${config.relu_fn}(sum4, out_mult, out_shift);
+%endif
         if(i_o == 0x01)
         {
           *pOut = bitins(out[0], n_mask, out[1], mask, off);
           *pOut2 = bitins(out2[0], n_mask, out2[1], mask, off);
+%if config.kernel.matmul_fmt == '4x4':
+          *pOut3 = bitins(out3[0], n_mask, out3[1], mask, off);
+          *pOut4 = bitins(out4[0], n_mask, out4[1], mask, off);
+%endif
           pOut++;
           pOut2++;
+%if config.kernel.matmul_fmt == '4x4':
+          pOut3++;
+          pOut4++;
+%endif
         }
 %endif
       }
@@ -1805,16 +2534,34 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
         pOut++;
         *pOut2 = (uint8_t) clip8(sum2 >> out_shift);
         pOut2++;
+%if config.kernel.matmul_fmt == '4x4':
+        *pOut3 = (uint8_t) clip8(sum3 >> out_shift);
+        pOut3++;
+        *pOut4 = (uint8_t) clip8(sum4 >> out_shift);
+        pOut4++;
+%endif
 %elif config.kernel.out_data_t == 4:
         uint8_t i_o = i & 0x01;
         out[i_o] = (uint8_t) clip4(sum >> out_shift);
         out2[i_o] = (uint8_t) clip4(sum2 >> out_shift);
+%if config.kernel.matmul_fmt == '4x4':
+        out3[i_o] = (uint8_t) clip4(sum3 >> out_shift);
+        out4[i_o] = (uint8_t) clip4(sum4 >> out_shift);
+%endif
         if(i_o == 0x01)
         {
           *pOut = bitins(out[0], n_mask, out[1], mask, off);
           *pOut2 = bitins(out2[0], n_mask, out2[1], mask, off);
+%if config.kernel.matmul_fmt == '4x4':
+          *pOut3 = bitins(out3[0], n_mask, out3[1], mask, off);
+          *pOut4 = bitins(out4[0], n_mask, out4[1], mask, off);
+%endif
           pOut++;
           pOut2++;
+%if config.kernel.matmul_fmt == '4x4':
+          pOut3++;
+          pOut4++;
+%endif
         }
 %endif
       }
@@ -1823,13 +2570,25 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
     uint8_t i_o = i & 0x01;
     out[i_o] = pulp_nn_i4_quant(sum, pThr);
     out2[i_o] = pulp_nn_i4_quant(sum2, pThr);
+%if config.kernel.matmul_fmt == '4x4':
+    out3[i_o] = pulp_nn_i4_quant(sum3, pThr);
+    out4[i_o] = pulp_nn_i4_quant(sum4, pThr);
+%endif
     pThr+=16;
     if(i_o == 0x01)
     {
       *pOut = bitins(out[0], n_mask, out[1], mask, off);
       *pOut2 = bitins(out2[0], n_mask, out2[1], mask, off);
+%if config.kernel.matmul_fmt == '4x4':
+      *pOut3 = bitins(out3[0], n_mask, out3[1], mask, off);
+      *pOut4 = bitins(out4[0], n_mask, out4[1], mask, off);
+%endif
       pOut++;
       pOut2++;
+%if config.kernel.matmul_fmt == '4x4':
+      pOut3++;
+      pOut4++;
+%endif
     }
 %endif
 %if config.kernel.out_data_t == 4:
