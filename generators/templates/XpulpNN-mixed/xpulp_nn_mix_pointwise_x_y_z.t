@@ -20,34 +20,21 @@
 #include "pmsis.h"
 #include "pulp_nn_utils.h"
 #include "pulp_nn_kernels.h"
-<%
-act_prec = int(config.kernel.act_prec[0:2])
-act_t = f"int{act_prec}_t"
-def su(sgn):
-    return 's' if sgn else 'u'
-def u_(sgn):
-    return '' if sgn else 'u'
-def s_(sgn):
-    return 's' if sgn else ''
 
-pt_in = f"{u_(config.kernel.in_signed)}int8_t"
-vt_in = f"v4{su(config.kernel.in_signed)}"
-int_t_in = f"{u_(config.kernel.in_signed)}int32_t"
-pt_out = f"{u_(config.kernel.out_signed)}int8_t"
-macload_fn = f"MacLoad{s_(config.kernel.in_signed)}4"
-sumdotp_fn = f"SumDotp{s_(config.kernel.in_signed)}4"
-out_clip_fn = f"clip{s_(config.kernel.out_signed)}{config.kernel.out_data_t}"
-bex = f"bitext{u_(config.kernel.in_signed)}"
-%>
 
-void ${config.fn_name}(
-                        ${pt_in} *pIn,
-                        ${pt_in} *pIm2ColBuffer,
+void __attribute__((noinline)) ${config.fn_name}(
+                        uint8_t *pIn,
+                        uint8_t *pIm2ColBuffer,
                         int8_t *pBias,
-                        ${pt_out} *pOut,
+                        uint8_t *pOut,
                         int8_t *pWeight,
-                        ${act_t} *pKappa,
-                        ${act_t} *pLambda,
+%if config.kernel.act_prec == '32bit':
+                        int32_t *pKappa,
+                        int32_t *pLambda,
+%elif config.kernel.act_prec == '64bit':
+                        int64_t *pKappa,
+                        int64_t *pLambda,
+%endif
                         uint16_t out_mult,
                         uint16_t out_shift,
                         uint16_t dim_in_x,
@@ -105,14 +92,12 @@ void ${config.fn_name}(
   int start_pixel = min((chunk * core_id_r), dim_out_y);
   int stop_pixel = min(start_pixel + chunk, dim_out_y);
 
-  ${pt_out} *pOutBuffer = pOut + (start_pixel * ch_out_r * dim_out_x) + (section * ch_out_r * dim_out_x_r);
-%if config.kernel.in_data_t < config.kernel.wt_data_t:  
-  ${pt_in} *pIm2Col = pIm2ColBuffer + (2 * core_id * PACK_INT${config.kernel.wt_data_t}_SIZE(ch_in));
+  uint8_t *pOutBuffer = pOut + (start_pixel * ch_out_r * dim_out_x) + (section * ch_out_r * dim_out_x_r);
 %if config.kernel.in_data_t < config.kernel.wt_data_t:
 %if config.kernel.matmul_fmt == '4x2':  
-  ${pt_in} *pIm2Col = pIm2ColBuffer + (2 * core_id * PACK_INT${config.kernel.wt_data_t}_SIZE(ch_in));
+  uint8_t *pIm2Col = pIm2ColBuffer + (2 * core_id * PACK_INT${config.kernel.wt_data_t}_SIZE(ch_in));
 %elif config.kernel.matmul_fmt == '4x4':
-  ${pt_in} *pIm2Col = pIm2ColBuffer + (4 * core_id * PACK_INT${config.kernel.wt_data_t}_SIZE(ch_in));
+  uint8_t *pIm2Col = pIm2ColBuffer + (4 * core_id * PACK_INT${config.kernel.wt_data_t}_SIZE(ch_in));
 %endif
 %endif
 
@@ -120,16 +105,16 @@ void ${config.fn_name}(
   {
     i_out_x= (section * dim_out_x_r);
 
+%if config.kernel.matmul_fmt == '4x2':
     for(int n = 0; n<((dim_out_x_r + (section * flag_dim_out_x_odd)) >> 1); n++)
+%elif config.kernel.matmul_fmt == '4x4':
+    for(int n = 0; n<((dim_out_x_r + (section * flag_dim_out_x_odd)) >> 2); n++)
+%endif
     {
 %if config.kernel.in_data_t < config.kernel.wt_data_t:
-%if config.kernel.matmul_fmt == '4x2':
       ${config.im2col_fn}(pIn + (i_out_x * ch_in_r) + (i_out_y * dim_in_x * ch_in_r), pIm2Col, ch_in<<1);
-%elif config.kernel.matmul_fmt == '4x4':
-      ${config.im2col_fn}(pIn + (i_out_x * ch_in_r) + (i_out_y * dim_in_x * ch_in_r), pIm2Col, ch_in<<2);
-%endif
 %else:
-      ${pt_in} *pIm2Col = (pIn + (i_out_x * ch_in_r) + (i_out_y * dim_in_x * ch_in_r));
+      uint8_t *pIm2Col = (pIn + (i_out_x * ch_in_r) + (i_out_y * dim_in_x * ch_in_r));
 %endif
       pOutBuffer = ${config.mat_mul_fn}(
           pIm2Col,
@@ -176,9 +161,13 @@ void ${config.fn_name}(
   %endif
       const int8_t *pA = pWeight;
       int i;
-      ${act_t} * k1 = pKappa;
-      ${act_t} * lambda1 = pLambda;
-
+%if config.kernel.act_prec == '32bit':
+      int32_t * k1 = pKappa;
+      int32_t * lambda1 = pLambda;
+%elif config.kernel.act_prec == '64bit':
+      int64_t * k1 = pKappa;
+      int64_t * lambda1 = pLambda;
+%endif
 %if config.kernel.wt_data_t == 2:
       v4s inA[4];
 %elif config.kernel.wt_data_t == 4:
@@ -187,16 +176,16 @@ void ${config.fn_name}(
       v4s inA;
 %endif
 %if config.kernel.in_data_t == 2:
-      ${vt_in} inB[4];
+      v4u inB[4];
 %elif config.kernel.in_data_t == 4:
-      ${vt_in} inB[2];
+      v4u inB[2];
 %else:
-      ${vt_in} inB;
+      v4u inB;
 %endif
   %if config.kernel.out_data_t == 4:
-      ${pt_out} out[2];
+      uint8_t out[2];
   %elif config.kernel.out_data_t == 2:
-      ${pt_out} out[4];
+      uint8_t out[4];
   %endif
       for(i = 0; i < ch_out; i++)
       {
@@ -206,7 +195,7 @@ void ${config.fn_name}(
           sum = ((int) (*pBias++));
         }
 
-        ${pt_in} *pB = (pIn + (i_out_x * ch_in) + (i_out_y * dim_in_x * ch_in));
+        uint8_t *pB = (pIn + (i_out_x * ch_in) + (i_out_y * dim_in_x * ch_in));
 
         uint16_t col_cnt_im2col = ch_in * dim_kernel_x * dim_kernel_y;
 <%! import math %>
@@ -214,71 +203,71 @@ void ${config.fn_name}(
         {
 %if config.kernel.wt_data_t == 2:
 %if config.kernel.in_data_t == 8:
-          inB = *((${vt_in}*) pB);
+          inB = *((v4u*) pB);
 
           pB+=4;
 
           pA = ${config.unpack_wt_fn}(pA,inA);
 
-          sum = ${sumdotp_fn}(inB, inA[0], sum);
+          sum = SumDotp4(inB, inA[0], sum);
 
-          inB = *((${vt_in}*) pB);
-
-          pB+=4;
-
-          sum = ${sumdotp_fn}(inB, inA[1], sum);
-
-          inB = *((${vt_in}*) pB);
+          inB = *((v4u*) pB);
 
           pB+=4;
 
-          sum = ${sumdotp_fn}(inB, inA[2], sum);
+          sum = SumDotp4(inB, inA[1], sum);
 
-          inB = *((${vt_in}*) pB);
+          inB = *((v4u*) pB);
 
           pB+=4;
 
-          sum = ${sumdotp_fn}(inB, inA[3], sum);
+          sum = SumDotp4(inB, inA[2], sum);
+
+          inB = *((v4u*) pB);
+
+          pB+=4;
+
+          sum = SumDotp4(inB, inA[3], sum);
 %elif config.kernel.in_data_t == 4:
           pB = ${config.unpack_in_fn}(pB,inB);
 
           pA = ${config.unpack_wt_fn}(pA,inA);
 
-          sum = ${sumdotp_fn}(inB[0], inA[0], sum);
+          sum = SumDotp4(inB[0], inA[0], sum);
 
-          sum = ${sumdotp_fn}(inB[1], inA[1], sum);
+          sum = SumDotp4(inB[1], inA[1], sum);
 
           pB = ${config.unpack_in_fn}(pB,inB);
 
-          sum = ${sumdotp_fn}(inB[0], inA[2], sum);
+          sum = SumDotp4(inB[0], inA[2], sum);
 
-          sum = ${sumdotp_fn}(inB[1], inA[3], sum);
+          sum = SumDotp4(inB[1], inA[3], sum);
 %elif config.kernel.in_data_t == 2:
           pB = ${config.unpack_in_fn}(pB,inB);
 
           pA = ${config.unpack_wt_fn}(pA,inA);
 
-          sum = ${sumdotp_fn}(inB[0], inA[0], sum);
+          sum = SumDotp4(inB[0], inA[0], sum);
 
-          sum = ${sumdotp_fn}(inB[1], inA[1], sum);
+          sum = SumDotp4(inB[1], inA[1], sum);
 
-          sum = ${sumdotp_fn}(inB[2], inA[2], sum);
+          sum = SumDotp4(inB[2], inA[2], sum);
 
-          sum = ${sumdotp_fn}(inB[3], inA[3], sum);
+          sum = SumDotp4(inB[3], inA[3], sum);
 %endif
 %elif config.kernel.wt_data_t == 4:
 %if config.kernel.in_data_t == 8:
-          inB = *((${vt_in}*) pB);
+          inB = *((v4u*) pB);
 
           pB+=4;
 
           pA = ${config.unpack_wt_fn}(pA,inA);
 
-          sum = ${sumdotp_fn}(inB, inA[0], sum);
+          sum = SumDotp4(inB, inA[0], sum);
 
-          inB = *((${vt_in}*) pB);
+          inB = *((v4u*) pB);
 
-          sum = ${sumdotp_fn}(inB, inA[1], sum);
+          sum = SumDotp4(inB, inA[1], sum);
 
           pB+=4;
 %elif config.kernel.in_data_t == 4:
@@ -286,30 +275,30 @@ void ${config.fn_name}(
 
           pA = ${config.unpack_wt_fn}(pA,inA);
 
-          sum = ${sumdotp_fn}(inB[0], inA[0], sum);
+          sum = SumDotp4(inB[0], inA[0], sum);
 
-          sum = ${sumdotp_fn}(inB[1], inA[1], sum);
+          sum = SumDotp4(inB[1], inA[1], sum);
 %elif config.kernel.in_data_t == 2:
           pB = ${config.unpack_in_fn}(pB,inB);
 
           pA = ${config.unpack_wt_fn}(pA,inA);
 
-          sum = ${sumdotp_fn}(inB[0], inA[0], sum);
+          sum = SumDotp4(inB[0], inA[0], sum);
 
-          sum = ${sumdotp_fn}(inB[1], inA[1], sum);
+          sum = SumDotp4(inB[1], inA[1], sum);
 
           pA = ${config.unpack_wt_fn}(pA,inA);
 
-          sum = ${sumdotp_fn}(inB[0], inA[0], sum);
+          sum = SumDotp4(inB[0], inA[0], sum);
 
-          sum = ${sumdotp_fn}(inB[1], inA[1], sum);
+          sum = SumDotp4(inB[1], inA[1], sum);
 %endif
 %else:
 %if config.kernel.in_data_t == 8:
           v4s inA = *((v4s*) pA);
-          ${vt_in} inB = *((${vt_in}*) pB);
+          v4u inB = *((v4u*) pB);
 
-          sum = ${sumdotp_fn}(inB, inA, sum);
+          sum = SumDotp4(inB, inA, sum);
           pA+=4;
           pB+=4;
 %elif config.kernel.in_data_t == 4:
@@ -319,13 +308,13 @@ void ${config.fn_name}(
 
           pB = ${config.unpack_in_fn}(pB,inB);
 
-          sum = ${sumdotp_fn}(inB[0], inA, sum);
+          sum = SumDotp4(inB[0], inA, sum);
 
           inA = *((v4s*) pA);
 
           pA+=4;
 
-          sum = ${sumdotp_fn}(inB[1], inA, sum);
+          sum = SumDotp4(inB[1], inA, sum);
 %elif config.kernel.in_data_t == 2:
           inA = *((v4s*) pA);
 
@@ -333,25 +322,25 @@ void ${config.fn_name}(
 
           pB = ${config.unpack_in_fn}(pB,inB);
 
-          sum = ${sumdotp_fn}(inB[0], inA, sum);
+          sum = SumDotp4(inB[0], inA, sum);
 
           inA = *((v4s*) pA);
 
           pA+=4;
 
-          sum = ${sumdotp_fn}(inB[1], inA, sum);
+          sum = SumDotp4(inB[1], inA, sum);
 
           inA = *((v4s*) pA);
 
           pA+=4;
 
-          sum = ${sumdotp_fn}(inB[2], inA, sum);
+          sum = SumDotp4(inB[2], inA, sum);
 
           inA = *((v4s*) pA);
 
           pA+=4;
 
-          sum = ${sumdotp_fn}(inB[3], inA, sum);
+          sum = SumDotp4(inB[3], inA, sum);
 %endif
 %endif
         }
@@ -367,7 +356,7 @@ void ${config.fn_name}(
 %if config.kernel.wt_data_t == 2:
 %if config.kernel.in_data_t == 8:
           int8_t inA1 = (int8_t) bitext((int) *pA, 2, 0);
-          ${pt_in} inB1 = *pB++;
+          uint8_t inB1 = *pB++;
           sum += inA1 * inB1;
           inA1 = (int8_t) bitext((int) *pA, 2, 2);
           inB1 = *pB++;
@@ -383,17 +372,17 @@ void ${config.fn_name}(
           col_cnt_im2col-=4;
 %elif config.kernel.in_data_t == 4:
           int8_t inA1 = (int8_t) bitext((int) *pA, 2, 0);
-          ${pt_in} inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 4, 0);
+          uint8_t inB1 = (uint8_t) bitextu((unsigned int) *pB, 4, 0);
           sum += inA1 * inB1;
           inA1 = (int8_t) bitext((int) *pA, 2, 2);
-          inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 4, 4);
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 4, 4);
           sum += inA1 * inB1;
           pB++;
           inA1 = (int8_t) bitext((int) *pA, 2, 4);
-          inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 4, 0);
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 4, 0);
           sum += inA1 * inB1;
           inA1 = (int8_t) bitext((int) *pA, 2, 6);
-          inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 4, 4);
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 4, 4);
           sum += inA1 * inB1;
 
           pA++;
@@ -401,16 +390,16 @@ void ${config.fn_name}(
           col_cnt_im2col-=4;
 %elif config.kernel.in_data_t == 2:
           int8_t inA1 = (int8_t) bitext((int) *pA, 2, 0);
-          ${pt_in} inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 2, 0);
+          uint8_t inB1 = (uint8_t) bitextu((unsigned int) *pB, 2, 0);
           sum += inA1 * inB1;
           inA1 = (int8_t) bitext((int) *pA, 2, 2);
-          inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 2, 2);
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 2, 2);
           sum += inA1 * inB1;
           inA1 = (int8_t) bitext((int) *pA, 2, 4);
-          inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 2, 4);
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 2, 4);
           sum += inA1 * inB1;
           inA1 = (int8_t) bitext((int) *pA, 2, 6);
-          inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 2, 6);
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 2, 6);
           sum += inA1 * inB1;
 
           pA++;
@@ -420,7 +409,7 @@ void ${config.fn_name}(
 %elif config.kernel.wt_data_t == 4:
 %if config.kernel.in_data_t == 8:
           int8_t inA1 = (int8_t) bitext((int) *pA, 4, 0);
-          ${pt_in} inB1 = *pB++;
+          uint8_t inB1 = *pB++;
           sum += inA1 * inB1;
           inA1 = (int8_t) bitextu((int) *pA, 4, 4);
           inB1 = *pB++;
@@ -430,10 +419,10 @@ void ${config.fn_name}(
           col_cnt_im2col-=2;
 %elif config.kernel.in_data_t == 4:
           int8_t inA1 = (int8_t) bitext((int) *pA, 4, 0);
-          ${pt_in} inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 4, 0);
+          uint8_t inB1 = (uint8_t) bitextu((unsigned int) *pB, 4, 0);
           sum += inA1 * inB1;
           inA1 = (int8_t) bitext((int) *pA, 4, 4);
-          inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 4, 4);
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 4, 4);
           sum += inA1 * inB1;
 
           pA++;
@@ -441,17 +430,17 @@ void ${config.fn_name}(
           col_cnt_im2col-=2;
 %elif config.kernel.in_data_t == 2:
           int8_t inA1 = (int8_t) bitext((int) *pA, 4, 0);
-          ${pt_in} inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 2, 0);
+          uint8_t inB1 = (uint8_t) bitextu((unsigned int) *pB, 2, 0);
           sum += inA1 * inB1;
           inA1 = (int8_t) bitext((int) *pA, 4, 4);
-          inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 2, 2);
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 2, 2);
           sum += inA1 * inB1;
           pA++;
           inA1 = (int8_t) bitext((int) *pA, 4, 0);
-          inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 2, 4);
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 2, 4);
           sum += inA1 * inB1;
           inA1 = (int8_t) bitext((int) *pA, 4, 4);
-          inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 2, 6);
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 2, 6);
           sum += inA1 * inB1;
 
           pA++;
@@ -461,32 +450,32 @@ void ${config.fn_name}(
 %else:
 %if config.kernel.in_data_t == 8:
           int8_t inA1 = *pA++;
-          ${pt_in} inB1 = *pB++;
+          uint8_t inB1 = *pB++;
           asm volatile("": : :"memory");
           sum += inA1 * inB1;
 
           col_cnt_im2col--;
 %elif config.kernel.in_data_t == 4:
           int8_t inA1 = *pA++;
-          ${pt_in} inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 4, 0);
+          uint8_t inB1 = (uint8_t) bitextu((unsigned int) *pB, 4, 0);
           sum += inA1 * inB1;
           inA1 = *pA++;
-          inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 4, 4);
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 4, 4);
           sum += inA1 * inB1;
           pB++;
           col_cnt_im2col-=2;
 %elif config.kernel.in_data_t == 2:
           int8_t inA1 = *pA++;
-          ${pt_in} inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 2, 0);
+          uint8_t inB1 = (uint8_t) bitextu((unsigned int) *pB, 2, 0);
           sum += inA1 * inB1;
           inA1 = *pA++;
-          inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 2, 2);
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 2, 2);
           sum += inA1 * inB1;
           inA1 = *pA++;
-          inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 2, 4);
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 2, 4);
           sum += inA1 * inB1;
           inA1 = *pA++;
-          inB1 = (${pt_in}) ${bex}((${int_t_in}) *pB, 2, 6);
+          inB1 = (uint8_t) bitextu((unsigned int) *pB, 2, 6);
           sum += inA1 * inB1;
           pB++;
           col_cnt_im2col-=4;
@@ -555,11 +544,11 @@ void ${config.fn_name}(
           else
           {
   %if config.kernel.out_data_t == 8:
-            *pOutBuffer = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+            *pOutBuffer = (uint8_t) clip8(sum >> out_shift);
             pOutBuffer++;
   %elif config.kernel.out_data_t == 4:
             uint8_t i_o = i & 0x01;
-            out[i_o] = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+            out[i_o] = (uint8_t) clip4(sum >> out_shift);
             if(i_o == 0x01)
             {
               *pOutBuffer = bitins(out[0], n_mask, out[1], mask, off);
@@ -567,7 +556,7 @@ void ${config.fn_name}(
             }
   %elif config.kernel.out_data_t == 2:
             uint8_t i_o = i & 0x03;
-            out[i_o] = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+            out[i_o] = (uint8_t) clip2(sum >> out_shift);
             if(i_o == 0x03)
             {
               out[0] = bitins(out[0], n_mask2, out[1], mask2, off2);

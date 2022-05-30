@@ -51,11 +51,10 @@ def main():
                     for z in pulp_nn_init.PULPNNWeightsPrecisions:
                         for q in pulp_nn_init.PULPNNQuantizationMethods:
                             for sgn_in, sgn_out in product([False, True], [False, True]):
-                            # TODO: add mixed PW kernels
-                                if e != 'XpulpNN-mixed':
-                            	    kernel_to_test = pulp_nn_factory.PULPNNKernel(name='pointwise', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=e, mm_fmt='4x2', in_signed=sgn_in, out_signed=sgn_out)
-                            	    pw=pulp_nn_factory.PULPNNConvolvePointwise(kernel=kernel_to_test, layer=None)
-                            	    pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='pointwise', comp=pw, api=pulp_nn_init.PULPNNAPI)
+                                for m in pulp_nn_init.MATMUL_FORMAT:
+                                    kernel_to_test = pulp_nn_factory.PULPNNKernel(name='pointwise', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=e, mm_fmt=m, in_signed=sgn_in, out_signed=sgn_out)
+                                    pw=pulp_nn_factory.PULPNNConvolvePointwise(kernel=kernel_to_test, layer=None)
+                                    pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='pointwise', comp=pw, api=pulp_nn_init.PULPNNAPI)
 
             if e == 'XpulpV2':
                 for i in pulp_nn_init.PULPNNDataPrecisions:
