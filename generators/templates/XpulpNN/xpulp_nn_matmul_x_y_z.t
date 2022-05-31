@@ -709,8 +709,8 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
         ${pt_in} inB = (${pt_in})${bex}((${int_t_in}) *pB, 4, 0);
         ${pt_in} inB2 = (${pt_in})${bex}((${int_t_in}) *pB2, 4, 0);
 %if config.kernel.matmul_fmt == '4x4':
-        ${pt_in} inB3 = (uint8_t)bitextu((unsigned int) *pB3, 4, 0);
-        ${pt_in} inB4 = (uint8_t)bitextu((unsigned int) *pB4, 4, 0);
+        ${pt_in} inB3 = (${pt_in})${bex}((${int_t_in}) *pB3, 4, 0);
+        ${pt_in} inB4 = (${pt_in})${bex}((${int_t_in}) *pB4, 4, 0);
 %endif
 
         sum += inA * inB;
@@ -1901,7 +1901,7 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
       sum  = ${mac_fn}(0, 1, 0, 0, ptrB3, sum);
       ptrB3 = MacLoadUpdate(ptrB3);
 
-      sum2 = ${mac_fn)}(0, 1, 0, 1, ptrB4, sum2);
+      sum2 = ${mac_fn}(0, 1, 0, 1, ptrB4, sum2);
       ptrB4 = MacLoadUpdate(ptrB4);
 
       sum3 = ${mac_fn}(0, 1, 0, 0, ptrB, sum3);
@@ -2319,8 +2319,8 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
         inB = (${pt_in})${bex}((${int_t_in}) *pB, 2, 2);
         inB2 = (${pt_in})${bex}((${int_t_in}) *pB2, 2, 2);
 %if config.kernel.matmul_fmt == '4x4':
-        inB3 = (${pt_in})${pt_in}((${int_t_in}) *pB3, 2, 2);
-        inB4 = (${pt_in})${pt_in}((${int_t_in}) *pB4, 2, 2);
+        inB3 = (${pt_in})${bex}((${int_t_in}) *pB3, 2, 2);
+        inB4 = (${pt_in})${bex}((${int_t_in}) *pB4, 2, 2);
 %endif
 
         sum += inA * inB;

@@ -106,8 +106,6 @@ void ${config.fn_name}(
   int stop_pixel = min(start_pixel + chunk, dim_out_y);
 
   ${pt_out} *pOutBuffer = pOut + (start_pixel * ch_out_r * dim_out_x) + (section * ch_out_r * dim_out_x_r);
-%if config.kernel.in_data_t < config.kernel.wt_data_t:  
-  ${pt_in} *pIm2Col = pIm2ColBuffer + (2 * core_id * PACK_INT${config.kernel.wt_data_t}_SIZE(ch_in));
 %if config.kernel.in_data_t < config.kernel.wt_data_t:
 %if config.kernel.matmul_fmt == '4x2':  
   ${pt_in} *pIm2Col = pIm2ColBuffer + (2 * core_id * PACK_INT${config.kernel.wt_data_t}_SIZE(ch_in));
@@ -120,7 +118,11 @@ void ${config.fn_name}(
   {
     i_out_x= (section * dim_out_x_r);
 
+%if config.kernel.matmul_fmt == '4x2':
     for(int n = 0; n<((dim_out_x_r + (section * flag_dim_out_x_odd)) >> 1); n++)
+%elif config.kernel.matmul_fmt == '4x4':
+    for(int n = 0; n<((dim_out_x_r + (section * flag_dim_out_x_odd)) >> 2); n++)
+%endif
     {
 %if config.kernel.in_data_t < config.kernel.wt_data_t:
 %if config.kernel.matmul_fmt == '4x2':

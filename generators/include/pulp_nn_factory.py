@@ -251,17 +251,17 @@ class PULPNNConvolvePointwise(PULPNNFactory):
                                                                                 str(self.kernel.out_data_t),
                                                                                 str(self.kernel.wt_data_t),
                                                                                 str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""),
-                                                                                str("_" + self.kernel.matmul_fmt if self.kernel.matmul_fmt == '4x4' else "")
+                                                                                str("_" + self.kernel.matmul_fmt if self.kernel.matmul_fmt == '4x4' else ""),
                                                                                 sgn_str(kernel.in_signed),
                                                                                 sgn_str(kernel.out_signed))
-            self.im2col_fn = "xpulp_nn_im2col_u{0}_to_u{1}".format(str(self.kernel.in_data_t),
+            self.im2col_fn = "xpulp_nn_im2col_{2}{0}_to_{2}{1}".format(str(self.kernel.in_data_t),
                                                                    str(self.max_precision),
                                                                    sgn_str(kernel.in_signed))
             self.mat_mul_fn = "xpulp_nn_matmul_{5}{0}_{6}{1}_i{2}{3}{4}".format(str(self.kernel.in_data_t),
                                                                                 str(self.kernel.out_data_t),
                                                                                 str(self.kernel.wt_data_t),
                                                                                 str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""),
-                                                                                str("_" + self.kernel.matmul_fmt if self.kernel.matmul_fmt == '4x4' else "")
+                                                                                str("_" + self.kernel.matmul_fmt if self.kernel.matmul_fmt == '4x4' else ""),
                                                                                 sgn_str(kernel.in_signed),
                                                                                 sgn_str(kernel.out_signed))
             self.unpack_in_fn = "pulp_nn_{2}{0}_to_{2}{1}".format(str(self.kernel.in_data_t),

@@ -112,7 +112,11 @@ void __attribute__((noinline)) ${config.fn_name}(
 %endif
     {
 %if config.kernel.in_data_t < config.kernel.wt_data_t:
+%if config.kernel.matmul_fmt == '4x2':
       ${config.im2col_fn}(pIn + (i_out_x * ch_in_r) + (i_out_y * dim_in_x * ch_in_r), pIm2Col, ch_in<<1);
+%elif config.kernel.matmul_fmt == '4x4':
+      ${config.im2col_fn}(pIn + (i_out_x * ch_in_r) + (i_out_y * dim_in_x * ch_in_r), pIm2Col, ch_in<<2);
+%endif
 %else:
       uint8_t *pIm2Col = (pIn + (i_out_x * ch_in_r) + (i_out_y * dim_in_x * ch_in_r));
 %endif
