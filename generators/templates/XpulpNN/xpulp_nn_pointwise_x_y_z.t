@@ -424,7 +424,7 @@ void ${config.fn_name}(
           int8_t inA1 = (int8_t) bitext((int) *pA, 4, 0);
           ${pt_in} inB1 = *pB++;
           sum += inA1 * inB1;
-          inA1 = (int8_t) bitextu((int) *pA, 4, 4);
+          inA1 = (int8_t) bitext((int) *pA, 4, 4);
           inB1 = *pB++;
           sum += inA1 * inB1;
 

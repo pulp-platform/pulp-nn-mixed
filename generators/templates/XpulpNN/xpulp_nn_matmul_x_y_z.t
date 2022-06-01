@@ -86,7 +86,6 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
   uint16_t num_col_im2col_w = PACK_INT${config.kernel.wt_data_t}_SIZE(num_col_im2col);
   uint16_t num_col_im2col_a = PACK_INT${config.max_precision}_SIZE(num_col_im2col);
 
-  //uint8_t *pOut2 = pOut + ch_out_r;
   int8_t *pA = pWeight;
 
   uint16_t chan_left = ch_out & 0x3;

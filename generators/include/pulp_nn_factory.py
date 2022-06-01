@@ -200,15 +200,23 @@ class PULPNNConvolve(PULPNNFactory):
             self.unpack_wt_fn = "pulp_nn_i{0}_to_i{1}".format(str(self.kernel.wt_data_t), str(self.max_precision))
         elif self.kernel.extentions == 'XpulpNN-mixed':
             self.max_precision = max([self.kernel.in_data_t, self.kernel.wt_data_t])
-            self.fn_name = "xpulp_nn_mix_conv_u{0}_u{1}_i{2}{3}{4}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
-                str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""),
-                str("_" + self.kernel.matmul_fmt if self.kernel.matmul_fmt == '4x4' else ""))
+            self.fn_name = "xpulp_nn_mix_conv_{5}{0}_{6}{1}_i{2}{3}{4}".format(str(self.kernel.in_data_t),
+                                                                               str(self.kernel.out_data_t),
+                                                                               str(self.kernel.wt_data_t),
+                                                                               str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""),
+                                                                               str("_" + self.kernel.matmul_fmt if self.kernel.matmul_fmt == '4x4' else ""),
+                                                                               sgn_str(kernel.in_signed),
+                                                                               sgn_str(kernel.out_signed))
             self.zeromem_fn = "xpulp_nn_zero_mem_u{0}".format(str(self.max_precision))
             self.im2col_fn = "xpulp_nn_im2col_{2}{0}_to_{2}{1}".format(str(self.kernel.in_data_t), str(self.max_precision),
                                                                        sgn_str(kernel.in_signed))
-            self.mat_mul_fn = "xpulp_nn_mix_matmul_u{0}_u{1}_i{2}{3}{4}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
-                str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""),
-                str("_" + self.kernel.matmul_fmt if self.kernel.matmul_fmt == '4x4' else ""))
+            self.mat_mul_fn = "xpulp_nn_mix_matmul_{5}{0}_{6}{1}_i{2}{3}{4}".format(str(self.kernel.in_data_t),
+                                                                                    str(self.kernel.out_data_t),
+                                                                                    str(self.kernel.wt_data_t),
+                                                                                    str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""),
+                                                                                    str("_" + self.kernel.matmul_fmt if self.kernel.matmul_fmt == '4x4' else ""),
+                                                                                    sgn_str(kernel.in_signed),
+                                                                                    sgn_str(kernel.out_signed))
             self.unpack_in_fn = "pulp_nn_{2}{0}_to_{2}{1}".format(str(self.kernel.in_data_t), str(self.max_precision),
                                                                   sgn_str(kernel.in_signed))
             self.unpack_wt_fn = "pulp_nn_i{0}_to_i{1}".format(str(self.kernel.wt_data_t), str(self.max_precision))
@@ -270,14 +278,25 @@ class PULPNNConvolvePointwise(PULPNNFactory):
             self.unpack_wt_fn = "pulp_nn_i{0}_to_i{1}".format(str(self.kernel.wt_data_t), '8')
         elif self.kernel.extentions == 'XpulpNN-mixed':
             self.max_precision = max([self.kernel.in_data_t, self.kernel.wt_data_t])
-            self.fn_name = "xpulp_nn_mix_pointwise_u{0}_u{1}_i{2}{3}{4}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
-                str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""),
-                str("_" + self.kernel.matmul_fmt if self.kernel.matmul_fmt == '4x4' else ""))
-            self.im2col_fn = "xpulp_nn_im2col_u{0}_to_u{1}".format(str(self.kernel.in_data_t), str(self.max_precision))
-            self.mat_mul_fn = "xpulp_nn_mix_matmul_u{0}_u{1}_i{2}{3}{4}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
-                str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""),
-                str("_" + self.kernel.matmul_fmt if self.kernel.matmul_fmt == '4x4' else ""))
-            self.unpack_in_fn = "pulp_nn_i{0}_to_i{1}".format(str(self.kernel.in_data_t), '8')
+            self.fn_name = "xpulp_nn_mix_pointwise_{5}{0}_{6}{1}_i{2}{3}{4}".format(str(self.kernel.in_data_t),
+                                                                                    str(self.kernel.out_data_t),
+                                                                                    str(self.kernel.wt_data_t),
+                                                                                    str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""),
+                                                                                    str("_" + self.kernel.matmul_fmt if self.kernel.matmul_fmt == '4x4' else ""),
+                                                                                    sgn_str(kernel.in_signed),
+                                                                                    sgn_str(kernel.out_signed))
+            self.im2col_fn = "xpulp_nn_im2col_{2}{0}_to_{2}{1}".format(str(self.kernel.in_data_t), str(self.max_precision),
+                                                                       sgn_str(kernel.in_signed))
+            self.mat_mul_fn = "xpulp_nn_mix_matmul_{5}{0}_{6}{1}_i{2}{3}{4}".format(str(self.kernel.in_data_t),
+                                                                                    str(self.kernel.out_data_t),
+                                                                                    str(self.kernel.wt_data_t),
+                                                                                    str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""),
+                                                                                    str("_" + self.kernel.matmul_fmt if self.kernel.matmul_fmt == '4x4' else ""),
+                                                                                    sgn_str(kernel.in_signed),
+                                                                                    sgn_str(kernel.out_signed))
+            self.unpack_in_fn = "pulp_nn_{2}{0}_to_{2}{1}".format(str(self.kernel.in_data_t),
+                                                                  '8',
+                                                                  sgn_str(kernel.in_signed))
             self.unpack_wt_fn = "pulp_nn_i{0}_to_i{1}".format(str(self.kernel.wt_data_t), '8')
 
         self.filename = self.fn_name + ".c"
@@ -363,10 +382,16 @@ class PULPNNMatMul(PULPNNFactory):
             #TODO: signed mix-matmul
         elif self.kernel.extentions == 'XpulpNN-mixed':
             self.max_precision = max([self.kernel.in_data_t, self.kernel.wt_data_t])
-            self.fn_name = "xpulp_nn_mix_matmul_u{0}_u{1}_i{2}{3}{4}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
-                str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""),
-                str("_" + self.kernel.matmul_fmt if self.kernel.matmul_fmt == '4x4' else ""))
-            self.unpack_in_fn = "pulp_nn_u{0}_to_u{1}".format(str(self.kernel.in_data_t), str(self.max_precision))
+            self.fn_name = "xpulp_nn_mix_matmul_{5}{0}_{6}{1}_i{2}{3}{4}".format(str(self.kernel.in_data_t),
+                                                                                 str(self.kernel.out_data_t),
+                                                                                 str(self.kernel.wt_data_t),
+                                                                                 str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""),
+                                                                                 str("_" + self.kernel.matmul_fmt if self.kernel.matmul_fmt == '4x4' else ""),
+                                                                                 sgn_str(kernel.in_signed),
+                                                                                 sgn_str(kernel.out_signed))
+            self.unpack_in_fn = "pulp_nn_{2}{0}_to_{2}{1}".format(str(self.kernel.in_data_t),
+                                                              str(self.max_precision),
+                                                              sgn_str(kernel.in_signed))
             self.unpack_wt_fn = "pulp_nn_i{0}_to_i{1}".format(str(self.kernel.wt_data_t), str(self.max_precision))
 
         self.filename = self.fn_name + ".c"

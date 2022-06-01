@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
+ISA="XpulpNN-mixed"
 #ISA="XpulpNN"
-ISA="XpulpV2"
+#ISA="XpulpV2"
 BW="32bit"
 #BW="64bit"
 TEST='conv_like'

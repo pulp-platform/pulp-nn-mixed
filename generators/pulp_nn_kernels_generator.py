@@ -83,9 +83,10 @@ def main():
                         for z in pulp_nn_init.PULPNNWeightsPrecisions:
                             for q in pulp_nn_init.PULPNNQuantizationMethods:
                                 for m in pulp_nn_init.MATMUL_FORMAT:
-                                    kernel_to_test = pulp_nn_factory.PULPNNKernel(name='matmul', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=e, mm_fmt=m)
-                                    matmul=pulp_nn_factory.PULPNNMatMul(kernel=kernel_to_test, layer=None)
-                                    pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='matmul', comp=matmul, api=pulp_nn_init.PULPNNAPI)
+                                    for sgn_in, sgn_out in product([False, True], [False, True]):
+                                        kernel_to_test = pulp_nn_factory.PULPNNKernel(name='matmul', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=e, mm_fmt=m, in_signed=sgn_in, out_signed=sgn_out)
+                                        matmul=pulp_nn_factory.PULPNNMatMul(kernel=kernel_to_test, layer=None)
+                                        pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='matmul', comp=matmul, api=pulp_nn_init.PULPNNAPI)
 
 
             for i in pulp_nn_init.PULPNNDataPrecisions:
