@@ -68,7 +68,7 @@ void __attribute__((noinline)) ${config.fn_name}(
 
     if (pBias != NULL)
     {
-      sum = ((int) (pBias[i]));
+      sum = *(int32_t *)(pBias + 4*i);
     }
 
     int8_t *pA = pWeight + (i * dim_vec_wt);

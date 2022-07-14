@@ -62,6 +62,12 @@ void pulp_nn_linear_i2_u4_i4(
     {
         int sum = 0;
         int sum2 = 0;
+        if (pBias != NULL)
+        {
+          sum = *(int32_t *)(pBias + 4*i);
+          sum2 = *(int32_t *)(pBias + 4*i + 4);
+        }
+
 
         int8_t *pA = pIn;
         int8_t *pB = pWeight + (i * dim_vec_wt);
