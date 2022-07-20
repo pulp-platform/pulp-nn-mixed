@@ -588,7 +588,7 @@ void __attribute__((noinline)) ${config.fn_name}(
     if (flag_batch_norm && flag_relu)
     {
 %if config.kernel.out_data_t == 8:
-      *pOutBuffer = ${config.bn_fn}(sum, *k1, *lambda1, out_shift);
+      *pOutBuffer = ${config.bn_fn}(sum, *k1++, *lambda1++, out_shift);
       pOutBuffer++;
 %elif config.kernel.out_data_t == 4:
       sum = ${config.bn_fn}(sum, *k1, *lambda1, out_shift);
