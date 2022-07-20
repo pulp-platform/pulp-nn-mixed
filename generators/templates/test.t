@@ -1,6 +1,7 @@
 /*
  * test.c
  * Nazareno Bruschi <nazareno.bruschi@unibo.it>
+ * Alessandro Nadalini <alessandro.nadalini3@unibo.it>
  *
  * Copyright (C) 2019-2020 University of Bologna
  *
@@ -53,6 +54,199 @@ void test()
   int8_t off2 = 2;
   int8_t off4 = 4;
   int8_t off6 = 6;
+
+%if (config.kernel.extensions == 'XpulpNN-mixed'):
+%if (config.kernel.type == 'convolution') or (config.kernel.type == 'pointwise'):
+LEGACY_MODE("0");
+%if config.kernel.matmul_fmt == '4x2':
+A_SKIP("1");
+W_SKIP("3");
+MIXED_SKIP("8");
+%elif config.kernel.matmul_fmt == '4x4':
+A_SKIP("3");
+W_SKIP("3");
+MIXED_SKIP("16");
+%endif
+#if (KERNEL == 888) || (KERNEL == 848) || (KERNEL == 828) || (KERNEL == 488) || (KERNEL == 448) || (KERNEL == 428) || (KERNEL == 288) || (KERNEL == 248) || (KERNEL == 228)
+IVEC_FMT("2");
+#elif (KERNEL == 484) || (KERNEL == 444) || (KERNEL == 424) || (KERNEL == 284) || (KERMEL == 244) || (KERNEL == 224)
+IVEC_FMT("3");
+#elif (KERNEL == 282) || (KERNEL == 242) || (KERNEL == 222)
+IVEC_FMT("4");
+#elif (KERNEL == 482) || (KERNEL == 442) || (KERNEL == 422)
+IVEC_FMT("5");
+#elif (KERNEL == 882) || (KERNEL == 842) || (KERNEL == 822)
+IVEC_FMT("6");
+#elif (KERNEL == 884) || (KERNEL == 844) || (KERNEL == 824)
+IVEC_FMT("8");
+#else
+IVEC_FMT("0");
+#endif
+%elif (config.kernel.type == 'depthwise'):
+  LEGACY_MODE("0");
+  IVEC_FMT("2");
+  #if (KERNEL == 888)
+  A_SKIP("1");
+  W_SKIP("0");
+  #elif (KERNEL == 884) || (KERNEL == 848) || (KERNEL == 844) || (KERNEL == 488) || (KERNEL == 448) || (KERNEL == 484) || (KERNEL == 444)
+  A_SKIP("1");
+  W_SKIP("1");
+  #elif (KERNEL == 882) || (KERNEL == 842) || (KERNEL == 828) || (KERNEL == 824) || (KERNEL == 822) || (KERNEL == 482) || (KERNEL == 442) || (KERNEL == 428) || (KERNEL == 424) || (KERNEL == 422) || (KERNEL == 288) || (KERNEL == 248) || (KERNEL == 228) || (KERNEL == 284) || (KERNEL == 244) || (KERNEL == 224) || (KERNEL == 282) || (KERNEL == 242) || (KERNEL == 222)
+  A_SKIP("3");
+  W_SKIP("3");
+  #endif
+%elif (config.kernel.type == 'linear_no_quant'):
+  LEGACY_MODE("0");
+  A_SKIP("0");
+  W_SKIP("0");
+  A_STRIDE(0);
+  W_STRIDE(0);
+  A_ROLLBACK(4);
+  W_ROLLBACK(4);
+  #if (KERNEL == 88) || (KERNEL == 48) || (KERNEL == 28)
+  IVEC_FMT("2");
+  #elif (KERNEL == 44) || (KERNEL == 24)
+  IVEC_FMT("3");
+  #elif KERNEL == 22
+  IVEC_FMT("4");
+  #elif KERNEL == 42
+  IVEC_FMT("5");
+  MIXED_SKIP("1");
+  #elif KERNEL == 82
+  IVEC_FMT("6");
+  MIXED_SKIP("1");
+  #elif KERNEL == 84
+  IVEC_FMT("8");
+  MIXED_SKIP("1");
+  #else
+  IVEC_FMT("0");
+  #endif
+%elif (config.kernel.type == 'linear_quant'):
+  LEGACY_MODE("0");
+  #if KERNEL == 222
+  IVEC_FMT("4");
+  A_SKIP("0");
+  W_SKIP("3");
+  #elif KERNEL == 224
+  IVEC_FMT("3");
+  A_SKIP("0");
+  W_SKIP("3");
+  #elif KERNEL == 228
+  IVEC_FMT("2");
+  A_SKIP("0");
+  W_SKIP("3");
+  #elif KERNEL == 242
+  IVEC_FMT("4");
+  A_SKIP("0");
+  W_SKIP("1");
+  #elif KERNEL == 244
+  IVEC_FMT("3");
+  A_SKIP("0");
+  W_SKIP("1");
+  #elif KERNEL == 248
+  IVEC_FMT("2");
+  A_SKIP("0");
+  W_SKIP("1");
+  #elif KERNEL == 282
+  IVEC_FMT("4");
+  A_SKIP("0");
+  W_SKIP("0");
+  #elif KERNEL == 284
+  IVEC_FMT("3");
+  A_SKIP("0");
+  W_SKIP("0");
+  #elif KERNEL == 288
+  IVEC_FMT("2");
+  A_SKIP("0");
+  W_SKIP("0");
+  #elif KERNEL == 422
+  IVEC_FMT("5");
+  MIXED_SKIP("4");
+  A_SKIP("0");
+  W_SKIP("3");
+  #elif KERNEL == 424
+  IVEC_FMT("3");
+  A_SKIP("0");
+  W_SKIP("3");
+  #elif KERNEL == 428
+  IVEC_FMT("2");
+  A_SKIP("0");
+  W_SKIP("3");
+  #elif KERNEL == 442
+  IVEC_FMT("5");
+  MIXED_SKIP("2");
+  A_SKIP("0");
+  W_SKIP("1");
+  #elif KERNEL == 444
+  IVEC_FMT("3");
+  A_SKIP("0");
+  W_SKIP("1");
+  #elif KERNEL == 448
+  IVEC_FMT("2");
+  A_SKIP("0");
+  W_SKIP("1");
+  #elif KERNEL == 482
+  IVEC_FMT("5");
+  MIXED_SKIP("1");
+  A_SKIP("0");
+  W_SKIP("0");
+  #elif KERNEL == 484
+  IVEC_FMT("3");
+  A_SKIP("0");
+  W_SKIP("0");
+  #elif KERNEL == 488
+  IVEC_FMT("2");
+  A_SKIP("0");
+  W_SKIP("0");
+  #elif KERNEL == 822
+  IVEC_FMT("6");
+  MIXED_SKIP("4");
+  A_SKIP("0");
+  W_SKIP("3");
+  #elif KERNEL == 824
+  IVEC_FMT("8");
+  MIXED_SKIP("4");
+  A_SKIP("0");
+  W_SKIP("3");
+  #elif KERNEL == 828
+  IVEC_FMT("2");
+  A_SKIP("0");
+  W_SKIP("3");
+  #elif KERNEL == 842
+  IVEC_FMT("6");
+  MIXED_SKIP("2");
+  A_SKIP("0");
+  W_SKIP("1");
+  #elif KERNEL == 844
+  IVEC_FMT("8");
+  MIXED_SKIP("2");
+  A_SKIP("0");
+  W_SKIP("1");
+  #elif KERNEL == 848
+  IVEC_FMT("2");
+  A_SKIP("0");
+  W_SKIP("1");
+  #elif KERNEL == 882
+  IVEC_FMT("6");
+  MIXED_SKIP("1");
+  A_SKIP("0");
+  W_SKIP("0");
+  #elif KERNEL == 884
+  IVEC_FMT("8");
+  MIXED_SKIP("1");
+  A_SKIP("0");
+  W_SKIP("0");
+  #elif KERNEL == 888
+  IVEC_FMT("2");
+  A_SKIP("0");
+  W_SKIP("0");
+  #else
+  IVEC_FMT("0");
+  A_SKIP("0");
+  W_SKIP("0");
+  #endif
+%endif
+%endif
 
   if(pi_core_id()==0)
   {

@@ -89,39 +89,10 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 %endif
   int32_t w_rollback = 4 - (num_col_im2col_w + (num_col_im2col_w << 1));
 
-  LEGACY_MODE("0");
-%if config.kernel.wt_data_t == 8 and config.kernel.wt_data_t == 8:
-  IVEC_FMT("2");
-%elif config.kernel.wt_data_t == 4 and config.kernel.in_data_t == 4:
-  IVEC_FMT("3");
-%elif config.kernel.wt_data_t == 2 and config.kernel.in_data_t == 2:
-  IVEC_FMT("4");
-%elif config.kernel.wt_data_t == 2 and config.kernel.in_data_t == 4:
-  IVEC_FMT("5");
-%elif config.kernel.wt_data_t == 2 and config.kernel.in_data_t == 8:
-  IVEC_FMT("6");
-%elif config.kernel.wt_data_t == 4 and config.kernel.in_data_t == 8:
-  IVEC_FMT("8");
-%elif config.kernel.in_data_t < config.kernel.wt_data_t:
-%if config.max_precision == 8:
-  IVEC_FMT("2");
-%elif config.max_precision == 4:
-  IVEC_FMT("3");
-%endif
-%endif
   A_STRIDE(num_col_im2col_a);
   W_STRIDE(num_col_im2col_w);
   A_ROLLBACK(a_rollback);
   W_ROLLBACK(w_rollback);
-%if config.kernel.matmul_fmt == '4x2':
-  A_SKIP("1");
-  W_SKIP("3");
-  MIXED_SKIP("8");
-%elif config.kernel.matmul_fmt == '4x4':
-  A_SKIP("3");
-  W_SKIP("3");
-  MIXED_SKIP("16");
-%endif
 
   int8_t *pA = pWeight;
 
@@ -1849,8 +1820,7 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
   int i = 0;
 %endif
 
-  w_rollback = 4;
-  W_ROLLBACK(w_rollback);
+  W_ROLLBACK(4);
   W_SKIP("0");
 %if config.kernel.matmul_fmt == '4x2':
   MIXED_SKIP("2");
@@ -2672,6 +2642,12 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 %endif
     chan_left--;
   }
+  W_SKIP("3");
+%if config.kernel.matmul_fmt == '4x2':
+  MIXED_SKIP("8");
+%elif config.kernel.matmul_fmt == '4x4':
+  MIXED_SKIP("16");
+%endif
 %endif
 %if config.kernel.matmul_fmt == '4x2':
   pOut+=ch_out_r;
