@@ -285,8 +285,8 @@ ${pt_out} *${config.fn_name}(
       int8_t inA2 = (int8_t) bitext((int) *pA2, 2, 0);
       int8_t inA3 = (int8_t) bitext((int) *pA3, 2, 0);
       int8_t inA4 = (int8_t) bitext((int) *pA4, 2, 0);
-      uint8_t inB = *pB++;
-      uint8_t inB2 = *pB2++;
+      ${pt_in} inB = *pB++;
+      ${pt_in} inB2 = *pB2++;
       sum += inA * inB;
       sum2 += inA2 * inB;
       sum3 += inA3 * inB;
@@ -348,8 +348,8 @@ ${pt_out} *${config.fn_name}(
       int8_t inA2 = (int8_t) bitext((int) *pA2, 4, 0);
       int8_t inA3 = (int8_t) bitext((int) *pA3, 4, 0);
       int8_t inA4 = (int8_t) bitext((int) *pA4, 4, 0);
-      uint8_t inB = *pB++;
-      uint8_t inB2 = *pB2++;
+      ${pt_in} inB = *pB++;
+      ${pt_in} inB2 = *pB2++;
       sum += inA * inB;
       sum2 += inA2 * inB;
       sum3 += inA3 * inB;
@@ -383,8 +383,8 @@ ${pt_out} *${config.fn_name}(
       int8_t inA2 = *pA2++;
       int8_t inA3 = *pA3++;
       int8_t inA4 = *pA4++;
-      uint8_t inB = *pB++;
-      uint8_t inB2 = *pB2++;
+      ${pt_in} inB = *pB++;
+      ${pt_in} inB2 = *pB2++;
       asm volatile("": : :"memory");
       sum += inA * inB;
       sum2 += inA2 * inB;
@@ -779,8 +779,8 @@ ${pt_out} *${config.fn_name}(
       col_cnt_im2col-=4;
 %elif config.kernel.wt_data_t == 4:
       int8_t inA = (int8_t) bitext((int) *pA, 4, 0);
-      ${pt_out} inB = *pB++;
-      ${pt_out} inB2 = *pB2++;
+      ${pt_in} inB = *pB++;
+      ${pt_in} inB2 = *pB2++;
       sum += inA * inB;
       sum2 += inA * inB2;
       inA = (int8_t) bitext((int) *pA, 4, 4);
@@ -793,8 +793,8 @@ ${pt_out} *${config.fn_name}(
       col_cnt_im2col-=2;
 %else:
       int8_t inA = *pA++;
-      ${pt_out} inB = *pB++;
-      ${pt_out} inB2 = *pB2++;
+      ${pt_in} inB = *pB++;
+      ${pt_in} inB2 = *pB2++;
       asm volatile("": : :"memory");
       sum += inA * inB;
       sum2 += inA * inB2;
