@@ -89,6 +89,7 @@ else:
 
 #define MemoryFence()                                        asm volatile("":::"memory")
 
+%if config.ext == 'XpulpNN-mixed':
 #define LEGACY_MODE(x)                                       asm volatile ("csrwi 0x010," x)
 #define IVEC_FMT(x)                                          asm volatile ("csrwi 0x00D," x)
 #define MIXED_SKIP(x)                                        asm volatile ("csrwi 0x00F," x)
@@ -100,6 +101,7 @@ else:
 #define W_ROLLBACK(x)                                        asm volatile ("csrw 0x105, %0":: "r" (x))
 #define A_SKIP(x)                                            asm volatile ("csrwi 0x106," x)
 #define W_SKIP(x)                                            asm volatile ("csrwi 0x107," x)
+%endif
 
 % for prec in [2,4,8]:
 % for signed in [False, True]:
