@@ -140,9 +140,9 @@ PI_L1 int8_t WEIGHT_INT8_L1[(DIM_KERNEL_X * DIM_KERNEL_Y * CH_IM_IN * CH_IM_OUT)
 PI_L2 int8_t WEIGHT_INT8_L2[(DIM_KERNEL_X * DIM_KERNEL_Y * CH_IM_IN * CH_IM_OUT)] = WEIGHT_INT8;
 PI_L1 int8_t WEIGHT_INT8_L1[(DIM_KERNEL_X * DIM_KERNEL_Y * CH_IM_IN * CH_IM_OUT)];
 %endif
-%if config.kernel.extentions == 'XpulpV2':
+%if config.kernel.extensions == 'XpulpV2':
 PI_L1 ${pt_in} IM2COL_L1[((CH_IM_IN * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) * NUM_CORES];
-%elif config.kernel.extentions == 'XpulpNN':
+%elif config.kernel.extensions == 'XpulpNN':
 %if max(config.kernel.in_data_t, config.kernel.wt_data_t) == 8:
 %if config.kernel.matmul_fmt == '4x2':
 PI_L1 ${pt_in} IM2COL_L1[((CH_IM_IN * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) * NUM_CORES];
@@ -162,7 +162,7 @@ PI_L1 ${pt_in} IM2COL_L1[(((CH_IM_IN >> 2) * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) 
 PI_L1 ${pt_in} IM2COL_L1[(((CH_IM_IN >> 2) * DIM_KERNEL_X * DIM_KERNEL_Y) << 2) * NUM_CORES];
 %endif
 %endif
-%elif config.kernel.extentions == 'XpulpNN-mixed':
+%elif config.kernel.extensions == 'XpulpNN-mixed':
 %if max(config.kernel.in_data_t, config.kernel.wt_data_t) == 8:
 %if config.kernel.matmul_fmt == '4x2':
 PI_L1 ${pt_in} IM2COL_L1[((CH_IM_IN * DIM_KERNEL_X * DIM_KERNEL_Y) << 1) * NUM_CORES];

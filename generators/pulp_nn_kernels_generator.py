@@ -76,7 +76,6 @@ def main():
                                         matmul=pulp_nn_factory.PULPNNMatMul(kernel=kernel_to_test, layer=None)
                                         pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='matmul', comp=matmul, api=pulp_nn_init.PULPNNAPI)
 
-            # TODO: signed mix-matmul
             elif e == 'XpulpNN-mixed':
                 for i in pulp_nn_init.PULPNNDataPrecisions:
                     for j in pulp_nn_init.PULPNNWeightsPrecisions:
@@ -94,17 +93,13 @@ def main():
                     for z in pulp_nn_init.PULPNNWeightsPrecisions:
                         for q in pulp_nn_init.PULPNNQuantizationMethods:
                             for sgn_in, sgn_out in product([False, True], [False, True]):
-                            # TODO: add mixed depthwise kernels
-                                if e != 'XpulpNN-mixed':
-                            	    kernel_to_test = pulp_nn_factory.PULPNNKernel(name='depthwise', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=e, mm_fmt='', in_signed=sgn_in, out_signed=sgn_out)
-                            	    dw=pulp_nn_factory.PULPNNConvolveDepthwise(kernel=kernel_to_test, layer=None)
-                            	    pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='depthwise', comp=dw, api=pulp_nn_init.PULPNNAPI)
+                            	kernel_to_test = pulp_nn_factory.PULPNNKernel(name='depthwise', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=e, mm_fmt='', in_signed=sgn_in, out_signed=sgn_out)
+                            	dw=pulp_nn_factory.PULPNNConvolveDepthwise(kernel=kernel_to_test, layer=None)
+                            	pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='depthwise', comp=dw, api=pulp_nn_init.PULPNNAPI)
 
             for i in pulp_nn_init.PULPNNDataPrecisions:
                 for z in pulp_nn_init.PULPNNWeightsPrecisions:
                     for sgn_in in [False, True]:
-                        # TODO: add mixed linear kernels
-                        if e != 'XpulpNN-mixed':
                     	    kernel_to_test = pulp_nn_factory.PULPNNKernel(name='linear_no_quant', inp=i, out=32, wt=z, quant=None, act_prec=a, ext=e, mm_fmt='', in_signed=sgn_in, out_signed=True)
                     	    lin_nq=pulp_nn_factory.PULPNNLinearNoQuant(kernel=kernel_to_test, layer=None)
                     	    pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='linear_nq', comp=lin_nq, api=pulp_nn_init.PULPNNAPI)
@@ -114,11 +109,9 @@ def main():
                     for z in pulp_nn_init.PULPNNWeightsPrecisions:
                         for q in pulp_nn_init.PULPNNQuantizationMethods:
                             for sgn_in, sgn_out in product([False, True], [False, True]):
-                            # TODO: add mixed depthwise kernels
-                                if e != 'XpulpNN-mixed':
-                            	    kernel_to_test = pulp_nn_factory.PULPNNKernel(name='linear_quant', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=e, mm_fmt='', in_signed=sgn_in, out_signed=sgn_out)
-                            	    lin_q=pulp_nn_factory.PULPNNLinearQuant(kernel=kernel_to_test, layer=None)
-                            	    pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='linear_q', comp=lin_q, api=pulp_nn_init.PULPNNAPI)
+                            	kernel_to_test = pulp_nn_factory.PULPNNKernel(name='linear_quant', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=e, mm_fmt='', in_signed=sgn_in, out_signed=sgn_out)
+                            	lin_q=pulp_nn_factory.PULPNNLinearQuant(kernel=kernel_to_test, layer=None)
+                            	pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='linear_q', comp=lin_q, api=pulp_nn_init.PULPNNAPI)
 
             for i in pulp_nn_init.PULPNNDataPrecisions:
                 # TODO: what about XpulpNN-mixed?

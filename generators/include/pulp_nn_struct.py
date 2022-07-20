@@ -534,7 +534,6 @@ def mkdir_test(kernel, act_prec, ext):
                 mkdir_p(PULPNNSrcDirsExtHW32bit['golden_model_conv'])
             elif kernel=='depthwise':
                 mkdir_p(PULPNNSrcDirsExtHW32bit['pulp_nn_depthwise'])
-                mkdir_p(PULPNNSrcDirsExtHW32bit['pulp_nn_matmul'])
                 mkdir_p(PULPNNSrcDirsExtHW32bit['data_allocation_dw'])
                 mkdir_p(PULPNNSrcDirsExtHW32bit['golden_model_dw'])
             elif kernel=='linear_no_quant':

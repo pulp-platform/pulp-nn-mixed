@@ -45,7 +45,7 @@ class PULPNNKernel(object):
         self.wt_data_t = wt
         self.quantization = quant
         self.act_prec = act_prec
-        self.extentions = ext
+        self.extensions = ext
         self.matmul_fmt = mm_fmt
         self.in_signed = in_signed
         self.out_signed = out_signed
@@ -165,22 +165,23 @@ class PULPNNUtils(PULPNNFactory):
         self.act_prec=act_prec
         return Template(filename="templates/pulp_nn_utils_c.t", strict_undefined=True).render(config=self)
 
-    def generate_header(self, act_prec):
+    def generate_header(self, act_prec, ext):
         self.act_prec=act_prec
+        self.ext=ext
         return Template(filename="templates/pulp_nn_utils_h.t", strict_undefined=True).render(config=self)
 
 
 class PULPNNConvolve(PULPNNFactory):
     def __init__(self, kernel, layer):
         super().__init__(kernel, layer)
-        if self.kernel.extentions == 'XpulpV2':
+        if self.kernel.extensions == 'XpulpV2':
             self.fn_name = "pulp_nn_conv_{4}{0}_{5}{1}_i{2}{3}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
                                                                        str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""), sgn_str(kernel.in_signed), sgn_str(kernel.out_signed))
             self.im2col_fn = "pulp_nn_im2col_{2}{0}_to_{2}{1}".format(str(self.kernel.in_data_t), '8', sgn_str(kernel.in_signed))
             self.mat_mul_fn = "pulp_nn_matmul_{3}8_{4}{0}_i{1}{2}".format(str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
                                                                           str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""), sgn_str(kernel.in_signed), sgn_str(kernel.out_signed))
             self.unpack_fn = "pulp_nn_i{0}_to_i{1}".format(str(self.kernel.wt_data_t), '8')
-        elif self.kernel.extentions == 'XpulpNN':
+        elif self.kernel.extensions == 'XpulpNN':
             self.max_precision = max([self.kernel.in_data_t, self.kernel.wt_data_t])
             self.fn_name = "xpulp_nn_conv_{5}{0}_{6}{1}_i{2}{3}{4}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
                 str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""),
@@ -198,7 +199,7 @@ class PULPNNConvolve(PULPNNFactory):
             self.unpack_in_fn = "pulp_nn_{2}{0}_to_{2}{1}".format(str(self.kernel.in_data_t), str(self.max_precision),
                                                                   sgn_str(kernel.in_signed))
             self.unpack_wt_fn = "pulp_nn_i{0}_to_i{1}".format(str(self.kernel.wt_data_t), str(self.max_precision))
-        elif self.kernel.extentions == 'XpulpNN-mixed':
+        elif self.kernel.extensions == 'XpulpNN-mixed':
             self.max_precision = max([self.kernel.in_data_t, self.kernel.wt_data_t])
             self.fn_name = "xpulp_nn_mix_conv_{5}{0}_{6}{1}_i{2}{3}{4}".format(str(self.kernel.in_data_t),
                                                                                str(self.kernel.out_data_t),
@@ -229,18 +230,18 @@ class PULPNNConvolve(PULPNNFactory):
         self.thr_fn = None
 
     def generate_code(self):
-        if self.kernel.extentions == 'XpulpV2':
+        if self.kernel.extensions == 'XpulpV2':
             return Template(filename="templates/pulp_nn_conv_x_y_z.t", strict_undefined=True).render(config=self)
-        elif self.kernel.extentions == 'XpulpNN':
+        elif self.kernel.extensions == 'XpulpNN':
             return Template(filename="templates/XpulpNN/xpulp_nn_conv_x_y_z.t", strict_undefined=True).render(config=self)
-        elif self.kernel.extentions == 'XpulpNN-mixed':
+        elif self.kernel.extensions == 'XpulpNN-mixed':
             return Template(filename="templates/XpulpNN-mixed/xpulp_nn_mix_conv_x_y_z.t", strict_undefined=True).render(config=self)
 
 class PULPNNConvolvePointwise(PULPNNFactory):
     def __init__(self, kernel, layer):
         super().__init__(kernel, layer)
 
-        if self.kernel.extentions == 'XpulpV2':
+        if self.kernel.extensions == 'XpulpV2':
             self.fn_name = "pulp_nn_pointwise_{4}{0}_{5}{1}_i{2}{3}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
                                                                             str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""),
                                                                             sgn_str(kernel.in_signed),
@@ -253,7 +254,7 @@ class PULPNNConvolvePointwise(PULPNNFactory):
                                                                           sgn_str(kernel.out_signed))
             self.unpack_fn = "pulp_nn_i{0}_to_i{1}".format(str(self.kernel.wt_data_t), '8')
         # TODO: add pointwise mixed kernels
-        elif self.kernel.extentions == 'XpulpNN':
+        elif self.kernel.extensions == 'XpulpNN':
             self.max_precision = max([self.kernel.in_data_t, self.kernel.wt_data_t])
             self.fn_name = "xpulp_nn_pointwise_{5}{0}_{6}{1}_i{2}{3}{4}".format(str(self.kernel.in_data_t),
                                                                                 str(self.kernel.out_data_t),
@@ -276,7 +277,7 @@ class PULPNNConvolvePointwise(PULPNNFactory):
                                                                   '8',
                                                                   sgn_str(kernel.in_signed))
             self.unpack_wt_fn = "pulp_nn_i{0}_to_i{1}".format(str(self.kernel.wt_data_t), '8')
-        elif self.kernel.extentions == 'XpulpNN-mixed':
+        elif self.kernel.extensions == 'XpulpNN-mixed':
             self.max_precision = max([self.kernel.in_data_t, self.kernel.wt_data_t])
             self.fn_name = "xpulp_nn_mix_pointwise_{5}{0}_{6}{1}_i{2}{3}{4}".format(str(self.kernel.in_data_t),
                                                                                     str(self.kernel.out_data_t),
@@ -308,32 +309,32 @@ class PULPNNConvolvePointwise(PULPNNFactory):
         self.thr_fn = None
 
     def generate_code(self):
-        if self.kernel.extentions == 'XpulpV2':
+        if self.kernel.extensions == 'XpulpV2':
             return Template(filename="templates/pulp_nn_pointwise_x_y_z.t", strict_undefined=True).render(config=self)
-        elif self.kernel.extentions == 'XpulpNN':
+        elif self.kernel.extensions == 'XpulpNN':
             return Template(filename="templates/XpulpNN/xpulp_nn_pointwise_x_y_z.t", strict_undefined=True).render(config=self)
-        elif self.kernel.extentions == 'XpulpNN-mixed':
+        elif self.kernel.extensions == 'XpulpNN-mixed':
             return Template(filename="templates/XpulpNN-mixed/xpulp_nn_mix_pointwise_x_y_z.t", strict_undefined=True).render(config=self)
 
 class PULPNNConvolveDepthwise(PULPNNFactory):
     def __init__(self, kernel, layer):
         super().__init__(kernel, layer)
-        if self.kernel.extentions == 'XpulpV2':
+        if self.kernel.extensions == 'XpulpV2':
             self.fn_name = "pulp_nn_depthwise_{4}{0}_{5}{1}_i{2}{3}".format(str(self.kernel.in_data_t),
                                                                             str(self.kernel.out_data_t),
                                                                             str(self.kernel.wt_data_t),
                                                                             str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""),
                                                                             sgn_str(kernel.in_signed),
                                                                             sgn_str(kernel.out_signed))
-        elif self.kernel.extentions == 'XpulpNN':
+        elif self.kernel.extensions == 'XpulpNN':
             self.fn_name = "xpulp_nn_depthwise_{4}{0}_{5}{1}_i{2}{3}".format(str(self.kernel.in_data_t),
                                                                              str(self.kernel.out_data_t),
                                                                              str(self.kernel.wt_data_t),
                                                                              str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""),
                                                                             sgn_str(kernel.in_signed),
                                                                             sgn_str(kernel.out_signed))
-        elif self.kernel.extentions == 'XpulpNN-mixed':
-            self.fn_name = "xpulp_nn_depthwise_{4}{0}_{5}{1}_i{2}{3}".format(str(self.kernel.in_data_t),
+        elif self.kernel.extensions == 'XpulpNN-mixed':
+            self.fn_name = "xpulp_nn_mix_depthwise_{4}{0}_{5}{1}_i{2}{3}".format(str(self.kernel.in_data_t),
                                                                              str(self.kernel.out_data_t),
                                                                              str(self.kernel.wt_data_t),
                                                                              str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""),
@@ -347,18 +348,18 @@ class PULPNNConvolveDepthwise(PULPNNFactory):
         self.less_precision = min([self.kernel.in_data_t, self.kernel.wt_data_t, self.kernel.out_data_t])
 
     def generate_code(self):
-        if self.kernel.extentions == 'XpulpV2':
+        if self.kernel.extensions == 'XpulpV2':
             return Template(filename="templates/pulp_nn_dw_x_y_z.t", strict_undefined=True).render(config=self)
-        elif self.kernel.extentions == 'XpulpNN':
+        elif self.kernel.extensions == 'XpulpNN':
             return Template(filename="templates/XpulpNN/xpulp_nn_dw_x_y_z.t", strict_undefined=True).render(config=self)
-        elif self.kernel.extentions == 'XpulpNN-mixed':
-            return Template(filename="templates/XpulpNN-mixed/xpulp_nn_dw_x_y_z.t", strict_undefined=True).render(config=self)
+        elif self.kernel.extensions == 'XpulpNN-mixed':
+            return Template(filename="templates/XpulpNN-mixed/xpulp_nn_mix_dw_x_y_z.t", strict_undefined=True).render(config=self)
 
 class PULPNNMatMul(PULPNNFactory):
     def __init__(self, kernel, layer):
         super().__init__(kernel, layer)
 
-        if self.kernel.extentions == 'XpulpV2':
+        if self.kernel.extensions == 'XpulpV2':
             self.fn_name = "pulp_nn_matmul_{3}8_{4}{0}_i{1}{2}".format(str(self.kernel.out_data_t),
                                                                        str(self.kernel.wt_data_t),
 
@@ -366,7 +367,7 @@ class PULPNNMatMul(PULPNNFactory):
                                                                        sgn_str(kernel.in_signed),
                                                                        sgn_str(kernel.out_signed))
             self.unpack_fn = "pulp_nn_i{0}_to_i{1}".format(str(self.kernel.wt_data_t), '8')
-        elif self.kernel.extentions == 'XpulpNN':
+        elif self.kernel.extensions == 'XpulpNN':
             self.max_precision = max([self.kernel.in_data_t, self.kernel.wt_data_t])
             self.fn_name = "xpulp_nn_matmul_{5}{0}_{6}{1}_i{2}{3}{4}".format(str(self.kernel.in_data_t),
                                                                              str(self.kernel.out_data_t),
@@ -380,7 +381,7 @@ class PULPNNMatMul(PULPNNFactory):
                                                                   sgn_str(kernel.in_signed))
             self.unpack_wt_fn = "pulp_nn_i{0}_to_i{1}".format(str(self.kernel.wt_data_t), str(self.max_precision))
             #TODO: signed mix-matmul
-        elif self.kernel.extentions == 'XpulpNN-mixed':
+        elif self.kernel.extensions == 'XpulpNN-mixed':
             self.max_precision = max([self.kernel.in_data_t, self.kernel.wt_data_t])
             self.fn_name = "xpulp_nn_mix_matmul_{5}{0}_{6}{1}_i{2}{3}{4}".format(str(self.kernel.in_data_t),
                                                                                  str(self.kernel.out_data_t),
@@ -401,18 +402,18 @@ class PULPNNMatMul(PULPNNFactory):
         self.relu_fn = "pulp_nn_quant_{0}{1}".format(sgn_str(kernel.out_signed), str(self.kernel.out_data_t))
 
     def generate_code(self):
-        if self.kernel.extentions == 'XpulpV2':
+        if self.kernel.extensions == 'XpulpV2':
             return Template(filename="templates/pulp_nn_matmul_x_y_z.t", strict_undefined=True).render(config=self)
-        elif self.kernel.extentions == 'XpulpNN':
+        elif self.kernel.extensions == 'XpulpNN':
             return Template(filename="templates/XpulpNN/xpulp_nn_matmul_x_y_z.t", strict_undefined=True).render(config=self)
-        elif self.kernel.extentions == 'XpulpNN-mixed':
+        elif self.kernel.extensions == 'XpulpNN-mixed':
             return Template(filename="templates/XpulpNN-mixed/xpulp_nn_mix_matmul_x_y_z.t", strict_undefined=True).render(config=self)
 
 class PULPNNLinearNoQuant(PULPNNFactory):
     def __init__(self, kernel, layer):
         super().__init__(kernel, layer)
 
-        if self.kernel.extentions == 'XpulpV2':
+        if self.kernel.extensions == 'XpulpV2':
             self.fn_name = "pulp_nn_linear_{3}{0}_i{1}_i{2}".format(str(self.kernel.in_data_t),
                                                                     '32',
                                                                     str(self.kernel.wt_data_t),
@@ -421,7 +422,7 @@ class PULPNNLinearNoQuant(PULPNNFactory):
             self.unpack_in_fn = "pulp_nn_{2}{0}_to_{2}{1}".format(str(self.kernel.in_data_t),
                                                                   '8',
                                                                   sgn_str(kernel.in_signed))
-        elif self.kernel.extentions == 'XpulpNN':
+        elif self.kernel.extensions == 'XpulpNN':
             self.fn_name = "xpulp_nn_linear_{3}{0}_i{1}_i{2}".format(str(self.kernel.in_data_t),
                                                                      '32',
                                                                      str(self.kernel.wt_data_t),
@@ -431,8 +432,8 @@ class PULPNNLinearNoQuant(PULPNNFactory):
             self.unpack_in_fn = "pulp_nn_{2}{0}_to_{2}{1}".format(str(self.kernel.in_data_t),
                                                                   str(self.max_precision),
                                                                   sgn_str(kernel.in_signed))
-        elif self.kernel.extentions == 'XpulpNN-mixed':
-            self.fn_name = "xpulp_nn_linear_{3}{0}_i{1}_i{2}".format(str(self.kernel.in_data_t),
+        elif self.kernel.extensions == 'XpulpNN-mixed':
+            self.fn_name = "xpulp_nn_mix_linear_{3}{0}_i{1}_i{2}".format(str(self.kernel.in_data_t),
                                                                      '32',
                                                                      str(self.kernel.wt_data_t),
                                                                      sgn_str(kernel.in_signed))
@@ -447,18 +448,18 @@ class PULPNNLinearNoQuant(PULPNNFactory):
         self.less_precision = min([self.kernel.in_data_t, self.kernel.wt_data_t])
 
     def generate_code(self):
-        if self.kernel.extentions == 'XpulpV2':
+        if self.kernel.extensions == 'XpulpV2':
             return Template(filename="templates/pulp_nn_linear_nq_x_y_z.t", strict_undefined=True).render(config=self)
-        elif self.kernel.extentions == 'XpulpNN':
+        elif self.kernel.extensions == 'XpulpNN':
             return Template(filename="templates/XpulpNN/xpulp_nn_linear_nq_x_y_z.t", strict_undefined=True).render(config=self)
-        elif self.kernel.extentions == 'XpulpNN-mixed':
-            return Template(filename="templates/XpulpNN-mixed/xpulp_nn_linear_nq_x_y_z.t", strict_undefined=True).render(config=self)
+        elif self.kernel.extensions == 'XpulpNN-mixed':
+            return Template(filename="templates/XpulpNN-mixed/xpulp_nn_mix_linear_nq_x_y_z.t", strict_undefined=True).render(config=self)
 
 class PULPNNLinearQuant(PULPNNFactory):
     def __init__(self, kernel, layer):
         super().__init__(kernel, layer)
 
-        if self.kernel.extentions == 'XpulpV2':
+        if self.kernel.extensions == 'XpulpV2':
             self.fn_name = "pulp_nn_linear_{3}{0}_{4}{1}_i{2}".format(str(self.kernel.in_data_t),
                                                                       str(self.kernel.out_data_t),
                                                                       str(self.kernel.wt_data_t),
@@ -468,7 +469,7 @@ class PULPNNLinearQuant(PULPNNFactory):
             self.unpack_in_fn = "pulp_nn_{2}{0}_to_{2}{1}".format(str(self.kernel.in_data_t),
                                                                   '8',
                                                                   sgn_str(kernel.in_signed))
-        elif self.kernel.extentions == 'XpulpNN':
+        elif self.kernel.extensions == 'XpulpNN':
             self.fn_name = "xpulp_nn_linear_{3}{0}_{4}{1}_i{2}".format(str(self.kernel.in_data_t),
                                                                        str(self.kernel.out_data_t),
                                                                        str(self.kernel.wt_data_t),
@@ -479,8 +480,8 @@ class PULPNNLinearQuant(PULPNNFactory):
             self.unpack_in_fn = "pulp_nn_{2}{0}_to_{2}{1}".format(str(self.kernel.in_data_t),
                                                                   str(self.max_precision),
                                                                   sgn_str(kernel.in_signed))
-        elif self.kernel.extentions == 'XpulpNN-mixed':
-            self.fn_name = "xpulp_nn_linear_{3}{0}_{4}{1}_i{2}".format(str(self.kernel.in_data_t),
+        elif self.kernel.extensions == 'XpulpNN-mixed':
+            self.fn_name = "xpulp_nn_mix_linear_{3}{0}_{4}{1}_i{2}".format(str(self.kernel.in_data_t),
                                                                        str(self.kernel.out_data_t),
                                                                        str(self.kernel.wt_data_t),
                                                                        sgn_str(kernel.in_signed),
@@ -499,23 +500,23 @@ class PULPNNLinearQuant(PULPNNFactory):
         self.less_precision = min([self.kernel.in_data_t, self.kernel.wt_data_t])
 
     def generate_code(self):
-        if self.kernel.extentions == 'XpulpV2':
+        if self.kernel.extensions == 'XpulpV2':
             return Template(filename="templates/pulp_nn_linear_q_x_y_z.t", strict_undefined=True).render(config=self)
-        elif self.kernel.extentions == 'XpulpNN':
+        elif self.kernel.extensions == 'XpulpNN':
             return Template(filename="templates/XpulpNN/xpulp_nn_linear_q_x_y_z.t", strict_undefined=True).render(config=self)
-        elif self.kernel.extentions == 'XpulpNN-mixed':
-            return Template(filename="templates/XpulpNN-mixed/xpulp_nn_linear_q_x_y_z.t", strict_undefined=True).render(config=self)
+        elif self.kernel.extensions == 'XpulpNN-mixed':
+            return Template(filename="templates/XpulpNN-mixed/xpulp_nn_mix_linear_q_x_y_z.t", strict_undefined=True).render(config=self)
 
 class PULPNNMaxPool(PULPNNFactory):
     def __init__(self, kernel, layer):
         super().__init__(kernel, layer)
 
-        if self.kernel.extentions == 'XpulpV2':
+        if self.kernel.extensions == 'XpulpV2':
             self.fn_name = "pulp_nn_maxpool_{0}{1}".format(sgn_str(kernel.in_signed),
                                                            str(self.kernel.in_data_t))
             self.comp_and_replace_fn = "pulp_nn_compare_and_replace_if_larger_{0}{1}".format(sgn_str(kernel.in_signed),
                                                                                              str(self.kernel.in_data_t))
-        elif self.kernel.extentions == 'XpulpNN':
+        elif self.kernel.extensions == 'XpulpNN':
             self.fn_name = "xpulp_nn_maxpool_{0}{1}".format(sgn_str(kernel.in_signed),
                                                             str(self.kernel.in_data_t))
             self.comp_and_replace_fn = "xpulp_nn_compare_and_replace_if_larger_{0}{1}".format(sgn_str(kernel.in_signed),
@@ -523,7 +524,7 @@ class PULPNNMaxPool(PULPNNFactory):
             # there is no 'xpulp_nn_compare_and_replace_if_larger_u8'
             if self.kernel.in_data_t == 8:
                 self.comp_and_replace_fn = self.comp_and_replace_fn[1:]
-        elif self.kernel.extentions == 'XpulpNN-mixed':
+        elif self.kernel.extensions == 'XpulpNN-mixed':
             self.fn_name = "xpulp_nn_maxpool_{0}{1}".format(sgn_str(kernel.in_signed),
                                                             str(self.kernel.in_data_t))
             self.comp_and_replace_fn = "xpulp_nn_compare_and_replace_if_larger_{0}{1}".format(sgn_str(kernel.in_signed),
@@ -545,7 +546,7 @@ class PULPNNAvgPoolNew(PULPNNFactory):
                                                           str(self.kernel.in_data_t),
                                                           sgn_str(kernel.out_signed),
                                                           str(self.kernel.out_data_t))
-        if 'XpulpNN' in self.kernel.extentions:
+        if 'XpulpNN' in self.kernel.extensions:
             self.fn_name = "x"+self.fn_name
         self.filename = self.fn_name + ".c"
         self.api = self.__class__.__name__
@@ -560,7 +561,7 @@ class PULPNNAdd(PULPNNFactory):
         self.in1_data_t = kernel.in_data_t
         self.in2_data_t = kernel.out_data_t
         self.fn_name = "pulp_nn_add_u{0}_u{1}".format(str(self.in1_data_t), str(self.in2_data_t))
-        if "XpulpNN" in self.kernel.extentions:
+        if "XpulpNN" in self.kernel.extensions:
             self.fn_name = "x" + self.fn_name
         self.filename = self.fn_name + ".c"
         self.api = self.__class__.__name__
@@ -587,7 +588,7 @@ class PULPNNQuantAdd(PULPNNFactory):
                                                                  str(self.in2_data_t),
                                                                  sgn_str(kernel.out_signed),
                                                                  str(self.out_data_t))
-        if "XpulpNN" in self.kernel.extentions:
+        if "XpulpNN" in self.kernel.extensions:
             self.fn_name = "x" + self.fn_name
         self.filename = self.fn_name + ".c"
         self.api = self.__class__.__name__
@@ -699,17 +700,17 @@ def headers(act_prec='32bit', ext='XpulpV2'):
             shutil.copyfile(PULPNNSrcDirsExtHW64bit['inc'] + "pulp_nn_utils.h", PULPNNSrcDirsExtHW64bit['pulp_nn_include'] + "pulp_nn_utils.h")
 
 def copy_file(src_tag, key, dest_tag):
-    if key.kernel.extentions == 'XpulpV2':
+    if key.kernel.extensions == 'XpulpV2':
         if key.kernel.act_prec == '32bit':
             shutil.copyfile(PULPNNSrcDirsSW32bit[src_tag] + "%s" % key.filename, PULPNNSrcDirsSW32bit[dest_tag] + "%s" % key.filename)
         elif key.kernel.act_prec == '64bit':
             shutil.copyfile(PULPNNSrcDirsSW64bit[src_tag] + "%s" % key.filename, PULPNNSrcDirsSW64bit[dest_tag] + "%s" % key.filename)
-    elif key.kernel.extentions == 'XpulpNN':
+    elif key.kernel.extensions == 'XpulpNN':
         if key.kernel.act_prec == '32bit':
             shutil.copyfile(PULPNNSrcDirsHW32bit[src_tag] + "%s" % key.filename, PULPNNSrcDirsHW32bit[dest_tag] + "%s" % key.filename)
         elif key.kernel.act_prec == '64bit':
             shutil.copyfile(PULPNNSrcDirsHW64bit[src_tag] + "%s" % key.filename, PULPNNSrcDirsHW64bit[dest_tag] + "%s" % key.filename)
-    elif key.kernel.extentions == 'XpulpNN-mixed':
+    elif key.kernel.extensions == 'XpulpNN-mixed':
         if key.kernel.act_prec == '32bit':
             shutil.copyfile(PULPNNSrcDirsExtHW32bit[src_tag] + "%s" % key.filename, PULPNNSrcDirsExtHW32bit[dest_tag] + "%s" % key.filename)
         elif key.kernel.act_prec == '64bit':
@@ -751,22 +752,22 @@ def utils(act_prec, ext):
             new_file_h = open(PULPNNSrcDirsExtHW32bit['inc'] + comp.filename_h, 'w')
         elif act_prec == '64bit':
             new_file_h = open(PULPNNSrcDirsExtHW64bit['inc'] + comp.filename_h, 'w')
-    new_file_h.write(comp.generate_header(act_prec))
+    new_file_h.write(comp.generate_header(act_prec, ext))
     new_file_h.close()
 
 def kernel(path_tag, comp, api):
     api += comp.generate_api() + "\n"
-    if comp.kernel.extentions == 'XpulpV2':
+    if comp.kernel.extensions == 'XpulpV2':
         if comp.kernel.act_prec == '32bit':
             new_file = open(PULPNNSrcDirsSW32bit[path_tag] + comp.filename, 'w')
         elif comp.kernel.act_prec == '64bit':
             new_file = open(PULPNNSrcDirsSW64bit[path_tag] + comp.filename, 'w')
-    elif comp.kernel.extentions == 'XpulpNN':
+    elif comp.kernel.extensions == 'XpulpNN':
         if comp.kernel.act_prec == '32bit':
             new_file = open(PULPNNSrcDirsHW32bit[path_tag] + comp.filename, 'w')
         elif comp.kernel.act_prec == '64bit':
             new_file = open(PULPNNSrcDirsHW64bit[path_tag] + comp.filename, 'w')
-    elif comp.kernel.extentions == 'XpulpNN-mixed':
+    elif comp.kernel.extensions == 'XpulpNN-mixed':
         if comp.kernel.act_prec == '32bit':
             new_file = open(PULPNNSrcDirsExtHW32bit[path_tag] + comp.filename, 'w')
         elif comp.kernel.act_prec == '64bit':
@@ -787,17 +788,17 @@ def generation(call, make, include, comp):
 
 def allocation(path_tag, comp):
     c = PULPNNDataAllocation(kernel=comp.kernel, layer=comp.layer)
-    if comp.kernel.extentions == 'XpulpV2':
+    if comp.kernel.extensions == 'XpulpV2':
         if comp.kernel.act_prec == '32bit':
             new_file = open(PULPNNSrcDirsSW32bit[path_tag] + c.filename, 'w')
         elif comp.kernel.act_prec == '64bit':
             new_file = open(PULPNNSrcDirsSW64bit[path_tag] + c.filename, 'w')
-    elif comp.kernel.extentions == 'XpulpNN':
+    elif comp.kernel.extensions == 'XpulpNN':
         if comp.kernel.act_prec == '32bit':
             new_file = open(PULPNNSrcDirsHW32bit[path_tag] + c.filename, 'w')
         elif comp.kernel.act_prec == '64bit':
             new_file = open(PULPNNSrcDirsHW64bit[path_tag] + c.filename, 'w')
-    elif comp.kernel.extentions == 'XpulpNN-mixed':
+    elif comp.kernel.extensions == 'XpulpNN-mixed':
         if comp.kernel.act_prec == '32bit':
             new_file = open(PULPNNSrcDirsExtHW32bit[path_tag] + c.filename, 'w')
         elif comp.kernel.act_prec == '64bit':
@@ -807,17 +808,17 @@ def allocation(path_tag, comp):
 
 def golden(path_tag, comp):
     c = PULPNNGoldenModel(kernel=comp.kernel, layer=comp.layer)
-    if comp.kernel.extentions == 'XpulpV2':
+    if comp.kernel.extensions == 'XpulpV2':
         if comp.kernel.act_prec == '32bit':
             new_file = open(PULPNNSrcDirsSW32bit[path_tag] + c.filename, 'w')
         elif comp.kernel.act_prec == '64bit':
             new_file = open(PULPNNSrcDirsSW64bit[path_tag] + c.filename, 'w')
-    elif comp.kernel.extentions == 'XpulpNN':
+    elif comp.kernel.extensions == 'XpulpNN':
         if comp.kernel.act_prec == '32bit':
             new_file = open(PULPNNSrcDirsHW32bit[path_tag] + c.filename, 'w')
         elif comp.kernel.act_prec == '64bit':
             new_file = open(PULPNNSrcDirsHW64bit[path_tag] + c.filename, 'w')
-    elif comp.kernel.extentions == 'XpulpNN-mixed':
+    elif comp.kernel.extensions == 'XpulpNN-mixed':
         if comp.kernel.act_prec == '32bit':
             new_file = open(PULPNNSrcDirsExtHW32bit[path_tag] + c.filename, 'w')
         elif comp.kernel.act_prec == '64bit':
@@ -827,17 +828,17 @@ def golden(path_tag, comp):
 
 def makefile(path_tag, make, kernel):
     c = PULPNNMakefile(kernel=kernel)
-    if kernel.extentions == 'XpulpV2':
+    if kernel.extensions == 'XpulpV2':
         if kernel.act_prec == '32bit':
             new_file = open(PULPNNSrcDirsSW32bit[path_tag] + c.filename, 'w')
         elif kernel.act_prec == '64bit':
             new_file = open(PULPNNSrcDirsSW64bit[path_tag] + c.filename, 'w')
-    elif kernel.extentions == 'XpulpNN':
+    elif kernel.extensions == 'XpulpNN':
         if kernel.act_prec == '32bit':
             new_file = open(PULPNNSrcDirsHW32bit[path_tag] + c.filename, 'w')
         elif kernel.act_prec == '64bit':
             new_file = open(PULPNNSrcDirsHW64bit[path_tag] + c.filename, 'w')
-    elif kernel.extentions == 'XpulpNN-mixed':
+    elif kernel.extensions == 'XpulpNN-mixed':
         if kernel.act_prec == '32bit':
             new_file = open(PULPNNSrcDirsExtHW32bit[path_tag] + c.filename, 'w')
         elif kernel.act_prec == '64bit':
@@ -847,17 +848,17 @@ def makefile(path_tag, make, kernel):
 
 def test(path_tag, include, call, layer, kernel):
     c = PULPNNTest(kernel=kernel, layer=layer)
-    if kernel.extentions == 'XpulpV2':
+    if kernel.extensions == 'XpulpV2':
         if kernel.act_prec == '32bit':
             new_file = open(PULPNNSrcDirsSW32bit[path_tag] + c.filename, 'w')
         elif kernel.act_prec == '64bit':
             new_file = open(PULPNNSrcDirsSW64bit[path_tag] + c.filename, 'w')
-    elif kernel.extentions == 'XpulpNN':
+    elif kernel.extensions == 'XpulpNN':
         if kernel.act_prec == '32bit':
             new_file = open(PULPNNSrcDirsHW32bit[path_tag] + c.filename, 'w')
         elif kernel.act_prec == '64bit':
             new_file = open(PULPNNSrcDirsHW64bit[path_tag] + c.filename, 'w')
-    elif kernel.extentions == 'XpulpNN-mixed':
+    elif kernel.extensions == 'XpulpNN-mixed':
         if kernel.act_prec == '32bit':
             new_file = open(PULPNNSrcDirsExtHW32bit[path_tag] + c.filename, 'w')
         elif kernel.act_prec == '64bit':
@@ -973,7 +974,7 @@ def matmul_mixed_tests_generator(layer, kernel):
     #                                     ", bn: " + str(layer.bn) +
     #                                     ", relu: " + str(layer.relu) +
     #                                     ", quant: " + str(kernel.quantization) +
-    #                                     ", ISA: " + str(kernel.extentions) +
+    #                                     ", ISA: " + str(kernel.extensions) +
     #                                     ")")
     torch.manual_seed(5)
     random.seed(5)
@@ -1055,7 +1056,7 @@ def convolution_mixed_tests_generator(layer, kernel):
     #                                             ", act_prec: " + str(kernel.act_prec) +
     #                                             ", relu: " + str(layer.relu) +
     #                                             ", quant: " + str(kernel.quantization) +
-    #                                             ", ISA: " + str(kernel.extentions) +
+    #                                             ", ISA: " + str(kernel.extensions) +
     #                                             ")")
     torch.manual_seed(10)
     random.seed(4)
@@ -1143,7 +1144,7 @@ def linear_mixed_tests_generator(layer, kernel):
     #                                         ", act_prec: " + str(kernel.act_prec) +
     #                                         ", relu: " + str(layer.relu) +
     #                                         ", quant: " + str(kernel.quantization) +
-    #                                         ", ISA: " + str(kernel.extentions) +
+    #                                         ", ISA: " + str(kernel.extensions) +
     #                                         ")")
     torch.manual_seed(5)
     random.seed(5)
@@ -1225,7 +1226,7 @@ def linear_mixed_tests_generator(layer, kernel):
 
 def pooling_mixed_tests_generator(layer, kernel):
     # print("Pooling Mixed Test Generator (type: " + str(kernel.type) +
-    #                                     ", ISA: " + str(kernel.extentions) +
+    #                                     ", ISA: " + str(kernel.extensions) +
     #                                     ")")
     torch.manual_seed(5)
     random.seed(5)
@@ -1273,7 +1274,7 @@ def pooling_mixed_tests_generator(layer, kernel):
 
 def add_mixed_tests_generator(layer, kernel):
     # print("Add Mixed Test Generator (type: " + str(kernel.type) +
-    #                                 ", ISA: " + str(kernel.extentions) +
+    #                                 ", ISA: " + str(kernel.extensions) +
     #                                 ")")
     torch.manual_seed(5)
     random.seed(5)
@@ -1302,7 +1303,7 @@ def add_mixed_tests_generator(layer, kernel):
 
 def quant_add_mixed_tests_generator(layer, kernel):
     # print("Add Mixed Test Generator (type: " + str(kernel.type) +
-    #                                 ", ISA: " + str(kernel.extentions) +
+    #                                 ", ISA: " + str(kernel.extensions) +
     #                                 ")")
 
     
