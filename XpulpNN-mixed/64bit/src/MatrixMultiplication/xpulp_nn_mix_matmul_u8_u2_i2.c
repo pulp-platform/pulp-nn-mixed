@@ -22,6 +22,8 @@
 #include "pulp_nn_utils.h"
 
 
+
+
 uint8_t * __attribute__((noinline)) xpulp_nn_mix_matmul_u8_u2_i2(
                         uint8_t *pIn,
                         int8_t *pBias,
@@ -55,15 +57,10 @@ uint8_t * __attribute__((noinline)) xpulp_nn_mix_matmul_u8_u2_i2(
   int32_t a_rollback = 4 - num_col_im2col_a;
   int32_t w_rollback = 4 - (num_col_im2col_w + (num_col_im2col_w << 1));
 
-  LEGACY_MODE("0");
-  IVEC_FMT("6");
   A_STRIDE(num_col_im2col_a);
   W_STRIDE(num_col_im2col_w);
   A_ROLLBACK(a_rollback);
   W_ROLLBACK(w_rollback);
-  A_SKIP("1");
-  W_SKIP("3");
-  MIXED_SKIP("8");
 
   int8_t *pA = pWeight;
 
@@ -108,6 +105,7 @@ uint8_t * __attribute__((noinline)) xpulp_nn_mix_matmul_u8_u2_i2(
       sum6 = sum2;
       sum7 = sum3;
       sum8 = sum4;
+
     }
 
     for(int j=0; j<(num_col_im2col >> 4); j++)
@@ -195,7 +193,7 @@ uint8_t * __attribute__((noinline)) xpulp_nn_mix_matmul_u8_u2_i2(
 
       pB+=loop_cnt_im2col_a;
       
-      uint8_t *pB2 = (pB + loop_cnt_im2col_a);
+      uint8_t *pB2 = (pB + num_col_im2col_a);
 
       do
       {
@@ -217,6 +215,7 @@ uint8_t * __attribute__((noinline)) xpulp_nn_mix_matmul_u8_u2_i2(
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
 
+
         inA = (int8_t) bitext((int) *pA, 2, 2);
         inA2 = (int8_t) bitext((int) *pA2, 2, 2);
         inA3 = (int8_t) bitext((int) *pA3, 2, 2);
@@ -234,6 +233,7 @@ uint8_t * __attribute__((noinline)) xpulp_nn_mix_matmul_u8_u2_i2(
         sum6 += inA2 * inB2;
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
+
 
         inA = (int8_t) bitext((int) *pA, 2, 4);
         inA2 = (int8_t) bitext((int) *pA2, 2, 4);
@@ -253,6 +253,7 @@ uint8_t * __attribute__((noinline)) xpulp_nn_mix_matmul_u8_u2_i2(
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
 
+
         inA = (int8_t) bitext((int) *pA, 2, 6);
         inA2 = (int8_t) bitext((int) *pA2, 2, 6);
         inA3 = (int8_t) bitext((int) *pA3, 2, 6);
@@ -270,6 +271,7 @@ uint8_t * __attribute__((noinline)) xpulp_nn_mix_matmul_u8_u2_i2(
         sum6 += inA2 * inB2;
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
+
 
         pA++;
         pA2++;

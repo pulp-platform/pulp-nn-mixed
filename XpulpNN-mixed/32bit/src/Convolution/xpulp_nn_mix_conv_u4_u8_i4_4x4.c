@@ -23,6 +23,7 @@
 #include "pulp_nn_kernels.h"
 
 
+
 void __attribute__((noinline)) xpulp_nn_mix_conv_u4_u8_i4_4x4(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
@@ -108,7 +109,7 @@ void __attribute__((noinline)) xpulp_nn_mix_conv_u4_u8_i4_4x4(
             }
             else
             {
-              xpulp_nn_im2col_i4_to_i4((uint8_t*) (pIn + ((i_ker_y * dim_in_x + i_ker_x) * ch_in_r)), pIm2Col, ch_in);
+              xpulp_nn_im2col_u4_to_u4((uint8_t*) (pIn + ((i_ker_y * dim_in_x + i_ker_x) * ch_in_r)), pIm2Col, ch_in);
             }
             pIm2Col+=PACK_INT4_SIZE(ch_in);
           }
@@ -128,7 +129,7 @@ void __attribute__((noinline)) xpulp_nn_mix_conv_u4_u8_i4_4x4(
               }
               else
               {
-                xpulp_nn_im2col_i4_to_i4((uint8_t*) (pIn + ((i_ker_y * dim_in_x + i_ker_x) * ch_in_r)), pIm2Col, ch_in);
+                xpulp_nn_im2col_u4_to_u4((uint8_t*) (pIn + ((i_ker_y * dim_in_x + i_ker_x) * ch_in_r)), pIm2Col, ch_in);
               }
               pIm2Col+=PACK_INT4_SIZE(ch_in);
             }
@@ -138,7 +139,7 @@ void __attribute__((noinline)) xpulp_nn_mix_conv_u4_u8_i4_4x4(
         {
           for(i_ker_y=((i_out_y * stride_y) - padding_y_top); i_ker_y<((i_out_y * stride_y) - padding_y_top + dim_kernel_y); i_ker_y++)
           {
-            xpulp_nn_im2col_i4_to_i4((uint8_t*) pIn + (i_ker_y * dim_in_x + i_out_x * stride_x - padding_x_left)*ch_in_r,pIm2Col,ch_in * dim_kernel_x);
+            xpulp_nn_im2col_u4_to_u4((uint8_t*) pIn + (i_ker_y * dim_in_x + i_out_x * stride_x - padding_x_left)*ch_in_r,pIm2Col,ch_in * dim_kernel_x);
             pIm2Col+=PACK_INT4_SIZE(ch_in * dim_kernel_x);
           }
         }
@@ -154,7 +155,7 @@ void __attribute__((noinline)) xpulp_nn_mix_conv_u4_u8_i4_4x4(
               }
               else
               {
-                xpulp_nn_im2col_i4_to_i4((uint8_t *)pIn + (i_ker_y*dim_in_x+i_ker_x)* ch_in_r, pIm2Col, ch_in);
+                xpulp_nn_im2col_u4_to_u4((uint8_t *)pIn + (i_ker_y*dim_in_x+i_ker_x)* ch_in_r, pIm2Col, ch_in);
               }
               pIm2Col+=PACK_INT4_SIZE(ch_in);
             }
@@ -173,7 +174,7 @@ void __attribute__((noinline)) xpulp_nn_mix_conv_u4_u8_i4_4x4(
             }
             else
             {
-              xpulp_nn_im2col_i4_to_i4((uint8_t *) pIn + (i_ker_y * dim_in_x + i_ker_x) * ch_in_r, pIm2Col, ch_in);
+              xpulp_nn_im2col_u4_to_u4((uint8_t *) pIn + (i_ker_y * dim_in_x + i_ker_x) * ch_in_r, pIm2Col, ch_in);
             }
             pIm2Col+=PACK_INT4_SIZE(ch_in);
           }
@@ -187,7 +188,7 @@ void __attribute__((noinline)) xpulp_nn_mix_conv_u4_u8_i4_4x4(
           pOutBuffer,
           pOutBuffer + ch_out_r,
           pOutBuffer + (ch_out_r << 1),
-          pOutBuffer + (ch_out_r << 1 + ch_out_r),
+          pOutBuffer + (ch_out_r << 1) + ch_out_r,
           pWeight,
           pKappa,
           pLambda,
@@ -211,6 +212,8 @@ void __attribute__((noinline)) xpulp_nn_mix_conv_u4_u8_i4_4x4(
       int i;
       int32_t * k1 = pKappa;
       int32_t * lambda1 = pLambda;
+
+      uint8_t out[1];
       uint16_t num_col_im2col = ch_in * dim_kernel_x * dim_kernel_y;
       uint16_t num_col_im2col_w = PACK_INT4_SIZE(ch_in) * dim_kernel_x * dim_kernel_y;
 
@@ -229,7 +232,7 @@ void __attribute__((noinline)) xpulp_nn_mix_conv_u4_u8_i4_4x4(
 
         for(int j=0; j < (num_col_im2col >> 3); j++)
         {
-          sum = SumDotp8(*(uint32_t *)ptrB, *(int32_t *)ptrA, sum);
+          sum = SumDotp8(*(uint8_t *)ptrB, *(int32_t *)ptrA, sum);
           ptrA++;
           ptrB++;
         }
@@ -247,10 +250,10 @@ void __attribute__((noinline)) xpulp_nn_mix_conv_u4_u8_i4_4x4(
           do
           {
             int8_t inA1 = (int8_t) bitext((int) *pA, 4, 0);
-            uint8_t inB1 = (uint8_t) bitextu((unsigned int) *pB, 4, 0);
+            uint8_t inB1 = (uint8_t) bitextu((uint32_t) *pB, 4, 0);
             sum += inA1 * inB1;
             inA1 = (int8_t) bitext((int) *pA, 4, 4);
-            inB1 = (uint8_t) bitextu((unsigned int) *pB, 4, 4);
+            inB1 = (uint8_t) bitextu((uint32_t) *pB, 4, 4);
             sum += inA1 * inB1;
 
             pA++;
@@ -261,7 +264,7 @@ void __attribute__((noinline)) xpulp_nn_mix_conv_u4_u8_i4_4x4(
         }
         if (flag_batch_norm && flag_relu)
         {
-          *pOutBuffer = pulp_nn_bn_quant_i8(sum, *k1, *lambda1, out_shift);
+          *pOutBuffer = pulp_nn_bn_quant_u8(sum, *k1, *lambda1, out_shift);
           k1++;
           lambda1++;
           pOutBuffer++;
@@ -270,7 +273,7 @@ void __attribute__((noinline)) xpulp_nn_mix_conv_u4_u8_i4_4x4(
         {
           if(flag_relu == 1)
           {
-            *pOutBuffer = pulp_nn_quant_i8(sum, out_mult, out_shift);
+            *pOutBuffer = pulp_nn_quant_u8(sum, out_mult, out_shift);
             pOutBuffer++;
           }
           else

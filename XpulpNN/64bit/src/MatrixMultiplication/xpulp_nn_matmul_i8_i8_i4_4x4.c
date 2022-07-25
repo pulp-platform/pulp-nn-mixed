@@ -49,7 +49,6 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i8_i8_i4_4x4(
   uint16_t num_col_im2col_w = PACK_INT4_SIZE(num_col_im2col);
   uint16_t num_col_im2col_a = PACK_INT8_SIZE(num_col_im2col);
 
-  //uint8_t *pOut2 = pOut + ch_out_r;
   int8_t *pA = pWeight;
 
   uint16_t chan_left = ch_out & 0x3;
@@ -126,6 +125,16 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i8_i8_i4_4x4(
       sum6 = sum2;
       sum7 = sum3;
       sum8 = sum4;
+
+      sum9 = sum;
+      sum10 = sum2;
+      sum11 = sum3;
+      sum12 = sum4;
+
+      sum13 = sum;
+      sum14 = sum2;
+      sum15 = sum3;
+      sum16 = sum4;
     }
 
     for(int j=0; j<(num_col_im2col >> 3); j++)
@@ -168,6 +177,12 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i8_i8_i4_4x4(
       sum4 = MacLoads4(0, 1, 3, 0, ptrB3, sum4);
       ptrB3 = MacLoadUpdate(ptrB3);
 
+      sum5 = MacLoads4(0, 0, 0, 1, ptrA, sum5);
+      sum6 = MacLoads4(0, 0, 1, 1, ptrA2, sum6);
+      sum7 = MacLoads4(0, 0, 2, 1, ptrA3, sum7);
+      sum8 = MacLoads4(0, 1, 3, 1, ptrB4, sum8);
+      ptrB4 = MacLoadUpdate(ptrB4);
+
       pA  = pulp_nn_i4_to_i8(pA , vecA); 
       pA2 = pulp_nn_i4_to_i8(pA2, vecA2);
       pA3 = pulp_nn_i4_to_i8(pA3, vecA3);
@@ -177,12 +192,6 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i8_i8_i4_4x4(
       ptrA2  = MacLoadAssign(vecA2);
       ptrA3  = MacLoadAssign(vecA3);
       ptrA4  = MacLoadAssign(vecA4);
-
-      sum5 = MacLoads4(0, 0, 0, 1, ptrA, sum5);
-      sum6 = MacLoads4(0, 0, 1, 1, ptrA2, sum6);
-      sum7 = MacLoads4(0, 0, 2, 1, ptrA3, sum7);
-      sum8 = MacLoads4(0, 1, 3, 1, ptrB4, sum8);
-      ptrB4 = MacLoadUpdate(ptrB4);
 
       sum9  = MacLoads4(0, 0, 0, 0, ptrA, sum9);
       sum10 = MacLoads4(0, 0, 1, 0, ptrA2, sum10);
@@ -212,6 +221,8 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i8_i8_i4_4x4(
       uint16_t loop_cnt_im2col_a = (num_col_im2col >> 3) << 3;
       pB+=loop_cnt_im2col_a;
       pB2+=loop_cnt_im2col_a;
+      pB3+=loop_cnt_im2col_a;
+      pB4+=loop_cnt_im2col_a;
 
       do
       {
@@ -222,6 +233,8 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i8_i8_i4_4x4(
 
         int8_t inB = *pB++;
         int8_t inB2 = *pB2++;
+        int8_t inB3 = *pB3++;
+        int8_t inB4 = *pB4++;
 
         sum += inA * inB;
         sum2 += inA2 * inB;
@@ -232,6 +245,16 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i8_i8_i4_4x4(
         sum6 += inA2 * inB2;
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
+
+        sum9 += inA * inB3;
+        sum10 += inA2 * inB3;
+        sum11 += inA3 * inB3;
+        sum12 += inA4 * inB3;
+
+        sum13 += inA * inB4;
+        sum14 += inA2 * inB4;
+        sum15 += inA3 * inB4;
+        sum16 += inA4 * inB4;
 
         inA = (int8_t) bitext((int) *pA, 4, 4);
         inA2 = (int8_t) bitext((int) *pA2, 4, 4);
@@ -240,6 +263,8 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i8_i8_i4_4x4(
 
         inB = *pB++;
         inB2 = *pB2++;
+        inB3 = *pB3++;
+        inB4 = *pB4++;
 
         sum += inA * inB;
         sum2 += inA2 * inB;
@@ -250,6 +275,16 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i8_i8_i4_4x4(
         sum6 += inA2 * inB2;
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
+
+        sum9 += inA * inB3;
+        sum10 += inA2 * inB3;
+        sum11 += inA3 * inB3;
+        sum12 += inA4 * inB3;
+
+        sum13 += inA * inB4;
+        sum14 += inA2 * inB4;
+        sum15 += inA3 * inB4;
+        sum16 += inA4 * inB4;
 
         pA++;
         pA2++;
@@ -390,9 +425,13 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i8_i8_i4_4x4(
   {
     int8_t *pB = pIn;
     int8_t *pB2 = (pB + num_col_im2col_a);
+    int8_t *pB3 = (pB2 + num_col_im2col_a);
+    int8_t *pB4 = (pB3 + num_col_im2col_a);
 
     int32_t *ptrB  = (int32_t *) pB;
     int32_t *ptrB2 = (int32_t *) pB2;
+    int32_t *ptrB3 = (int32_t *) pB3;
+    int32_t *ptrB4 = (int32_t *) pB4;
 
     pA  = pulp_nn_i4_to_i8(pA , vecA);
 
@@ -412,27 +451,42 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i8_i8_i4_4x4(
       sum = ((int) (*pBias++));    
     }
     int sum2 = sum;
+    int sum3 = sum;
+    int sum4 = sum;
 
     for(int j=0; j < (num_col_im2col >> 3); j++)
     {
       ptrB2 = MacLoadInit(0, 1, 0, 1, ptrB2);
 
-      sum  = MacLoads4(0, 1, 0, 0, ptrB, sum);
+      sum  = MacLoads4(0, 1, 0, 0, ptrB3, sum);
+      ptrB3 = MacLoadUpdate(ptrB3);
+
+      sum2 = MacLoads4(0, 1, 0, 1, ptrB4, sum2);
+      ptrB4 = MacLoadUpdate(ptrB4);
+
+      sum3 = MacLoads4(0, 1, 0, 0, ptrB, sum3);
       ptrB = MacLoadUpdate(ptrB);
 
-      sum2 = MacLoads4(1, 0, 0, 1, ptrA, sum2);
+      sum4 = MacLoads4(1, 0, 0, 1, ptrA, sum4);
       ptrA = MacLoadUpdate(ptrA);
+
       ptrB2  = MacLoadInit(0, 1, 0, 1, ptrB2);
 
-      sum  = MacLoads4(0, 1, 0, 0, ptrB, sum);   
+      sum  = MacLoads4(0, 1, 0, 0, ptrB3, sum);
+      ptrB3 = MacLoadUpdate(ptrB3);
+
+      sum2 = MacLoads4(0, 1, 0, 1, ptrB4, sum2);
+      ptrB4 = MacLoadUpdate(ptrB4);
+
+      sum3 = MacLoads4(0, 1, 0, 0, ptrB, sum3);
       ptrB = MacLoadUpdate(ptrB);
 
-      pA  = pulp_nn_i4_to_i8(pA , vecA);
+      pA = pulp_nn_i4_to_i8(pA , vecA);
 
-      ptrA   = MacLoadAssign(vecA);
+      ptrA = MacLoadAssign(vecA);
 
-      sum2  = MacLoads4(1, 0, 0, 1, ptrA, sum2);
-      ptrA  = MacLoadUpdate(ptrA);
+      sum4 = MacLoads4(1, 0, 0, 1, ptrA, sum4);
+      ptrA = MacLoadUpdate(ptrA);
     }
     pA-=4;
     int col_cnt_im2col = num_col_im2col & 0x7;
@@ -443,6 +497,8 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i8_i8_i4_4x4(
       uint16_t loop_cnt_im2col_a = (num_col_im2col >> 3) << 3;
       pB+=loop_cnt_im2col_a;
       pB2+=loop_cnt_im2col_a;
+      pB3+=loop_cnt_im2col_a;
+      pB4+=loop_cnt_im2col_a;
 
       do
       {
@@ -450,19 +506,31 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i8_i8_i4_4x4(
 
         int8_t inB = *pB++;
         int8_t inB2 = *pB2++;
+        int8_t inB3 = *pB3++;
+        int8_t inB4 = *pB4++;
 
         sum += inA * inB;
 
         sum2 += inA * inB2;
+
+        sum3 += inA * inB3;
+
+        sum4 += inA * inB4;
 
         inA = (int8_t) bitext((int) *pA, 4, 4);
 
         inB = *pB++;
         inB2 = *pB2++;
+        inB3 = *pB3++;
+        inB4 = *pB4++;
 
         sum += inA * inB;
 
         sum2 += inA * inB2;
+
+        sum3 += inA * inB3;
+
+        sum4 += inA * inB4;
 
         pA++;
 
@@ -475,6 +543,10 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i8_i8_i4_4x4(
       pOut++;
       *pOut2 = pulp_nn_bn_quant_i8(sum2, *pKappa, *pLambda, out_shift);
       pOut2++;
+      *pOut3 = pulp_nn_bn_quant_i8(sum3, *pKappa, *pLambda, out_shift);
+      pOut3++;
+      *pOut4 = pulp_nn_bn_quant_i8(sum4, *pKappa, *pLambda, out_shift);
+      pOut4++;
       pKappa++;
       pLambda++;
     }
@@ -486,6 +558,10 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i8_i8_i4_4x4(
         pOut++;
         *pOut2 = pulp_nn_quant_i8(sum2, out_mult, out_shift);
         pOut2++;
+        *pOut3 = pulp_nn_quant_i8(sum3, out_mult, out_shift);
+        pOut3++;
+        *pOut4 = pulp_nn_quant_i8(sum4, out_mult, out_shift);
+        pOut4++;
       }
       else
       {
@@ -493,6 +569,10 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i8_i8_i4_4x4(
         pOut++;
         *pOut2 = (int8_t) clips8(sum2 >> out_shift);
         pOut2++;
+        *pOut3 = (uint8_t) clip8(sum3 >> out_shift);
+        pOut3++;
+        *pOut4 = (uint8_t) clip8(sum4 >> out_shift);
+        pOut4++;
       }
     }
     chan_left--;

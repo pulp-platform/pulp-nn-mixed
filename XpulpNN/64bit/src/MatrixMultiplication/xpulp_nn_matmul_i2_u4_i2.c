@@ -46,7 +46,6 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i2_u4_i2(
   uint16_t num_col_im2col_w = PACK_INT2_SIZE(num_col_im2col);
   uint16_t num_col_im2col_a = PACK_INT2_SIZE(num_col_im2col);
 
-  //uint8_t *pOut2 = pOut + ch_out_r;
   int8_t *pA = pWeight;
 
   uint16_t chan_left = ch_out & 0x3;
@@ -96,6 +95,7 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i2_u4_i2(
       sum6 = sum2;
       sum7 = sum3;
       sum8 = sum4;
+
     }
 
     for(int j=0; j<(num_col_im2col >> 4); j++)
@@ -157,6 +157,7 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i2_u4_i2(
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
 
+
         inA = (int8_t) bitext((int) *pA, 2, 2);
         inA2 = (int8_t) bitext((int) *pA2, 2, 2);
         inA3 = (int8_t) bitext((int) *pA3, 2, 2);
@@ -174,6 +175,7 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i2_u4_i2(
         sum6 += inA2 * inB2;
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
+
 
         inA = (int8_t) bitext((int) *pA, 2, 4);
         inA2 = (int8_t) bitext((int) *pA2, 2, 4);
@@ -193,6 +195,7 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i2_u4_i2(
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
 
+
         inA = (int8_t) bitext((int) *pA, 2, 6);
         inA2 = (int8_t) bitext((int) *pA2, 2, 6);
         inA3 = (int8_t) bitext((int) *pA3, 2, 6);
@@ -210,6 +213,7 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i2_u4_i2(
         sum6 += inA2 * inB2;
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
+
 
         pA++;
         pA2++;
@@ -346,12 +350,13 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i2_u4_i2(
       {
         int8_t inA = (int8_t) bitext((int) *pA, 2, 0);
 
-        uint8_t inB = (int8_t)bitext((int32_t) *pB, 2, 0);
-        uint8_t inB2 = (int8_t)bitext((int32_t) *pB2, 2, 0);
+        int8_t inB = (int8_t)bitext((int32_t) *pB, 2, 0);
+        int8_t inB2 = (int8_t)bitext((int32_t) *pB2, 2, 0);
 
         sum += inA * inB;
 
         sum2 += inA * inB2;
+
 
         inA = (int8_t) bitext((int) *pA, 2, 2);
 
@@ -362,6 +367,7 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i2_u4_i2(
 
         sum2 += inA * inB2;
 
+
         inA = (int8_t) bitext((int) *pA, 2, 4);
 
         inB = (int8_t)bitext((int32_t) *pB, 2, 4);
@@ -371,6 +377,7 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i2_u4_i2(
 
         sum2 += inA * inB2;
 
+
         inA = (int8_t) bitext((int) *pA, 2, 6);
 
         inB = (int8_t)bitext((int32_t) *pB, 2, 6);
@@ -379,6 +386,7 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i2_u4_i2(
         sum += inA * inB;
 
         sum2 += inA * inB2;
+
 
         pA++;
 

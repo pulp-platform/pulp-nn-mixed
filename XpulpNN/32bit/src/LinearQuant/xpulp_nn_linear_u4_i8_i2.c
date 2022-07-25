@@ -121,7 +121,7 @@ void __attribute__((noinline)) xpulp_nn_linear_u4_i8_i2(
     }
     if (flag_batch_norm && flag_relu)
     {
-      *pOutBuffer = pulp_nn_bn_quant_i8(sum, *k1, *lambda1, out_shift);
+      *pOutBuffer = pulp_nn_bn_quant_i8(sum, *k1++, *lambda1++, out_shift);
       pOutBuffer++;
     }
     else

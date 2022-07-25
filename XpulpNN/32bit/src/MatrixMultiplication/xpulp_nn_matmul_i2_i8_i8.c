@@ -43,7 +43,6 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i2_i8_i8(
   uint16_t num_col_im2col_w = PACK_INT8_SIZE(num_col_im2col);
   uint16_t num_col_im2col_a = PACK_INT8_SIZE(num_col_im2col);
 
-  //uint8_t *pOut2 = pOut + ch_out_r;
   int8_t *pA = pWeight;
 
   uint16_t chan_left = ch_out & 0x3;
@@ -93,6 +92,7 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i2_i8_i8(
       sum6 = sum2;
       sum7 = sum3;
       sum8 = sum4;
+
     }
 
     for(int j=0; j<(num_col_im2col >> 2); j++)
@@ -153,6 +153,7 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i2_i8_i8(
         sum6 += inA2 * inB2;
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
+
 
         col_cnt_im2col--;
       } while(col_cnt_im2col > 0);
@@ -287,6 +288,7 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_i2_i8_i8(
         sum += inA * inB;
 
         sum2 += inA * inB2;
+
 
         col_cnt_im2col--;
       } while(col_cnt_im2col > 0);

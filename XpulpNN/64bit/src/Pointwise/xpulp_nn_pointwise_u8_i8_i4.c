@@ -157,7 +157,7 @@ void xpulp_nn_pointwise_u8_i8_i4(
           int8_t inA1 = (int8_t) bitext((int) *pA, 4, 0);
           uint8_t inB1 = *pB++;
           sum += inA1 * inB1;
-          inA1 = (int8_t) bitextu((int) *pA, 4, 4);
+          inA1 = (int8_t) bitext((int) *pA, 4, 4);
           inB1 = *pB++;
           sum += inA1 * inB1;
 

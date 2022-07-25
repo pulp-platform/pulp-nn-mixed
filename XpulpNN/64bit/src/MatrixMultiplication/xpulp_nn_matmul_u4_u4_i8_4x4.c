@@ -48,7 +48,6 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_u4_u4_i8_4x4(
   uint16_t num_col_im2col_w = PACK_INT8_SIZE(num_col_im2col);
   uint16_t num_col_im2col_a = PACK_INT8_SIZE(num_col_im2col);
 
-  //uint8_t *pOut2 = pOut + ch_out_r;
   int8_t *pA = pWeight;
 
   uint16_t chan_left = ch_out & 0x3;
@@ -110,6 +109,16 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_u4_u4_i8_4x4(
       sum6 = sum2;
       sum7 = sum3;
       sum8 = sum4;
+
+      sum9 = sum;
+      sum10 = sum2;
+      sum11 = sum3;
+      sum12 = sum4;
+
+      sum13 = sum;
+      sum14 = sum2;
+      sum15 = sum3;
+      sum16 = sum4;
     }
 
     for(int j=0; j<(num_col_im2col >> 2); j++)
@@ -159,6 +168,8 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_u4_u4_i8_4x4(
       uint16_t loop_cnt_im2col_a = (num_col_im2col >> 2) << 2;
       pB+=loop_cnt_im2col_a;
       pB2+=loop_cnt_im2col_a;
+      pB3+=loop_cnt_im2col_a;
+      pB4+=loop_cnt_im2col_a;
 
       do
       {
@@ -169,6 +180,8 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_u4_u4_i8_4x4(
 
         uint8_t inB = *pB++;
         uint8_t inB2 = *pB2++;
+        uint8_t inB3 = *pB3++;
+        uint8_t inB4 = *pB4++;
         asm volatile("": : :"memory");
         sum += inA * inB;
         sum2 += inA2 * inB;
@@ -179,6 +192,16 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_u4_u4_i8_4x4(
         sum6 += inA2 * inB2;
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
+
+        sum9 += inA * inB3;
+        sum10 += inA2 * inB3;
+        sum11 += inA3 * inB3;
+        sum12 += inA4 * inB3;
+
+        sum13 += inA * inB4;
+        sum14 += inA2 * inB4;
+        sum15 += inA3 * inB4;
+        sum16 += inA4 * inB4;
 
         col_cnt_im2col--;
       } while(col_cnt_im2col > 0);
@@ -312,9 +335,13 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_u4_u4_i8_4x4(
   {
     uint8_t *pB = pIn;
     uint8_t *pB2 = (pB + num_col_im2col_a);
+    uint8_t *pB3 = (pB2 + num_col_im2col_a);
+    uint8_t *pB4 = (pB3 + num_col_im2col_a);
 
     uint32_t *ptrB  = (uint32_t *) pB;
     uint32_t *ptrB2 = (uint32_t *) pB2;
+    uint32_t *ptrB3 = (uint32_t *) pB3;
+    uint32_t *ptrB4 = (uint32_t *) pB4;
 
     int32_t *ptrA  = (int32_t *) pA;
 
@@ -328,18 +355,29 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_u4_u4_i8_4x4(
       sum = ((int) (*pBias++));    
     }
     int sum2 = sum;
+    int sum3 = sum;
+    int sum4 = sum;
 
     uint8_t out[2];
     uint8_t out2[2];
+    uint8_t out3[2];
+    uint8_t out4[2];
     for(int j=0; j < (num_col_im2col >> 2); j++)
     {
       ptrB2 = MacLoadInit(0, 1, 0, 1, ptrB2);
 
-      sum  = MacLoad4(0, 1, 0, 0, ptrB, sum);
+      sum  = MacLoad4(0, 1, 0, 0, ptrB3, sum);
+      ptrB3 = MacLoadUpdate(ptrB3);
+
+      sum2 = MacLoad4(0, 1, 0, 1, ptrB4, sum2);
+      ptrB4 = MacLoadUpdate(ptrB4);
+
+      sum3 = MacLoad4(0, 1, 0, 0, ptrB, sum3);
       ptrB = MacLoadUpdate(ptrB);
 
-      sum2 = MacLoad4(1, 0, 0, 1, ptrA, sum2);
+      sum4 = MacLoad4(1, 0, 0, 1, ptrA, sum4);
       ptrA = MacLoadUpdate(ptrA);
+
     }
     int col_cnt_im2col = num_col_im2col & 0x3;
 
@@ -351,6 +389,8 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_u4_u4_i8_4x4(
       uint16_t loop_cnt_im2col_a = (num_col_im2col >> 2) << 2;
       pB+=loop_cnt_im2col_a;
       pB2+=loop_cnt_im2col_a;
+      pB3+=loop_cnt_im2col_a;
+      pB4+=loop_cnt_im2col_a;
 
       do
       {
@@ -358,10 +398,16 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_u4_u4_i8_4x4(
 
         uint8_t inB = *pB++;
         uint8_t inB2 = *pB2++;
+        uint8_t inB3 = *pB3++;
+        uint8_t inB4 = *pB4++;
         asm volatile("": : :"memory");
         sum += inA * inB;
 
         sum2 += inA * inB2;
+
+        sum3 += inA * inB3;
+
+        sum4 += inA * inB4;
 
         col_cnt_im2col--;
       } while(col_cnt_im2col > 0);
@@ -372,14 +418,20 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_u4_u4_i8_4x4(
       uint8_t i_o = i & 0x01;
       out[i_o] = pulp_nn_bn_quant_u4(sum, *pKappa, *pLambda, out_shift);
       out2[i_o] = pulp_nn_bn_quant_u4(sum2, *pKappa, *pLambda, out_shift);
+      out3[i_o] = pulp_nn_bn_quant_u4(sum3, *pKappa, *pLambda, out_shift);
+      out4[i_o] = pulp_nn_bn_quant_u4(sum4, *pKappa, *pLambda, out_shift);
       pKappa++;
       pLambda++;
       if(i_o == 0x01)
       {
         *pOut = bitins(out[0], n_mask, out[1], mask, off);
         *pOut2 = bitins(out2[0], n_mask, out2[1], mask, off);
+        *pOut3 = bitins(out3[0], n_mask, out3[1], mask, off);
+        *pOut4 = bitins(out4[0], n_mask, out4[1], mask, off);
         pOut++;
         pOut2++;
+        pOut3++;
+        pOut4++;
       }
     }
     else
@@ -389,12 +441,18 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_u4_u4_i8_4x4(
         uint8_t i_o = i & 0x01;
         out[i_o] = pulp_nn_quant_u4(sum, out_mult, out_shift);
         out2[i_o] = pulp_nn_quant_u4(sum2, out_mult, out_shift);
+        out3[i_o] = pulp_nn_quant_u4(sum3, out_mult, out_shift);
+        out4[i_o] = pulp_nn_quant_u4(sum4, out_mult, out_shift);
         if(i_o == 0x01)
         {
           *pOut = bitins(out[0], n_mask, out[1], mask, off);
           *pOut2 = bitins(out2[0], n_mask, out2[1], mask, off);
+          *pOut3 = bitins(out3[0], n_mask, out3[1], mask, off);
+          *pOut4 = bitins(out4[0], n_mask, out4[1], mask, off);
           pOut++;
           pOut2++;
+          pOut3++;
+          pOut4++;
         }
       }
       else
@@ -402,12 +460,18 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_u4_u4_i8_4x4(
         uint8_t i_o = i & 0x01;
         out[i_o] = (uint8_t) clip4(sum >> out_shift);
         out2[i_o] = (uint8_t) clip4(sum2 >> out_shift);
+        out3[i_o] = (uint8_t) clip4(sum3 >> out_shift);
+        out4[i_o] = (uint8_t) clip4(sum4 >> out_shift);
         if(i_o == 0x01)
         {
           *pOut = bitins(out[0], n_mask, out[1], mask, off);
           *pOut2 = bitins(out2[0], n_mask, out2[1], mask, off);
+          *pOut3 = bitins(out3[0], n_mask, out3[1], mask, off);
+          *pOut4 = bitins(out4[0], n_mask, out4[1], mask, off);
           pOut++;
           pOut2++;
+          pOut3++;
+          pOut4++;
         }
       }
     }

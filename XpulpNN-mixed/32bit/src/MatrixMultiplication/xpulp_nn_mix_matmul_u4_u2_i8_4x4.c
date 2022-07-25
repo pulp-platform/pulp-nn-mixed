@@ -22,6 +22,8 @@
 #include "pulp_nn_utils.h"
 
 
+
+
 uint8_t * __attribute__((noinline)) xpulp_nn_mix_matmul_u4_u2_i8_4x4(
                         uint8_t *pIn,
                         int8_t *pBias,
@@ -57,15 +59,10 @@ uint8_t * __attribute__((noinline)) xpulp_nn_mix_matmul_u4_u2_i8_4x4(
   int32_t a_rollback = 4 - (num_col_im2col_a + (num_col_im2col_a << 1));
   int32_t w_rollback = 4 - (num_col_im2col_w + (num_col_im2col_w << 1));
 
-  LEGACY_MODE("0");
-  IVEC_FMT("2");
   A_STRIDE(num_col_im2col_a);
   W_STRIDE(num_col_im2col_w);
   A_ROLLBACK(a_rollback);
   W_ROLLBACK(w_rollback);
-  A_SKIP("3");
-  W_SKIP("3");
-  MIXED_SKIP("16");
 
   int8_t *pA = pWeight;
 
@@ -118,6 +115,16 @@ uint8_t * __attribute__((noinline)) xpulp_nn_mix_matmul_u4_u2_i8_4x4(
       sum6 = sum2;
       sum7 = sum3;
       sum8 = sum4;
+
+      sum9 = sum;
+      sum10 = sum2;
+      sum11 = sum3;
+      sum12 = sum4;
+
+      sum13 = sum;
+      sum14 = sum2;
+      sum15 = sum3;
+      sum16 = sum4;
     }
 
     for(int j=0; j<(num_col_im2col >> 2); j++)
@@ -172,7 +179,9 @@ uint8_t * __attribute__((noinline)) xpulp_nn_mix_matmul_u4_u2_i8_4x4(
 
       pB+=loop_cnt_im2col_a;
       
-      uint8_t *pB2 = (pB + loop_cnt_im2col_a);
+      uint8_t *pB2 = (pB + num_col_im2col_a);
+      uint8_t *pB3 = (pB2 + num_col_im2col_a);
+      uint8_t *pB4 = (pB3 + num_col_im2col_a);
 
       do
       {
@@ -183,6 +192,8 @@ uint8_t * __attribute__((noinline)) xpulp_nn_mix_matmul_u4_u2_i8_4x4(
 
         uint8_t inB = *pB++;
         uint8_t inB2 = *pB2++;
+        uint8_t inB3 = *pB3++;
+        uint8_t inB4 = *pB4++;
         asm volatile("": : :"memory");
         sum += inA * inB;
         sum2 += inA2 * inB;
@@ -193,6 +204,16 @@ uint8_t * __attribute__((noinline)) xpulp_nn_mix_matmul_u4_u2_i8_4x4(
         sum6 += inA2 * inB2;
         sum7 += inA3 * inB2;
         sum8 += inA4 * inB2;
+
+        sum9 += inA * inB3;
+        sum10 += inA2 * inB3;
+        sum11 += inA3 * inB3;
+        sum12 += inA4 * inB3;
+
+        sum13 += inA * inB4;
+        sum14 += inA2 * inB4;
+        sum15 += inA3 * inB4;
+        sum16 += inA4 * inB4;
 
         col_cnt_im2col--;
       } while(col_cnt_im2col);
@@ -322,6 +343,6 @@ uint8_t * __attribute__((noinline)) xpulp_nn_mix_matmul_u4_u2_i8_4x4(
     }
     pA+=(4 * num_col_im2col_w);
   }
-  pOut+=ch_out_r;
+  pOut += 3 * ch_out_r;
   return pOut;
 }
