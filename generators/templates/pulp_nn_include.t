@@ -57,8 +57,8 @@ out_t = f"{iu(config.kernel.out_signed)}{config.kernel.out_data_t}"
 #if (KERNEL == ${config.kernel.in_data_t}) && (SIGNED== ${int(config.kernel.in_signed)})
 #define INPUT ${config.kernel.in_data_t}
 #define OUTPUT ${config.kernel.in_data_t}
-#include "GoldenModelMaxPool/golden_${in_t}.h"
-#include "DataAllocationMaxPool/data_allocation_${in_t}.h"
+#include "GoldenModelMaxPool/golden_${in_t}_${out_t}.h"
+#include "DataAllocationMaxPool/data_allocation_${in_t}_${out_t}.h"
 #endif
 %elif config.api == 'PULPNNAvgPoolNew':
 #if (KERNEL == ${in_w}${out_w}) && (SIGNED == ${f"{int(config.kernel.in_signed)}{int(config.kernel.out_signed)}"})
