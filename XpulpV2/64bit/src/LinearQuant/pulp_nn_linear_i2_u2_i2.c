@@ -75,8 +75,19 @@ void pulp_nn_linear_i2_u2_i2(
     {
         int sum = 0;
         int sum2 = 0;
+        if (pBias != NULL)
+        {
+          sum = *(int32_t *)(pBias + 4*i);
+          sum2 = *(int32_t *)(pBias + 4*i + 4);
+        }
+
         int sum3 = 0;
         int sum4 = 0;
+        if (pBias != NULL)
+        {
+          sum3 = *(int32_t *)(pBias + 4*i + 8);
+          sum4 = *(int32_t *)(pBias + 4*i + 12);
+        }
 
         int8_t *pA = pIn;
         int8_t *pB = pWeight + (i * dim_vec_wt);

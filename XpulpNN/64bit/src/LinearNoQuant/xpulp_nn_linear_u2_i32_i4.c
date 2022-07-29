@@ -48,7 +48,7 @@ void __attribute__((noinline)) xpulp_nn_linear_u2_i32_i4(
 
     if (pBias != NULL)
     {
-      sum = ((int) (pBias[i]));
+      sum = *(int32_t *)(pBias + 4*i);
     }
 
     int8_t *pA = pWeight + (i * dim_vec_wt);

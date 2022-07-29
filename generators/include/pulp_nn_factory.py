@@ -1219,7 +1219,8 @@ def pooling_mixed_tests_generator(layer, kernel):
         layers = [nn.AvgPool2d(layer.pool_kernel, layer.pool_stride)]
         layers.append(PULPNNBatchNorm(Cin = layer.ch_out, Kh = layer.pool_kernel, Kw =layer.pool_kernel, BitA = kernel.in_data_t, BitW = 0, BitO=kernel.out_data_t, SgnO=kernel.out_signed))
         # only a single multiply, add, shift
-        layers[1].k = layers[1].k.squeeze()[0:1].clone()
+        # make sure k is divisible by total kernel size
+        layers[1].k = (layers[1].k.squeeze()[0:1].clone()).floor()*layer.pool_kernel*layer.pool_kernel
         layers[1].l = layers[1].l.squeeze()[0:1].clone()
         net = nn.Sequential(*layers)
         if layer.bn:
@@ -1228,7 +1229,7 @@ def pooling_mixed_tests_generator(layer, kernel):
             str_out += f"#define OUT_SHIFT ({int(net[1].d.item())})\n"
             # when BN is enabled, we fold the division by kernel size into the
             # multiplication, so the model layer must take this into account
-            net[1].k *= (layer.pool_kernel**2)
+    #        net[1].k *= (layer.pool_kernel**2)
         else:
             # when no BN is used, we use the BN layer just to floor the test
             # network's output

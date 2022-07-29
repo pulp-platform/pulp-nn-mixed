@@ -81,7 +81,7 @@ void __attribute__((noinline)) xpulp_nn_linear_u4_u2_i4(
 
     if (pBias != NULL)
     {
-      sum = ((int) (pBias[i]));
+      sum = *(int32_t *)(pBias + 4*i);
       sum2 = (pBias[i + 1]);
       sum3 = (pBias[i + 2]);
       sum4 = (pBias[i + 3]);

@@ -65,6 +65,7 @@ void __attribute__ ((noinline))  pulp_nn_avgpool_u8_u8(
 
 
   uint32_t kernel_size_tot = dim_kernel_x * dim_kernel_y;
+  lambda = lambda/kernel_size_tot;
   int ch_im_in_r = ch_im_in >> 0;
   int ch_im_out_r = ch_im_in >> 0;
   uint32_t sum[1] = {0};
@@ -104,7 +105,7 @@ void __attribute__ ((noinline))  pulp_nn_avgpool_u8_u8(
                 }
                 int64_t out_large;
                 if (flag_requant) {
-                  out_large = (sum[0] * lambda / kernel_size_tot + out_add) >> out_shift;
+                  out_large = (sum[0] * lambda + out_add) >> out_shift;
                   out_el = clip8(out_large);
                   pDst[(ch_cnt >> (0)) + 0] = out_el;
                   } else {

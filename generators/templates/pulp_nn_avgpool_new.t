@@ -100,6 +100,7 @@ byte_chan_shift_diff = byte_chan_shift_out - byte_chan_shift_in
 
 
   uint32_t kernel_size_tot = dim_kernel_x * dim_kernel_y;
+  lambda = lambda/kernel_size_tot;
   int ch_im_in_r = ch_im_in >> ${byte_chan_shift_in};
   int ch_im_out_r = ch_im_in >> ${byte_chan_shift_out};
   ${sum_t} sum[${els_per_byte_in}] = {0};

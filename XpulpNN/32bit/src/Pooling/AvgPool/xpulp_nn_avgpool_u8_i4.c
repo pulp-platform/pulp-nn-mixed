@@ -65,6 +65,7 @@ void __attribute__ ((noinline))  xpulp_nn_avgpool_u8_i4(
 
 
   uint32_t kernel_size_tot = dim_kernel_x * dim_kernel_y;
+  lambda = lambda/kernel_size_tot;
   int ch_im_in_r = ch_im_in >> 0;
   int ch_im_out_r = ch_im_in >> 1;
   uint32_t sum[1] = {0};

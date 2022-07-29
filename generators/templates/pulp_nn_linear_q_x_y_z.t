@@ -152,9 +152,20 @@ void ${config.fn_name}(
     {
         int sum = 0;
         int sum2 = 0;
+        if (pBias != NULL)
+        {
+          sum = *(int32_t *)(pBias + 4*i);
+          sum2 = *(int32_t *)(pBias + 4*i + 4);
+        }
+
 %if config.kernel.out_data_t == 2:
         int sum3 = 0;
         int sum4 = 0;
+        if (pBias != NULL)
+        {
+          sum3 = *(int32_t *)(pBias + 4*i + 8);
+          sum4 = *(int32_t *)(pBias + 4*i + 12);
+        }
 %endif
 
         ${pt_in} *pA = pIn;
@@ -643,6 +654,10 @@ void ${config.fn_name}(
     if (lft_neurons && (stop - start) > 0)
     {
         int sum = 0;
+        if (pBias != NULL)
+        {
+          sum = *(int32_t *)(pBias + 4*i);
+        }
 
         ${pt_in} *pA = pIn;
         int8_t *pB = pWeight + (i * dim_vec_wt);

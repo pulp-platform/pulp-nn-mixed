@@ -52,6 +52,11 @@ void pulp_nn_linear_i8_i32_i8(
     {
         int sum = 0;
         int sum2 = 0;
+        if (pBias != NULL)
+        {
+          sum = *(int32_t *)(pBias + 4*i);
+          sum2 = *(int32_t *)(pBias + 4*i + 4);
+        }
 
         int8_t *pA = pIn;
         int8_t *pB = pWeight + (i * dim_vec_wt);
@@ -89,6 +94,10 @@ void pulp_nn_linear_i8_i32_i8(
     if (lft_neurons && (stop - start) > 0)
     {
         int sum = 0;
+        if (pBias != NULL)
+        {
+          sum = *(int32_t *)(pBias + 4*i);
+        }
 
         int8_t *pA = pIn;
         int8_t *pB = pWeight + (i * dim_vec_wt);
