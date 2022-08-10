@@ -1049,56 +1049,57 @@ def convolution_mixed_tests_generator(layer, kernel):
     out_mult = 0
     out_shift = 0
     # Setting the network
-    net = nn.Sequential(nn.Conv2d(in_channels=layer.ch_in, out_channels=layer.ch_out, kernel_size=layer.ker_x, stride=layer.stride_x, padding=layer.pad_y_top, groups=(1 if kernel.type != 'depthwise' else layer.ch_in), bias=layer.bias),
+    net = nn.Sequential(nn.ZeroPad2d((layer.pad_x_left, layer.pad_x_right, layer.pad_y_top, layer.pad_y_bot)),
+        nn.Conv2d(in_channels=layer.ch_in, out_channels=layer.ch_out, kernel_size=layer.ker_x, stride=layer.stride_x, padding=0, groups=(1 if kernel.type != 'depthwise' else layer.ch_in), bias=layer.bias),
                         PULPNNBatchNorm(Cin = layer.ch_out, Kh = layer.ker_y, Kw =layer.ker_x, BitA = kernel.in_data_t, BitW = kernel.wt_data_t, BitO=kernel.out_data_t, SgnO=kernel.out_signed) if (layer.bn==True and layer.relu==True) else (
                         PULPNNReLu(BitO=kernel.out_data_t, SgnO=kernel.out_signed) if layer.relu == True else (
                         PULPNNShiftClip(BitI=kernel.in_data_t, BitW=kernel.wt_data_t, BitO=kernel.out_data_t, SgnO=kernel.out_signed) if kernel.quantization=='shift_clip' else
                         ScaledThresholdsQuantization4d(num_bits=kernel.out_data_t))))
 
     # Setting weights
-    net[0].weight.data.random_(-(2**(kernel.wt_data_t-1)),(2**(kernel.wt_data_t-1))-1)
+    net[1].weight.data.random_(-(2**(kernel.wt_data_t-1)),(2**(kernel.wt_data_t-1))-1)
     #net[0].weight.data = torch.clamp(net[0].weight.data.normal_(mean=0, std=(2**(kernel.wt_data_t-2))), min=-(2**(kernel.wt_data_t-1)), max=((2**(kernel.wt_data_t-1))-1))
     #net[0].weight.data = torch.round(net[0].weight.data)
 
-    str_out = str_weight(net[0].weight.data, 'WEIGHT_INT' + str(kernel.wt_data_t))
+    str_out = str_weight(net[1].weight.data, 'WEIGHT_INT' + str(kernel.wt_data_t))
 
     str_out += '#define BIAS_SHIFT '+ str(bias_shift) +'\n'
 
     if layer.bias == True:
         net[0].bias.data.random_(-(2**(15)),(2**(15) -1))
-        str_out += str_tensor(net[0].bias.data, 'BIAS')
+        str_out += str_tensor(net[1].bias.data, 'BIAS')
 
     if layer.bn == True and layer.relu == True:
-        str_out += str_tensor(net[1].k, 'KAPPA')
-        str_out += str_tensor(net[1].l, 'LAMBDA')
-        str_out += '#define OUT_SHIFT '+ str(int(net[1].d.item()))+'\n'
+        str_out += str_tensor(net[2].k, 'KAPPA')
+        str_out += str_tensor(net[2].l, 'LAMBDA')
+        str_out += '#define OUT_SHIFT '+ str(int(net[2].d.item()))+'\n'
         str_out += '#define OUT_MULT '+ str(out_mult) +'\n'
     else:
         # Setting relu parameters
         if layer.relu == True:
             net[1].out_mult = out_mult
             net[1].out_shift = out_shift
-            str_out += '#define OUT_MULT '+ str(int(net[1].out_mult.item()))+'\n'
-            str_out += '#define OUT_SHIFT '+ str(int(net[1].out_shift.item()))+'\n'
+            str_out += '#define OUT_MULT '+ str(int(net[2].out_mult.item()))+'\n'
+            str_out += '#define OUT_SHIFT '+ str(int(net[2].out_shift.item()))+'\n'
         else:
 
             if kernel.quantization == 'shift_clip':
                 # Setting shift and clip quantization parameters
                 #net[1].out_shift = out_shift
                 str_out += '#define OUT_MULT '+ str(out_mult) +'\n'
-                str_out += '#define OUT_SHIFT '+ str(int(net[1].out_shift))+'\n'
+                str_out += '#define OUT_SHIFT '+ str(int(net[2].out_shift))+'\n'
             else:
                 # Setting quantization thresholds
                 net[1].thresholds = torch.Tensor(layer.ch_out,2**kernel.out_data_t-1)
                 net[1].signs = torch.Tensor(layer.ch_out).fill_(1)
-                for r in range(net[1].thresholds.size(0)):
+                for r in range(net[2].thresholds.size(0)):
                     base = torch.Tensor(1).random_(0,layer.ker_x*layer.ker_y*layer.ch_in*(2**(kernel.in_data_t-1)-1 ))
-                    for s in range(net[1].thresholds.size(1) ):
-                        if net[1].signs[r]==1:
-                            net[1].thresholds[r][s] = int(torch.clamp(- base*(2**(kernel.out_data_t-1)) + base*s, -32768, 32767).item())
+                    for s in range(net[2].thresholds.size(1) ):
+                        if net[2].signs[r]==1:
+                            net[2].thresholds[r][s] = int(torch.clamp(- base*(2**(kernel.out_data_t-1)) + base*s, -32768, 32767).item())
                         else:
-                            net[1].thresholds[r][s] = int(torch.clamp(base*(2**(kernel.out_data_t-1)) - base*s, -32768, 32767).item())
-                str_out += str_thr(net[1].thresholds,'THR_INT' + str(kernel.out_data_t))
+                            net[2].thresholds[r][s] = int(torch.clamp(base*(2**(kernel.out_data_t-1)) - base*s, -32768, 32767).item())
+                str_out += str_thr(net[2].thresholds,'THR_INT' + str(kernel.out_data_t))
     # Running the network
     y = net(x)
 
