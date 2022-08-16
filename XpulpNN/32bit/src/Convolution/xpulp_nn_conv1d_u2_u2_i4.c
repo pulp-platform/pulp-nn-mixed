@@ -22,6 +22,7 @@
 #include "pulp_nn_kernels.h"
 
 
+
 void __attribute__((noinline)) xpulp_nn_conv1d_u2_u2_i4(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
@@ -132,7 +133,7 @@ void __attribute__((noinline)) xpulp_nn_conv1d_u2_u2_i4(
 
         pIm2Col = pIm2ColBase;
       }
-
+    }
     if(pIm2Col != pIm2ColBase)
     {
       int8_t mask2 = 0x0c;
@@ -185,10 +186,10 @@ void __attribute__((noinline)) xpulp_nn_conv1d_u2_u2_i4(
           do
           {
             int8_t inA1 = (int8_t) bitext((int) *pA, 4, 0);
-            uint8_t inB1 = (uint8_t) bitextu((unsigned int) *pB, 4, 0);
+            uint8_t inB1 = (uint8_t) bitextu((uint32_t) *pB, 4, 0);
             sum += inA1 * inB1;
             inA1 = (int8_t) bitext((int) *pA, 4, 4);
-            inB1 = (uint8_t) bitextu((unsigned int) *pB, 4, 4);
+            inB1 = (uint8_t) bitextu((uint32_t) *pB, 4, 4);
             sum += inA1 * inB1;
 
             pA++;
@@ -240,7 +241,6 @@ void __attribute__((noinline)) xpulp_nn_conv1d_u2_u2_i4(
         }
         pA+=num_col_im2col_w;
       }
-    }
     pOutBuffer+=(extra_chunk * (1 - section) * ch_out_r);
     pIm2Col = pIm2ColBase;
   }

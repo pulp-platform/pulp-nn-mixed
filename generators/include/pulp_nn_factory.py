@@ -228,6 +228,35 @@ class PULPNNConvolve(PULPNNFactory):
         elif self.kernel.extentions == 'XpulpNN-mixed':
             return Template(filename="templates/XpulpNN-mixed/xpulp_nn_mix_conv_x_y_z.t", strict_undefined=True).render(config=self)
 
+
+class PULPNNConvolve1D(PULPNNFactory):
+    def __init__(self, kernel, layer):
+        super().__init__(kernel, layer)
+
+        if self.kernel.extentions == 'XpulpNN':
+            self.max_precision = max([self.kernel.in_data_t, self.kernel.wt_data_t])
+            self.fn_name = "xpulp_nn_conv1d_{5}{0}_{6}{1}_i{2}{3}{4}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
+                str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""),
+                str("_" + self.kernel.matmul_fmt if self.kernel.matmul_fmt == '4x4' else ""), sgn_str(kernel.in_signed), sgn_str(kernel.out_signed))
+            self.zeromem_fn = "xpulp_nn_zero_mem_u{0}".format(str(self.max_precision))
+            self.im2col_fn = "xpulp_nn_im2col_{2}{0}_to_{2}{1}".format(str(self.kernel.in_data_t), str(self.max_precision), sgn_str(kernel.in_signed))
+            self.mat_mul_fn = "xpulp_nn_matmul_{5}{0}_{6}{1}_i{2}{3}{4}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
+                str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""),
+                str("_" + self.kernel.matmul_fmt if self.kernel.matmul_fmt == '4x4' else ""), sgn_str(kernel.in_signed), sgn_str(kernel.out_signed))
+            self.unpack_in_fn = "pulp_nn_{2}{0}_to_{2}{1}".format(str(self.kernel.in_data_t), str(self.max_precision), sgn_str(kernel.in_signed))
+            self.unpack_wt_fn = "pulp_nn_i{0}_to_i{1}".format(str(self.kernel.wt_data_t), str(self.max_precision))
+
+        self.filename = self.fn_name + ".c"
+        self.api = self.__class__.__name__
+        self.bn_fn = "pulp_nn_bn_quant_{1}{0}".format(str(self.kernel.out_data_t), sgn_str(kernel.out_signed))
+        self.relu_fn = "pulp_nn_quant_{1}{0}".format(str(self.kernel.out_data_t), sgn_str(kernel.out_signed))
+        self.thr_fn = None
+
+    def generate_code(self):
+        if self.kernel.extentions == 'XpulpNN':
+            return Template(filename="templates/XpulpNN/xpulp_nn_conv1d_x_y_z.t").render(config=self)
+
+
 class PULPNNConvolvePointwise(PULPNNFactory):
     def __init__(self, kernel, layer):
         super().__init__(kernel, layer)

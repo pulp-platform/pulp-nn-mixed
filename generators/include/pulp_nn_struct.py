@@ -21,6 +21,7 @@
 import errno
 import os
 import shutil
+import pathlib
 
 # PULP-NN Mixed structure
 
@@ -142,6 +143,7 @@ PULPNNSrcDirsSW64bit = {'src':                      PULPNNInstallPathSW64bit + "
 PULPNNSrcDirsHW32bit = {'src':                      PULPNNInstallPathHW32bit + "src/",
                         'inc':                      PULPNNInstallPathHW32bit + "include/",
                         'convolution':              PULPNNInstallPathHW32bit + "src/Convolution/",
+                        'conv1d':                   PULPNNInstallPathHW32bit + "src/Convolution/",
                         'pointwise':                PULPNNInstallPathHW32bit + "src/Pointwise/",
                         'matmul':                   PULPNNInstallPathHW32bit + "src/MatrixMultiplication/",
                         'depthwise':                PULPNNInstallPathHW32bit + "src/Depthwise/",
@@ -185,6 +187,7 @@ PULPNNSrcDirsHW32bit = {'src':                      PULPNNInstallPathHW32bit + "
 PULPNNSrcDirsHW64bit = {'src':                      PULPNNInstallPathHW64bit + "src/",
                         'inc':                      PULPNNInstallPathHW64bit + "include/",
                         'convolution':              PULPNNInstallPathHW64bit + "src/Convolution/",
+                        'conv1d':                   PULPNNInstallPathHW64bit + "src/Convolution/",
                         'pointwise':                PULPNNInstallPathHW64bit + "src/Pointwise/",
                         'matmul':                   PULPNNInstallPathHW64bit + "src/MatrixMultiplication/",
                         'depthwise':                PULPNNInstallPathHW64bit + "src/Depthwise/",
@@ -314,14 +317,7 @@ PULPNNSrcDirsExtHW64bit = {'src':                   PULPNNInstallPathExtHW64bit 
 
 # Folder generation
 def mkdir_p(path):
-    try:
-        os.makedirs(path)
-    except OSError as exc:
-        if exc.errno == errno.EEXIST and os.path.isdir(path):
-            shutil.rmtree(path)
-            os.makedirs(path)
-        else:
-            raise
+    pathlib.Path(path).mkdir(parents=True, exist_ok=True)
 
 # Sources folder generation
 def mkdir_src(act_prec, ext):

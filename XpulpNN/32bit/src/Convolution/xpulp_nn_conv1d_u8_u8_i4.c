@@ -22,6 +22,7 @@
 #include "pulp_nn_kernels.h"
 
 
+
 void __attribute__((noinline)) xpulp_nn_conv1d_u8_u8_i4(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
@@ -132,7 +133,7 @@ void __attribute__((noinline)) xpulp_nn_conv1d_u8_u8_i4(
 
         pIm2Col = pIm2ColBase;
       }
-
+    }
     if(pIm2Col != pIm2ColBase)
     {
       const int8_t *pA = pWeight;
@@ -160,7 +161,7 @@ void __attribute__((noinline)) xpulp_nn_conv1d_u8_u8_i4(
         {
           pA = pulp_nn_i4_to_i8(pA,inA);
 
-          ptrA = (uint32_t *)inA;
+          ptrA = (int32_t *)inA;
 
           sum = SumDotp4(*(v4u *)ptrB, *(v4s *)ptrA, sum);
 
@@ -215,7 +216,6 @@ void __attribute__((noinline)) xpulp_nn_conv1d_u8_u8_i4(
           }
         }
       }
-    }
     pOutBuffer+=(extra_chunk * (1 - section) * ch_out_r);
     pIm2Col = pIm2ColBase;
   }

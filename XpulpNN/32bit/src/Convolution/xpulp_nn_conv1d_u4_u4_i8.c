@@ -22,6 +22,7 @@
 #include "pulp_nn_kernels.h"
 
 
+
 void __attribute__((noinline)) xpulp_nn_conv1d_u4_u4_i8(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
@@ -132,7 +133,7 @@ void __attribute__((noinline)) xpulp_nn_conv1d_u4_u4_i8(
 
         pIm2Col = pIm2ColBase;
       }
-
+    }
     if(pIm2Col != pIm2ColBase)
     {
       int8_t mask = 0xf0;
@@ -224,7 +225,6 @@ void __attribute__((noinline)) xpulp_nn_conv1d_u4_u4_i8(
         }
         pA+=num_col_im2col_w;
       }
-    }
     pOutBuffer+=(extra_chunk * (1 - section) * ch_out_r);
     pIm2Col = pIm2ColBase;
   }
