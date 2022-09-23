@@ -80,10 +80,14 @@ uint8_t *pulp_nn_matmul_i8_u2_i8(
 
     if (pBias != NULL)
     {
-      sum = ((int) (*pBias++));
-      sum2 = ((int) (*pBias++));      
-      sum3 = ((int) (*pBias++));      
-      sum4 = ((int) (*pBias++));
+      sum = *((int*)  pBias);
+      pBias+= 4;
+      sum2 = *((int*)  pBias);
+      pBias+= 4;
+      sum3 = *((int*)  pBias);
+      pBias+= 4;
+      sum4 = *((int*)  pBias);
+      pBias+= 4;
 
       sum5 = sum;
       sum6 = sum2;

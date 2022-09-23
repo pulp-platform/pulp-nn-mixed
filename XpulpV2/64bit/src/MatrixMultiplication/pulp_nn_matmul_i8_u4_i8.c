@@ -74,10 +74,14 @@ uint8_t *pulp_nn_matmul_i8_u4_i8(
 
     if (pBias != NULL)
     {
-      sum = ((int) (*pBias++));
-      sum2 = ((int) (*pBias++));      
-      sum3 = ((int) (*pBias++));      
-      sum4 = ((int) (*pBias++));
+      sum = *((int*)  pBias);
+      pBias+= 4;
+      sum2 = *((int*)  pBias);
+      pBias+= 4;
+      sum3 = *((int*)  pBias);
+      pBias+= 4;
+      sum4 = *((int*)  pBias);
+      pBias+= 4;
 
       sum5 = sum;
       sum6 = sum2;
@@ -212,8 +216,10 @@ uint8_t *pulp_nn_matmul_i8_u4_i8(
     int8_t *pB = pIn;
     int8_t *pB2 = (pB + num_col_im2col);
     int sum = 0;
-    if (pBias != NULL)
-      sum = ((int) (*pBias++));    
+    if (pBias != NULL){
+      sum = *((int*) pBias);
+      pBias += 4;
+    }
     int sum2 = sum;
 
     uint8_t out[2];

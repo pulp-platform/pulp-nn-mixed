@@ -106,10 +106,14 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_u8_i4_i4(
 
     if (pBias != NULL)
     {
-      sum = ((int) (*pBias++));
-      sum2 = ((int) (*pBias++));
-      sum3 = ((int) (*pBias++));
-      sum4 = ((int) (*pBias++));
+      sum = *((int*)  pBias);
+      pBias+= 4;
+      sum2 = *((int*)  pBias);
+      pBias+= 4;
+      sum3 = *((int*)  pBias);
+      pBias+= 4;
+      sum4 = *((int*)  pBias);
+      pBias+= 4;
 
       sum5 = sum;
       sum6 = sum2;
@@ -126,7 +130,7 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_u8_i4_i4(
       sum3 = MacLoad4(0, 0, 2, 0, ptrA3, sum3);
       sum4 = MacLoad4(0, 1, 3, 0, ptrB, sum4);
       ptrB = MacLoadUpdate(ptrB);
-      
+
 
       sum5 = MacLoad4(1, 0, 0, 1, ptrA, sum5);
       ptrA = MacLoadUpdate(ptrA);
@@ -145,10 +149,10 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_u8_i4_i4(
       sum  = MacLoad4(0, 0, 0, 0, ptrA, sum);
       sum2 = MacLoad4(0, 0, 1, 0, ptrA2, sum2);
       sum3 = MacLoad4(0, 0, 2, 0, ptrA3, sum3);
-      sum4 = MacLoad4(0, 1, 3, 0, ptrB, sum4);      
+      sum4 = MacLoad4(0, 1, 3, 0, ptrB, sum4);
       ptrB = MacLoadUpdate(ptrB);
 
-      pA  = pulp_nn_i4_to_i8(pA , vecA); 
+      pA  = pulp_nn_i4_to_i8(pA , vecA);
       pA2 = pulp_nn_i4_to_i8(pA2, vecA2);
       pA3 = pulp_nn_i4_to_i8(pA3, vecA3);
       pA4 = pulp_nn_i4_to_i8(pA4, vecA4);
@@ -328,7 +332,7 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_u8_i4_i4(
     int sum = 0;
     if (pBias != NULL)
     {
-      sum = ((int) (*pBias++));    
+      sum = *((int*) pBias++);
     }
     int sum2 = sum;
 
@@ -345,7 +349,7 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_u8_i4_i4(
       ptrA = MacLoadUpdate(ptrA);
       ptrB2  = MacLoadInit(0, 1, 0, 1, ptrB2);
 
-      sum  = MacLoad4(0, 1, 0, 0, ptrB, sum);   
+      sum  = MacLoad4(0, 1, 0, 0, ptrB, sum);
       ptrB = MacLoadUpdate(ptrB);
 
       pA  = pulp_nn_i4_to_i8(pA , vecA);

@@ -134,10 +134,14 @@ ${pt_out} *${config.fn_name}(
 
     if (pBias != NULL)
     {
-      sum = ((int) (*pBias++));
-      sum2 = ((int) (*pBias++));      
-      sum3 = ((int) (*pBias++));      
-      sum4 = ((int) (*pBias++));
+      sum = *((int*)  pBias);
+      pBias+= 4;
+      sum2 = *((int*)  pBias);
+      pBias+= 4;
+      sum3 = *((int*)  pBias);
+      pBias+= 4;
+      sum4 = *((int*)  pBias);
+      pBias+= 4;
 
       sum5 = sum;
       sum6 = sum2;
@@ -682,8 +686,10 @@ ${pt_out} *${config.fn_name}(
     ${pt_in} *pB = pIn;
     ${pt_in} *pB2 = (pB + num_col_im2col);
     int sum = 0;
-    if (pBias != NULL)
-      sum = ((int) (*pBias++));    
+    if (pBias != NULL){
+      sum = *((int*) pBias);
+      pBias += 4;
+    }
     int sum2 = sum;
 
 %if config.kernel.out_data_t == 4:
