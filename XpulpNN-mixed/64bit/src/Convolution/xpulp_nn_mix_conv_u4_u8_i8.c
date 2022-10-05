@@ -217,7 +217,8 @@ void __attribute__((noinline)) xpulp_nn_mix_conv_u4_u8_i8(
         int sum = 0;
         if (pBias != NULL)
         {
-          sum = ((int) (*pBias++));
+          sum = *((int*) pBias);
+          pBias += 4;
         }
 
         uint8_t *pB = pIm2ColBase;

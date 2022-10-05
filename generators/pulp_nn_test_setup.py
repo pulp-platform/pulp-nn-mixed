@@ -19,7 +19,7 @@
 
 # If is 1 only the selected-below kernel is created (SINGLE KERNEL SOLUTION). Otherwise, all kernels are created (ALL KERNELS SOLUTION)
 
-SINGLE_KERNEL		= 0
+SINGLE_KERNEL		= 1
 
 # Select from the supported ones:
 
@@ -36,7 +36,7 @@ MATMUL_FMT			= '4x2'
 
 # -> convolution, pointwise, depthwise, linear_no_quant, linear_quant, maxpool, avgpool, add
 
-TYPE_OF_KERNEL 		= 'avgpool'
+TYPE_OF_KERNEL 		= 'convolution'
 
 # If SINGLE_KERNEL = 0 these will be ignored. Otherwise, select the possibilities from the supported ones
 #
@@ -55,12 +55,12 @@ TYPE_OF_KERNEL 		= 'avgpool'
 # -> quantization method:
 #       - shift_clip
 
-in_precision 		= 8
-wt_precision 		= 8
+in_precision 		= 2
+wt_precision 		= 2
 in_signed = True
-out_precision 		= 8 # if is add layer, out_precision is the second input
+out_precision 		= 2 # if is add layer, out_precision is the second input
 # precision
-out_signed = True
+out_signed = False
 quantization_type 	= 'shift_clip' # TODO / WARNING: THRESHOLD QUANTIZATION NOT
 # SUPPORTED FOR SIGNED OUTPUT KERNELS
 
@@ -81,18 +81,18 @@ quantization_type 	= 'shift_clip' # TODO / WARNING: THRESHOLD QUANTIZATION NOT
 # if depthwise CH_IM_IN must be equal to CH_IM_OUT
 DIM_IM_IN_X 		= 8
 DIM_IM_IN_Y 		= 8
-CH_IM_IN 			= 16
+CH_IM_IN 			= 4
 # if pooling, output dimensions must be relative to kernel and stride sizes
-DIM_IM_OUT_X 		= 4
-DIM_IM_OUT_Y 		= 4
-CH_IM_OUT 			= 16
+DIM_IM_OUT_X 		= 8
+DIM_IM_OUT_Y 		= 8
+CH_IM_OUT 			= 4
 # if is not linear
 DIM_KERNEL_X 		= 3 # 1 if is pointwise, free otherwise
 DIM_KERNEL_Y 		= 3 # 1 if is pointwise, free otherwise
-PADDING_Y_TOP 		= 0 # 0 if is pointwise, free otherwise
-PADDING_Y_BOTTOM 	= 0 # 0 if is pointwise, free otherwise
-PADDING_X_LEFT 		= 0 # 0 if is pointwise, free otherwise
-PADDING_X_RIGHT 	= 0 # 0 if is pointwise, free otherwise
+PADDING_Y_TOP 		= 1 # 0 if is pointwise, free otherwise
+PADDING_Y_BOTTOM 	= 1 # 0 if is pointwise, free otherwise
+PADDING_X_LEFT 		= 1 # 0 if is pointwise, free otherwise
+PADDING_X_RIGHT 	= 1 # 0 if is pointwise, free otherwise
 STRIDE_X 			= 1
 STRIDE_Y 			= 1
 # Other parameters

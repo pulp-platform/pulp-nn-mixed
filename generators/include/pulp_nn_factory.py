@@ -1071,6 +1071,9 @@ def convolution_mixed_tests_generator(layer, kernel):
         lower_in_clip = 0
     # Setting input activations
     x = torch.Tensor(1,layer.ch_in,layer.dim_in_y,layer.dim_in_x).random_(lower_in_clip, upper_in_clip)
+    x_np = x.clone().detach().numpy().transpose(0,2,3,1)
+    np.savetxt('conv_in.txt', x_np.flatten(), delimiter=',', fmt='%1d,')
+    np.save('conv_in.npy', x_np)
     #x = torch.clamp(torch.Tensor(1,layer.ch_in,layer.dim_in_y,layer.dim_in_x).normal_(mean=(2**(kernel.in_data_t-1)),std=(2**(kernel.in_data_t-2))), min=0, max=(2**(kernel.in_data_t)-1))
     #x = torch.round(x)
     # Setting biases
@@ -1131,6 +1134,22 @@ def convolution_mixed_tests_generator(layer, kernel):
                 str_out += str_thr(net[2].thresholds,'THR_INT' + str(kernel.out_data_t))
     # Running the network
     y = net(x)
+    y_np = y.clone().detach().numpy().transpose(0,2,3,1)
+    y_int = net[0:2](x)
+    y_int_np = y_int.clone().detach().numpy().transpose(0, 2, 3, 1)
+    np.savetxt('./conv_out.txt', y_np.flatten(), delimiter=',', fmt='%1d,')
+    np.savetxt('./conv_out_int.txt', y_int_np.flatten(), delimiter=',', fmt='%1d,')
+    np.save('conv_out.npy', y_np)
+    np.save('conv_out_int.npy', y_int_np)
+    wt_np = net[1].weight.data.clone().detach().numpy().transpose(0,2,3,1)
+    np.save('conv_wt.npy', wt_np)
+    np.savetxt('./conv_wt.txt', wt_np.flatten(), delimiter=',', fmt='%1d,')
+    kappa_np = net[2].k.clone().detach().numpy()
+    lambda_np = net[2].l.clone().detach().numpy()
+    np.save('kappa.npy', kappa_np)
+    np.savetxt('./kappa.txt', kappa_np.flatten(), delimiter=',', fmt='%1d,')
+    np.save('lambda.npy', lambda_np)
+    np.savetxt('./lambda.txt', lambda_np.flatten(), delimiter=',', fmt='%1d,')
 
     str_out += str_tensor(x, 'IN_INT'+ str(kernel.in_data_t))
     str_out += str_tensor(torch.Tensor(y), 'OUT_INT' + str(kernel.out_data_t))

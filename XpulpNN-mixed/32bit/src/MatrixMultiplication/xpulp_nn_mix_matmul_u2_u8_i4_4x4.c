@@ -99,10 +99,14 @@ uint8_t * __attribute__((noinline)) xpulp_nn_mix_matmul_u2_u8_i4_4x4(
 
     if (pBias != NULL)
     {
-      sum = ((int) (*pBias++));
-      sum2 = ((int) (*pBias++));
-      sum3 = ((int) (*pBias++));
-      sum4 = ((int) (*pBias++));
+      sum =  *((int*) pBias);
+      pBias += 4;
+      sum2 = *((int*) pBias);
+      pBias += 4;
+      sum3 = *((int*) pBias);
+      pBias += 4;
+      sum4 = *((int*) pBias);
+      pBias += 4;
 
       sum5 = sum;
       sum6 = sum2;
