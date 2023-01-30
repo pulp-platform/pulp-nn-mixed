@@ -34,6 +34,28 @@ void ${config.fn_name}(
                         uint16_t stride_y,
                         uint8_t flag_relu,
                         uint8_t flag_batchnorm);
+%elif config.api == "PULPNNConvolve1D":
+void ${config.fn_name}(
+                        ${pt_in} *pIn,
+                        ${pt_in} *pIm2ColBuffer,
+                        int8_t *pBias,
+                        ${pt_out} *pOut,
+                        int8_t *pWeight,
+                        ${act_t} *pKappa,
+                        ${act_t} *pLambda,
+                        uint16_t out_mul,
+                        uint16_t out_shift,
+                        uint16_t dim_in_x,
+                        uint16_t ch_in,
+                        uint16_t dim_out_x,
+                        uint16_t ch_out,
+                        uint16_t dim_kernel_x,
+                        uint16_t padding_x_left,
+                        uint16_t padding_x_right,
+                        uint16_t stride_x,
+                        uint16_t dilation_x,
+                        uint8_t flag_relu,
+                        uint8_t flag_batchnorm);
 %elif config.api == "PULPNNConvolvePointwise":
 void ${config.fn_name}(
                         ${pt_in} *pIn,

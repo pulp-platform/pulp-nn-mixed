@@ -237,6 +237,35 @@ class PULPNNConvolve(PULPNNFactory):
         elif self.kernel.extensions == 'XpulpNN-mixed':
             return Template(filename="templates/XpulpNN-mixed/xpulp_nn_mix_conv_x_y_z.t", strict_undefined=True).render(config=self)
 
+
+class PULPNNConvolve1D(PULPNNFactory):
+    def __init__(self, kernel, layer):
+        super().__init__(kernel, layer)
+
+        if self.kernel.extentions == 'XpulpNN':
+            self.max_precision = max([self.kernel.in_data_t, self.kernel.wt_data_t])
+            self.fn_name = "xpulp_nn_conv1d_{5}{0}_{6}{1}_i{2}{3}{4}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
+                str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""),
+                str("_" + self.kernel.matmul_fmt if self.kernel.matmul_fmt == '4x4' else ""), sgn_str(kernel.in_signed), sgn_str(kernel.out_signed))
+            self.zeromem_fn = "xpulp_nn_zero_mem_u{0}".format(str(self.max_precision))
+            self.im2col_fn = "xpulp_nn_im2col_{2}{0}_to_{2}{1}".format(str(self.kernel.in_data_t), str(self.max_precision), sgn_str(kernel.in_signed))
+            self.mat_mul_fn = "xpulp_nn_matmul_{5}{0}_{6}{1}_i{2}{3}{4}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
+                str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""),
+                str("_" + self.kernel.matmul_fmt if self.kernel.matmul_fmt == '4x4' else ""), sgn_str(kernel.in_signed), sgn_str(kernel.out_signed))
+            self.unpack_in_fn = "pulp_nn_{2}{0}_to_{2}{1}".format(str(self.kernel.in_data_t), str(self.max_precision), sgn_str(kernel.in_signed))
+            self.unpack_wt_fn = "pulp_nn_i{0}_to_i{1}".format(str(self.kernel.wt_data_t), str(self.max_precision))
+
+        self.filename = self.fn_name + ".c"
+        self.api = self.__class__.__name__
+        self.bn_fn = "pulp_nn_bn_quant_{1}{0}".format(str(self.kernel.out_data_t), sgn_str(kernel.out_signed))
+        self.relu_fn = "pulp_nn_quant_{1}{0}".format(str(self.kernel.out_data_t), sgn_str(kernel.out_signed))
+        self.thr_fn = None
+
+    def generate_code(self):
+        if self.kernel.extentions == 'XpulpNN':
+            return Template(filename="templates/XpulpNN/xpulp_nn_conv1d_x_y_z.t").render(config=self)
+
+
 class PULPNNConvolvePointwise(PULPNNFactory):
     def __init__(self, kernel, layer):
         super().__init__(kernel, layer)
@@ -1069,6 +1098,9 @@ def convolution_mixed_tests_generator(layer, kernel):
         lower_in_clip = 0
     # Setting input activations
     x = torch.Tensor(1,layer.ch_in,layer.dim_in_y,layer.dim_in_x).random_(lower_in_clip, upper_in_clip)
+    x_np = x.clone().detach().numpy().transpose(0,2,3,1)
+    np.savetxt('conv_in.txt', x_np.flatten(), delimiter=',', fmt='%1d,')
+    np.save('conv_in.npy', x_np)
     #x = torch.clamp(torch.Tensor(1,layer.ch_in,layer.dim_in_y,layer.dim_in_x).normal_(mean=(2**(kernel.in_data_t-1)),std=(2**(kernel.in_data_t-2))), min=0, max=(2**(kernel.in_data_t)-1))
     #x = torch.round(x)
     # Setting biases
@@ -1076,58 +1108,75 @@ def convolution_mixed_tests_generator(layer, kernel):
     out_mult = 0
     out_shift = 0
     # Setting the network
-    net = nn.Sequential(nn.Conv2d(in_channels=layer.ch_in, out_channels=layer.ch_out, kernel_size=layer.ker_x, stride=layer.stride_x, padding=layer.pad_y_top, groups=(1 if kernel.type != 'depthwise' else layer.ch_in), bias=layer.bias),
+    net = nn.Sequential(nn.ZeroPad2d((layer.pad_x_left, layer.pad_x_right, layer.pad_y_top, layer.pad_y_bot)),
+        nn.Conv2d(in_channels=layer.ch_in, out_channels=layer.ch_out, kernel_size=layer.ker_x, stride=layer.stride_x, padding=0, groups=(1 if kernel.type != 'depthwise' else layer.ch_in), bias=layer.bias),
                         PULPNNBatchNorm(Cin = layer.ch_out, Kh = layer.ker_y, Kw =layer.ker_x, BitA = kernel.in_data_t, BitW = kernel.wt_data_t, BitO=kernel.out_data_t, SgnO=kernel.out_signed) if (layer.bn==True and layer.relu==True) else (
                         PULPNNReLu(BitO=kernel.out_data_t, SgnO=kernel.out_signed) if layer.relu == True else (
                         PULPNNShiftClip(BitI=kernel.in_data_t, BitW=kernel.wt_data_t, BitO=kernel.out_data_t, SgnO=kernel.out_signed) if kernel.quantization=='shift_clip' else
                         ScaledThresholdsQuantization4d(num_bits=kernel.out_data_t))))
 
     # Setting weights
-    net[0].weight.data.random_(-(2**(kernel.wt_data_t-1)),(2**(kernel.wt_data_t-1))-1)
+    net[1].weight.data.random_(-(2**(kernel.wt_data_t-1)),(2**(kernel.wt_data_t-1))-1)
     #net[0].weight.data = torch.clamp(net[0].weight.data.normal_(mean=0, std=(2**(kernel.wt_data_t-2))), min=-(2**(kernel.wt_data_t-1)), max=((2**(kernel.wt_data_t-1))-1))
     #net[0].weight.data = torch.round(net[0].weight.data)
 
-    str_out = str_weight(net[0].weight.data, 'WEIGHT_INT' + str(kernel.wt_data_t))
+    str_out = str_weight(net[1].weight.data, 'WEIGHT_INT' + str(kernel.wt_data_t))
 
     str_out += '#define BIAS_SHIFT '+ str(bias_shift) +'\n'
 
     if layer.bias == True:
         net[0].bias.data.random_(-(2**(15)),(2**(15) -1))
-        str_out += str_tensor(net[0].bias.data, 'BIAS')
+        str_out += str_tensor(net[1].bias.data, 'BIAS')
 
     if layer.bn == True and layer.relu == True:
-        str_out += str_tensor(net[1].k, 'KAPPA')
-        str_out += str_tensor(net[1].l, 'LAMBDA')
-        str_out += '#define OUT_SHIFT '+ str(int(net[1].d.item()))+'\n'
+        str_out += str_tensor(net[2].k, 'KAPPA')
+        str_out += str_tensor(net[2].l, 'LAMBDA')
+        str_out += '#define OUT_SHIFT '+ str(int(net[2].d.item()))+'\n'
         str_out += '#define OUT_MULT '+ str(out_mult) +'\n'
     else:
         # Setting relu parameters
         if layer.relu == True:
             net[1].out_mult = out_mult
             net[1].out_shift = out_shift
-            str_out += '#define OUT_MULT '+ str(int(net[1].out_mult.item()))+'\n'
-            str_out += '#define OUT_SHIFT '+ str(int(net[1].out_shift.item()))+'\n'
+            str_out += '#define OUT_MULT '+ str(int(net[2].out_mult.item()))+'\n'
+            str_out += '#define OUT_SHIFT '+ str(int(net[2].out_shift.item()))+'\n'
         else:
 
             if kernel.quantization == 'shift_clip':
                 # Setting shift and clip quantization parameters
                 #net[1].out_shift = out_shift
                 str_out += '#define OUT_MULT '+ str(out_mult) +'\n'
-                str_out += '#define OUT_SHIFT '+ str(int(net[1].out_shift))+'\n'
+                str_out += '#define OUT_SHIFT '+ str(int(net[2].out_shift))+'\n'
             else:
                 # Setting quantization thresholds
                 net[1].thresholds = torch.Tensor(layer.ch_out,2**kernel.out_data_t-1)
                 net[1].signs = torch.Tensor(layer.ch_out).fill_(1)
-                for r in range(net[1].thresholds.size(0)):
+                for r in range(net[2].thresholds.size(0)):
                     base = torch.Tensor(1).random_(0,layer.ker_x*layer.ker_y*layer.ch_in*(2**(kernel.in_data_t-1)-1 ))
-                    for s in range(net[1].thresholds.size(1) ):
-                        if net[1].signs[r]==1:
-                            net[1].thresholds[r][s] = int(torch.clamp(- base*(2**(kernel.out_data_t-1)) + base*s, -32768, 32767).item())
+                    for s in range(net[2].thresholds.size(1) ):
+                        if net[2].signs[r]==1:
+                            net[2].thresholds[r][s] = int(torch.clamp(- base*(2**(kernel.out_data_t-1)) + base*s, -32768, 32767).item())
                         else:
-                            net[1].thresholds[r][s] = int(torch.clamp(base*(2**(kernel.out_data_t-1)) - base*s, -32768, 32767).item())
-                str_out += str_thr(net[1].thresholds,'THR_INT' + str(kernel.out_data_t))
+                            net[2].thresholds[r][s] = int(torch.clamp(base*(2**(kernel.out_data_t-1)) - base*s, -32768, 32767).item())
+                str_out += str_thr(net[2].thresholds,'THR_INT' + str(kernel.out_data_t))
     # Running the network
     y = net(x)
+    y_np = y.clone().detach().numpy().transpose(0,2,3,1)
+    y_int = net[0:2](x)
+    y_int_np = y_int.clone().detach().numpy().transpose(0, 2, 3, 1)
+    np.savetxt('./conv_out.txt', y_np.flatten(), delimiter=',', fmt='%1d,')
+    np.savetxt('./conv_out_int.txt', y_int_np.flatten(), delimiter=',', fmt='%1d,')
+    np.save('conv_out.npy', y_np)
+    np.save('conv_out_int.npy', y_int_np)
+    wt_np = net[1].weight.data.clone().detach().numpy().transpose(0,2,3,1)
+    np.save('conv_wt.npy', wt_np)
+    np.savetxt('./conv_wt.txt', wt_np.flatten(), delimiter=',', fmt='%1d,')
+    kappa_np = net[2].k.clone().detach().numpy()
+    lambda_np = net[2].l.clone().detach().numpy()
+    np.save('kappa.npy', kappa_np)
+    np.savetxt('./kappa.txt', kappa_np.flatten(), delimiter=',', fmt='%1d,')
+    np.save('lambda.npy', lambda_np)
+    np.savetxt('./lambda.txt', lambda_np.flatten(), delimiter=',', fmt='%1d,')
 
     str_out += str_tensor(x, 'IN_INT'+ str(kernel.in_data_t))
     str_out += str_tensor(torch.Tensor(y), 'OUT_INT' + str(kernel.out_data_t))

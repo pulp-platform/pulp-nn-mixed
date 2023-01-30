@@ -265,7 +265,8 @@ void __attribute__((noinline)) ${config.fn_name}(
         int sum = 0;
         if (pBias != NULL)
         {
-          sum = ((int) (*pBias++));
+          sum = *((int*) pBias);
+          pBias+= 4;
         }
 
         ${pt_in} *pB = pIm2ColBase;

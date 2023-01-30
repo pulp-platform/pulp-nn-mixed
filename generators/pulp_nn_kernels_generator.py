@@ -46,6 +46,16 @@ def main():
                                     conv=pulp_nn_factory.PULPNNConvolve(kernel=kernel_to_test, layer=None)
                                     pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='convolution', comp=conv, api=pulp_nn_init.PULPNNAPI)
 
+            if e == "XpulpNN":
+                for i in pulp_nn_init.PULPNNDataPrecisions:
+                    for j in pulp_nn_init.PULPNNDataPrecisions:
+                        for z in pulp_nn_init.PULPNNWeightsPrecisions:
+                            for q in pulp_nn_init.PULPNNQuantizationMethods:
+                                for sgn_in, sgn_out in product([False, True], [False, True]):
+                                    for m in pulp_nn_init.MATMUL_FORMAT:
+                                        kernel_to_test = pulp_nn_factory.PULPNNKernel(name='conv1d', inp=i, out=j, wt=z, quant=q, act_prec=a, ext=e, mm_fmt=m, in_signed=sgn_in, out_signed=sgn_out)
+                                        conv=pulp_nn_factory.PULPNNConvolve1D(kernel=kernel_to_test, layer=None)
+                                        pulp_nn_init.PULPNNAPI = pulp_nn_factory.kernel(path_tag='conv1d', comp=conv, api=pulp_nn_init.PULPNNAPI)
             for i in pulp_nn_init.PULPNNDataPrecisions:
                 for j in pulp_nn_init.PULPNNDataPrecisions:
                     for z in pulp_nn_init.PULPNNWeightsPrecisions:

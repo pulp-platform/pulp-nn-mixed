@@ -217,7 +217,8 @@ void pulp_nn_conv_u2_u8_i4(
         int sum = 0;
         if (pBias != NULL)
         {
-          sum = ((int) (*pBias++));
+          sum = *((int*) pBias);
+          pBias += 4;
         }
 
         uint8_t *pB = pIm2ColBase;

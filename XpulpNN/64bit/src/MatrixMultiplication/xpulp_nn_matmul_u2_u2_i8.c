@@ -92,10 +92,14 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_u2_u2_i8(
 
     if (pBias != NULL)
     {
-      sum = ((int) (*pBias++));
-      sum2 = ((int) (*pBias++));
-      sum3 = ((int) (*pBias++));
-      sum4 = ((int) (*pBias++));
+      sum = *((int*)  pBias);
+      pBias+= 4;
+      sum2 = *((int*)  pBias);
+      pBias+= 4;
+      sum3 = *((int*)  pBias);
+      pBias+= 4;
+      sum4 = *((int*)  pBias);
+      pBias+= 4;
 
       sum5 = sum;
       sum6 = sum2;
@@ -113,7 +117,7 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_u2_u2_i8(
       sum3 = MacLoad4(0, 0, 2, 0, ptrA3, sum3);
       sum4 = MacLoad4(0, 1, 3, 0, ptrB, sum4);
       ptrB = MacLoadUpdate(ptrB);
-      
+
 
       sum5 = MacLoad4(1, 0, 0, 1, ptrA, sum5);
       ptrA = MacLoadUpdate(ptrA);
