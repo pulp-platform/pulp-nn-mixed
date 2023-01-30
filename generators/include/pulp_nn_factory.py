@@ -242,7 +242,7 @@ class PULPNNConvolve1D(PULPNNFactory):
     def __init__(self, kernel, layer):
         super().__init__(kernel, layer)
 
-        if self.kernel.extentions == 'XpulpNN':
+        if self.kernel.extensions == 'XpulpNN':
             self.max_precision = max([self.kernel.in_data_t, self.kernel.wt_data_t])
             self.fn_name = "xpulp_nn_conv1d_{5}{0}_{6}{1}_i{2}{3}{4}".format(str(self.kernel.in_data_t), str(self.kernel.out_data_t), str(self.kernel.wt_data_t),
                 str("_" + self.kernel.quantization if self.kernel.quantization != "shift_clip" else ""),
@@ -262,7 +262,7 @@ class PULPNNConvolve1D(PULPNNFactory):
         self.thr_fn = None
 
     def generate_code(self):
-        if self.kernel.extentions == 'XpulpNN':
+        if self.kernel.extensions == 'XpulpNN':
             return Template(filename="templates/XpulpNN/xpulp_nn_conv1d_x_y_z.t").render(config=self)
 
 
