@@ -440,9 +440,11 @@ uint8_t * __attribute__((noinline)) xpulp_nn_mix_matmul_u2_u4_i2_4x4(
   }
   int i = 0;
 
-  W_ROLLBACK(4);
-  W_SKIP("0");
-  MIXED_SKIP("4");
+  if(chan_left != 0){
+    W_ROLLBACK(4);
+    W_SKIP("0");
+    MIXED_SKIP("4");
+  }
 
   while(chan_left)
   {
@@ -647,8 +649,12 @@ uint8_t * __attribute__((noinline)) xpulp_nn_mix_matmul_u2_u4_i2_4x4(
     pA+=num_col_im2col_w;
     chan_left--;
   }
-  W_SKIP("3");
-  MIXED_SKIP("16");
+
+  if(chan_left != 0){
+    W_ROLLBACK(w_rollback);
+    W_SKIP("3");
+    MIXED_SKIP("16");
+  }
   pOut += 3 * ch_out_r;
   return pOut;
 }

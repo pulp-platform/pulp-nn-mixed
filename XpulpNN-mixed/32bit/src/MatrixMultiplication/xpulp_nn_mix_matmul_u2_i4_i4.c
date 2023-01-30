@@ -90,10 +90,14 @@ uint8_t * __attribute__((noinline)) xpulp_nn_mix_matmul_u2_i4_i4(
 
     if (pBias != NULL)
     {
-      sum = ((int) (*pBias++));
-      sum2 = ((int) (*pBias++));
-      sum3 = ((int) (*pBias++));
-      sum4 = ((int) (*pBias++));
+      sum =  *((int*) pBias);
+      pBias += 4;
+      sum2 = *((int*) pBias);
+      pBias += 4;
+      sum3 = *((int*) pBias);
+      pBias += 4;
+      sum4 = *((int*) pBias);
+      pBias += 4;
 
       sum5 = sum;
       sum6 = sum2;
@@ -272,9 +276,11 @@ uint8_t * __attribute__((noinline)) xpulp_nn_mix_matmul_u2_i4_i4(
   }
   int i = 0;
 
-  W_ROLLBACK(4);
-  W_SKIP("0");
-  MIXED_SKIP("2");
+  if(chan_left != 0){
+    W_ROLLBACK(4);
+    W_SKIP("0");
+    MIXED_SKIP("2");
+  }
 
   while(chan_left)
   {
@@ -407,8 +413,12 @@ uint8_t * __attribute__((noinline)) xpulp_nn_mix_matmul_u2_i4_i4(
     pA+=num_col_im2col_w;
     chan_left--;
   }
-  W_SKIP("3");
-  MIXED_SKIP("8");
+
+  if(chan_left != 0){
+    W_ROLLBACK(w_rollback);
+    W_SKIP("3");
+    MIXED_SKIP("8");
+  }
   pOut+=ch_out_r;
   return pOut;
 }

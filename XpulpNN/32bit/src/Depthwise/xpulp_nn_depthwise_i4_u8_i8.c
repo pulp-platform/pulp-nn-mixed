@@ -197,9 +197,9 @@ void xpulp_nn_depthwise_i4_u8_i8(
           int32_t  ptrA  = (int32_t *) pWt;
           int32_t  ptrA2 = (int32_t *) pWt2;
           int32_t ptrB  = (int32_t *) pIm2Col;
-          int32_t ptrB_2 = (int32_t *) (pIm2Col + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+          int32_t ptrB_2 = (int32_t *) (pIm2Col + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
           int32_t ptrB2 = (int32_t *) pIm2Col2;
-          int32_t ptrB2_2 = (int32_t *) (pIm2Col2 + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+          int32_t ptrB2_2 = (int32_t *) (pIm2Col2 + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
 
           ptrA  = MacLoadInit(1, 0, 0, 0, ptrA);
           ptrA2 = MacLoadInit(1, 0, 1, 0, ptrA2);
@@ -229,12 +229,12 @@ void xpulp_nn_depthwise_i4_u8_i8(
             {
               int8_t w = *(int8_t *) pWt++;
               int8_t x = *(int8_t *) pIm2Col++;
-              int8_t x_2 = *(int8_t *) (pIm2Col - 1 + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+              int8_t x_2 = *(int8_t *) (pIm2Col - 1 + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
               sum += x * w;
               sum3 += x_2 * w;
               int8_t w2 = *(int8_t *) pWt2++;
               int8_t x2 = *(int8_t *) pIm2Col2++;
-              int8_t x2_2 = *(int8_t *) (pIm2Col2 - 1 + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+              int8_t x2_2 = *(int8_t *) (pIm2Col2 - 1 + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
               sum2 += x2 * w2;
               sum4 += x2_2 * w2;
               j++;
@@ -268,6 +268,71 @@ void xpulp_nn_depthwise_i4_u8_i8(
           pOutBuffer2+=(dim_out_x * ch_out_r);
           l++;
         }while(l<(dim_out_y>>1));
+        if(dim_out_y&0x1){
+          pWt = pWeight + i_wt_ch;
+          pWt2 = pWt + kernel_size;
+          int sum = 0;
+          int sum2 = 0;
+          if (pBias != NULL)
+          {
+            sum = ((int) (pBias[i_ch]));
+            sum2 = ((int) (pBias[i_ch + 1]));
+          }
+          pIm2Col = (pIm2ColBase + (((dim_out_y-1) * stride_y) * dim_kernel_x));
+          pIm2Col2 = pIm2Col + im2col_size;
+
+          int32_t ptrA  = (int32_t *) pWt;
+          int32_t ptrA2 = (int32_t *) pWt2;
+          int32_t ptrB  = (int32_t *) pIm2Col;
+          int32_t ptrB2 = (int32_t *) pIm2Col2;
+
+          ptrA  = MacLoadInit(1, 0, 0, 0, ptrA);
+          ptrA2 = MacLoadInit(1, 0, 1, 0, ptrA2);
+          ptrB  = MacLoadInit(0, 1, 0, 0, ptrB);
+          int j = 0;
+          do{
+            ptrB2 = MacLoadInit(0, 1, 0, 1, ptrB2);
+            sum = MacLoads4(1, 0, 0, 0, ptrA, sum);
+            ptrA = MacLoadUpdate(ptrA);
+            sum2 = MacLoads4(1, 0, 1, 1, ptrA2, sum2);
+            ptrA2 = MacLoadUpdate(ptrA2);
+            ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
+            j++;
+          }while(j<colCnt);
+          if(leftCnt){
+            pWt+=(j<<2);
+            pWt2+=(j<<2);
+            pIm2Col+=(j<<2);
+            pIm2Col2+=(j<<2);
+            do{
+              int8_t w  = *(int8_t *) pWt++;
+              int8_t w2 = *(int8_t *) pWt2++;
+              int8_t x  = *(int8_t *) pIm2Col++;
+              int8_t x2 = *(int8_t *) pIm2Col2++;
+              sum += x * w;
+              sum2 += x2 * w2;
+              j++;
+            }while(j<leftCnt);
+          }
+          if (flag_batch_norm && flag_relu)
+          {
+            *pOutBuffer2 = pulp_nn_bn_quant_u8(sum, *k1, *lambda1, out_shift);
+            *(pOutBuffer2 + 1) = pulp_nn_bn_quant_u8(sum2, *(k1 + 1), *(lambda1 + 1), out_shift);
+          }
+          else
+          {
+            if(flag_relu == 1)
+            {
+              *pOutBuffer2 = pulp_nn_quant_u8(sum, out_mult, out_shift);
+              *(pOutBuffer2 + 1) = pulp_nn_quant_u8(sum2, out_mult, out_shift);
+            }
+            else
+            {
+              *pOutBuffer2 = (uint8_t) clip8(sum >> out_shift);
+              *(pOutBuffer2 + 1) = (uint8_t) clip8(sum2 >> out_shift);
+            }
+          }
+        }
         i_out_x++;
       }while((i_out_x * stride_x) < padding_x_left);
     }
@@ -361,9 +426,9 @@ void xpulp_nn_depthwise_i4_u8_i8(
         int32_t  ptrA  = (int32_t *) pWt;
         int32_t  ptrA2 = (int32_t *) pWt2;
         int32_t ptrB  = (int32_t *) pIm2Col;
-        int32_t ptrB_2 = (int32_t *) (pIm2Col + ((dim_in_y>>1) * stride_y * dim_kernel_x));
+        int32_t ptrB_2 = (int32_t *) (pIm2Col + ((dim_out_y>>1) * stride_y * dim_kernel_x));
         int32_t ptrB2 = (int32_t *) pIm2Col2;
-        int32_t ptrB2_2 = (int32_t *) (pIm2Col2 + ((dim_in_y>>1) * stride_y * dim_kernel_x));
+        int32_t ptrB2_2 = (int32_t *) (pIm2Col2 + ((dim_out_y>>1) * stride_y * dim_kernel_x));
 
         ptrA  = MacLoadInit(1, 0, 0, 0, ptrA);
         ptrA2 = MacLoadInit(1, 0, 1, 0, ptrA2);
@@ -393,12 +458,12 @@ void xpulp_nn_depthwise_i4_u8_i8(
           {
             int8_t w = *(int8_t *) pWt++;
             int8_t x = *(int8_t *) pIm2Col++;
-            int8_t x_2 = *(int8_t *) (pIm2Col - 1 + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+            int8_t x_2 = *(int8_t *) (pIm2Col - 1 + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
             sum += x * w;
             sum3 += x_2 * w;
             int8_t w2 = *(int8_t *) pWt2++;
             int8_t x2 = *(int8_t *) pIm2Col2++;
-            int8_t x2_2 = *(int8_t *) (pIm2Col2 - 1 + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+            int8_t x2_2 = *(int8_t *) (pIm2Col2 - 1 + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
             sum2 += x2 * w2;
             sum4 += x2_2 * w2;
             j++;
@@ -432,6 +497,71 @@ void xpulp_nn_depthwise_i4_u8_i8(
         pOutBuffer2+=(dim_out_x * ch_out_r);
         l++;
       }while(l<(dim_out_y>>1));
+      if(dim_out_y&0x1){
+          pWt = pWeight + i_wt_ch;
+          pWt2 = pWt + kernel_size;
+          int sum = 0;
+          int sum2 = 0;
+          if (pBias != NULL)
+          {
+            sum = ((int) (pBias[i_ch]));
+            sum2 = ((int) (pBias[i_ch + 1]));
+          }
+          pIm2Col = (pIm2ColBase + (((dim_out_y-1) * stride_y) * dim_kernel_x));
+          pIm2Col2 = pIm2Col + im2col_size;
+
+          int32_t ptrA  = (int32_t *) pWt;
+          int32_t ptrA2 = (int32_t *) pWt2;
+          int32_t ptrB  = (int32_t *) pIm2Col;
+          int32_t ptrB2 = (int32_t *) pIm2Col2;
+
+          ptrA  = MacLoadInit(1, 0, 0, 0, ptrA);
+          ptrA2 = MacLoadInit(1, 0, 1, 0, ptrA2);
+          ptrB  = MacLoadInit(0, 1, 0, 0, ptrB);
+          int j = 0;
+          do{
+            ptrB2 = MacLoadInit(0, 1, 0, 1, ptrB2);
+            sum = MacLoads4(1, 0, 0, 0, ptrA, sum);
+            ptrA = MacLoadUpdate(ptrA);
+            sum2 = MacLoads4(1, 0, 1, 1, ptrA2, sum2);
+            ptrA2 = MacLoadUpdate(ptrA2);
+            ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
+            j++;
+          }while(j<colCnt);
+          if(leftCnt){
+            pWt+=(j<<2);
+            pWt2+=(j<<2);
+            pIm2Col+=(j<<2);
+            pIm2Col2+=(j<<2);
+            do{
+              int8_t w  = *(int8_t *) pWt++;
+              int8_t w2 = *(int8_t *) pWt2++;
+              int8_t x  = *(int8_t *) pIm2Col++;
+              int8_t x2 = *(int8_t *) pIm2Col2++;
+              sum += x * w;
+              sum2 += x2 * w2;
+              j++;
+            }while(j<leftCnt);
+          }
+          if (flag_batch_norm && flag_relu)
+          {
+            *pOutBuffer2 = pulp_nn_bn_quant_u8(sum, *k1, *lambda1, out_shift);
+            *(pOutBuffer2 + 1) = pulp_nn_bn_quant_u8(sum2, *(k1 + 1), *(lambda1 + 1), out_shift);
+          }
+          else
+          {
+            if(flag_relu == 1)
+            {
+              *pOutBuffer2 = pulp_nn_quant_u8(sum, out_mult, out_shift);
+              *(pOutBuffer2 + 1) = pulp_nn_quant_u8(sum2, out_mult, out_shift);
+            }
+            else
+            {
+              *pOutBuffer2 = (uint8_t) clip8(sum >> out_shift);
+              *(pOutBuffer2 + 1) = (uint8_t) clip8(sum2 >> out_shift);
+            }
+          }
+        }
       i_out_x++;
     }while((i_out_x * stride_x) < ((dim_out_x * stride_x) - padding_x_right));
     for (i_out_x; i_out_x < dim_out_x; i_out_x++)
@@ -536,9 +666,9 @@ void xpulp_nn_depthwise_i4_u8_i8(
         int32_t  ptrA  = (int32_t *) pWt;
         int32_t  ptrA2 = (int32_t *) pWt2;
         int32_t ptrB  = (int32_t *) pIm2Col;
-        int32_t ptrB_2 = (int32_t *) (pIm2Col + ((dim_in_y>>1) * stride_y * dim_kernel_x));
+        int32_t ptrB_2 = (int32_t *) (pIm2Col + ((dim_out_y>>1) * stride_y * dim_kernel_x));
         int32_t ptrB2 = (int32_t *) pIm2Col2;
-        int32_t ptrB2_2 = (int32_t *) (pIm2Col2 + ((dim_in_y>>1) * stride_y * dim_kernel_x));
+        int32_t ptrB2_2 = (int32_t *) (pIm2Col2 + ((dim_out_y>>1) * stride_y * dim_kernel_x));
 
         ptrA  = MacLoadInit(1, 0, 0, 0, ptrA);
         ptrA2 = MacLoadInit(1, 0, 1, 0, ptrA2);
@@ -568,12 +698,12 @@ void xpulp_nn_depthwise_i4_u8_i8(
           {
             int8_t w = *(int8_t *) pWt++;
             int8_t x = *(int8_t *) pIm2Col++;
-            int8_t x_2 = *(int8_t *) (pIm2Col - 1 + ((dim_in_y>>1) * stride_y * dim_kernel_x));
+            int8_t x_2 = *(int8_t *) (pIm2Col - 1 + ((dim_out_y>>1) * stride_y * dim_kernel_x));
             sum += x * w;
             sum3 += x_2 * w;
             int8_t w2 = *(int8_t *) pWt2++;
             int8_t x2 = *(int8_t *) pIm2Col2++;
-            int8_t x2_2 = *(int8_t *) (pIm2Col2 - 1 + ((dim_in_y>>1) * stride_y * dim_kernel_x));
+            int8_t x2_2 = *(int8_t *) (pIm2Col2 - 1 + ((dim_out_y>>1) * stride_y * dim_kernel_x));
             sum2 += x2 * w2;
             sum4 += x2_2 * w2;
             j++;
@@ -607,6 +737,71 @@ void xpulp_nn_depthwise_i4_u8_i8(
         pOutBuffer2+=(dim_out_x * ch_out_r);
         l++;
       }while(l<(dim_out_y>>1));
+      if(dim_out_y&0x1){
+          pWt = pWeight + i_wt_ch;
+          pWt2 = pWt + kernel_size;
+          int sum = 0;
+          int sum2 = 0;
+          if (pBias != NULL)
+          {
+            sum = ((int) (pBias[i_ch]));
+            sum2 = ((int) (pBias[i_ch + 1]));
+          }
+          pIm2Col = (pIm2ColBase + (((dim_out_y-1) * stride_y) * dim_kernel_x));
+          pIm2Col2 = pIm2Col + im2col_size;
+
+          int32_t ptrA  = (int32_t *) pWt;
+          int32_t ptrA2 = (int32_t *) pWt2;
+          int32_t ptrB  = (int32_t *) pIm2Col;
+          int32_t ptrB2 = (int32_t *) pIm2Col2;
+
+          ptrA  = MacLoadInit(1, 0, 0, 0, ptrA);
+          ptrA2 = MacLoadInit(1, 0, 1, 0, ptrA2);
+          ptrB  = MacLoadInit(0, 1, 0, 0, ptrB);
+          int j = 0;
+          do{
+            ptrB2 = MacLoadInit(0, 1, 0, 1, ptrB2);
+            sum = MacLoads4(1, 0, 0, 0, ptrA, sum);
+            ptrA = MacLoadUpdate(ptrA);
+            sum2 = MacLoads4(1, 0, 1, 1, ptrA2, sum2);
+            ptrA2 = MacLoadUpdate(ptrA2);
+            ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
+            j++;
+          }while(j<colCnt);
+          if(leftCnt){
+            pWt+=(j<<2);
+            pWt2+=(j<<2);
+            pIm2Col+=(j<<2);
+            pIm2Col2+=(j<<2);
+            do{
+              int8_t w  = *(int8_t *) pWt++;
+              int8_t w2 = *(int8_t *) pWt2++;
+              int8_t x  = *(int8_t *) pIm2Col++;
+              int8_t x2 = *(int8_t *) pIm2Col2++;
+              sum += x * w;
+              sum2 += x2 * w2;
+              j++;
+            }while(j<leftCnt);
+          }
+          if (flag_batch_norm && flag_relu)
+          {
+            *pOutBuffer2 = pulp_nn_bn_quant_u8(sum, *k1, *lambda1, out_shift);
+            *(pOutBuffer2 + 1) = pulp_nn_bn_quant_u8(sum2, *(k1 + 1), *(lambda1 + 1), out_shift);
+          }
+          else
+          {
+            if(flag_relu == 1)
+            {
+              *pOutBuffer2 = pulp_nn_quant_u8(sum, out_mult, out_shift);
+              *(pOutBuffer2 + 1) = pulp_nn_quant_u8(sum2, out_mult, out_shift);
+            }
+            else
+            {
+              *pOutBuffer2 = (uint8_t) clip8(sum >> out_shift);
+              *(pOutBuffer2 + 1) = (uint8_t) clip8(sum2 >> out_shift);
+            }
+          }
+        }
     }
     i_in_ch+=in_image_size;
     i_wt_ch+=(kernel_size << 1);

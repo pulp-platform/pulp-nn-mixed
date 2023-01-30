@@ -222,13 +222,14 @@ void __attribute__((noinline)) xpulp_nn_mix_conv_i8_i8_i4(
         int sum = 0;
         if (pBias != NULL)
         {
-          sum = ((int) (*pBias++));
+          sum = *((int*) pBias);
+          pBias += 4;
         }
 
         int8_t *pB = pIm2ColBase;
 
         int32_t *ptrA  = (int32_t *)pA;
-        int32_t *ptrB = (uint32_t *)pB;
+        int32_t *ptrB = (int32_t *)pB;
 
         for(int j=0; j < (num_col_im2col >> 3); j++)
         {

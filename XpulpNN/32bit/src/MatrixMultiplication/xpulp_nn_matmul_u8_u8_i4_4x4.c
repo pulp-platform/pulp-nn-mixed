@@ -187,7 +187,7 @@ uint8_t * __attribute__((noinline)) xpulp_nn_matmul_u8_u8_i4_4x4(
       sum8 = MacLoad4(0, 1, 3, 1, ptrB4, sum8);
       ptrB4 = MacLoadUpdate(ptrB4);
 
-      pA  = pulp_nn_i4_to_i8(pA , vecA);
+      pA  = pulp_nn_i4_to_i8(pA , vecA); 
       pA2 = pulp_nn_i4_to_i8(pA2, vecA2);
       pA3 = pulp_nn_i4_to_i8(pA3, vecA3);
       pA4 = pulp_nn_i4_to_i8(pA4, vecA4);

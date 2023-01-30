@@ -68,7 +68,7 @@ void __attribute__((noinline)) xpulp_nn_mix_linear_i4_u8_i8(
 
     if (pBias != NULL)
     {
-      sum = ((int) (pBias[i]));
+      sum = *(int32_t *)(pBias + 4*i);
     }
 
     int8_t *pB = pIn;

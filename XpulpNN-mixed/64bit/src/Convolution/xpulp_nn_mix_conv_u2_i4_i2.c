@@ -223,7 +223,8 @@ void __attribute__((noinline)) xpulp_nn_mix_conv_u2_i4_i2(
         int sum = 0;
         if (pBias != NULL)
         {
-          sum = ((int) (*pBias++));
+          sum = *((int*) pBias);
+          pBias += 4;
         }
 
         uint8_t *pB = pIm2ColBase;
@@ -233,7 +234,7 @@ void __attribute__((noinline)) xpulp_nn_mix_conv_u2_i4_i2(
 
         for(int j=0; j < (num_col_im2col >> 4); j++)
         {
-          sum = SumDotp16(*(uint8_t *)ptrB, *(int32_t *)ptrA, sum);
+          sum = SumDotp16(*(uint32_t *)ptrB, *(int32_t *)ptrA, sum);
           ptrA++;
           ptrB++;
         }
