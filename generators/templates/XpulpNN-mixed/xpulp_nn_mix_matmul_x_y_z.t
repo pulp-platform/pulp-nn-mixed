@@ -138,10 +138,14 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
     if (pBias != NULL)
     {
-      sum = ((int) (*pBias++));
-      sum2 = ((int) (*pBias++));
-      sum3 = ((int) (*pBias++));
-      sum4 = ((int) (*pBias++));
+      sum =  *((int*) pBias);
+      pBias += 4;
+      sum2 = *((int*) pBias);
+      pBias += 4;
+      sum3 = *((int*) pBias);
+      pBias += 4;
+      sum4 = *((int*) pBias);
+      pBias += 4;
 
       sum5 = sum;
       sum6 = sum2;
@@ -1820,13 +1824,15 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
   int i = 0;
 %endif
 
-  W_ROLLBACK(4);
-  W_SKIP("0");
-%if config.kernel.matmul_fmt == '4x2':
-  MIXED_SKIP("2");
-%elif config.kernel.matmul_fmt == '4x4':
-  MIXED_SKIP("4");
-%endif
+  if(chan_left != 0){
+    W_ROLLBACK(4);
+    W_SKIP("0");
+  %if config.kernel.matmul_fmt == '4x2':
+    MIXED_SKIP("2");
+  %elif config.kernel.matmul_fmt == '4x4':
+    MIXED_SKIP("4");
+  %endif
+  }
 
   while(chan_left)
   {
@@ -2642,12 +2648,16 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 %endif
     chan_left--;
   }
-  W_SKIP("3");
-%if config.kernel.matmul_fmt == '4x2':
-  MIXED_SKIP("8");
-%elif config.kernel.matmul_fmt == '4x4':
-  MIXED_SKIP("16");
-%endif
+
+  if(chan_left != 0){
+    W_ROLLBACK(w_rollback);
+    W_SKIP("3");
+  %if config.kernel.matmul_fmt == '4x2':
+    MIXED_SKIP("8");
+  %elif config.kernel.matmul_fmt == '4x4':
+    MIXED_SKIP("16");
+  %endif
+  }
 %endif
 %if config.kernel.matmul_fmt == '4x2':
   pOut+=ch_out_r;

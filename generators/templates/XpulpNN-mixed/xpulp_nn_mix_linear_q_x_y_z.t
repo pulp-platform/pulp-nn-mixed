@@ -140,7 +140,7 @@ void __attribute__((noinline)) ${config.fn_name}(
 
     if (pBias != NULL)
     {
-      sum = ((int) (pBias[i]));
+      sum = *(int32_t *)(pBias + 4*i);
 %if config.kernel.out_data_t < 8:
       sum2 = (pBias[i + 1]);
 %if config.kernel.out_data_t == 2:

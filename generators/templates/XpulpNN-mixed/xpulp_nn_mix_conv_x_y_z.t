@@ -270,32 +270,33 @@ void __attribute__((noinline)) ${config.fn_name}(
         int sum = 0;
         if (pBias != NULL)
         {
-          sum = ((int) (*pBias++));
+          sum = *((int*) pBias);
+          pBias += 4;
         }
 
         ${pt_in} *pB = pIm2ColBase;
 
         int32_t *ptrA  = (int32_t *)pA;
-        ${int_t_in} *ptrB = (uint32_t *)pB;
+        ${int_t_in} *ptrB = (${int_t_in} *)pB;
 <%! import math %>
         for(int j=0; j < (num_col_im2col >> ${int(math.log2((int(32/config.max_precision))*(int(config.max_precision/config.kernel.wt_data_t))))}); j++)
         {
 %if config.max_precision == 2:
-          sum = ${mac_fn}(*(${pt_in} *)ptrB, *(int32_t *)ptrA, sum);
+          sum = ${mac_fn}(*(${int_t_in} *)ptrB, *(int32_t *)ptrA, sum);
           ptrA++;
           ptrB++;
 %elif config.max_precision == 4:
 %if config.kernel.wt_data_t < config.kernel.in_data_t:
-          sum = ${mac_fn}(*(${pt_in} *)ptrB, *(int32_t *)ptrA, sum);
+          sum = ${mac_fn}(*(${int_t_in} *)ptrB, *(int32_t *)ptrA, sum);
 
           ptrB++;
 
-          sum = ${mac_fn}(*(${pt_in} *)ptrB, *(int32_t *)ptrA, sum);
+          sum = ${mac_fn}(*(${int_t_in} *)ptrB, *(int32_t *)ptrA, sum);
 
           ptrA++;
           ptrB++;
 %else:
-          sum = ${mac_fn}(*(${pt_in} *)ptrB, *(int32_t *)ptrA, sum);
+          sum = ${mac_fn}(*(${int_t_in} *)ptrB, *(int32_t *)ptrA, sum);
           ptrA++;
           ptrB++;
 %endif
