@@ -586,7 +586,7 @@ void ${config.fn_name}(
 %if config.less_precision == 8:
           int32_t ptrA  = (int32_t *) pWt;
           ${int_t_in} ptrB = (${int_t_in} *) pIm2Col;
-          ${int_t_in} ptrB_2 = (${int_t_in} *) (pIm2Col + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+          ${int_t_in} ptrB_2 = (${int_t_in} *) (pIm2Col + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
 
           ptrA = MacLoadInit(1, 0, 0, 0, ptrA);
           ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
@@ -594,9 +594,9 @@ void ${config.fn_name}(
           int32_t  ptrA  = (int32_t *) pWt;
           int32_t  ptrA2 = (int32_t *) pWt2;
           ${int_t_in} ptrB  = (${int_t_in} *) pIm2Col;
-          ${int_t_in} ptrB_2 = (${int_t_in} *) (pIm2Col + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+          ${int_t_in} ptrB_2 = (${int_t_in} *) (pIm2Col + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
           ${int_t_in} ptrB2 = (${int_t_in} *) pIm2Col2;
-          ${int_t_in} ptrB2_2 = (${int_t_in} *) (pIm2Col2 + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+          ${int_t_in} ptrB2_2 = (${int_t_in} *) (pIm2Col2 + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
 
           ptrA  = MacLoadInit(1, 0, 0, 0, ptrA);
           ptrA2 = MacLoadInit(1, 0, 1, 0, ptrA2);
@@ -607,13 +607,13 @@ void ${config.fn_name}(
           int32_t ptrA3 = (int32_t *) pWt3;
           int32_t ptrA4 = (int32_t *) pWt4;
           ${int_t_in} ptrB = (${int_t_in} *) pIm2Col;
-          ${int_t_in} ptrB_2 = (${int_t_in} *) (pIm2Col + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+          ${int_t_in} ptrB_2 = (${int_t_in} *) (pIm2Col + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
           ${int_t_in} ptrB2 = (${int_t_in} *) pIm2Col2;
-          ${int_t_in} ptrB2_2 = (${int_t_in} *) (pIm2Col2 + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+          ${int_t_in} ptrB2_2 = (${int_t_in} *) (pIm2Col2 + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
           ${int_t_in} ptrB3 = (${int_t_in} *) pIm2Col3;
-          ${int_t_in} ptrB3_2 = (${int_t_in} *) (pIm2Col3 + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+          ${int_t_in} ptrB3_2 = (${int_t_in} *) (pIm2Col3 + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
           ${int_t_in} ptrB4 = (${int_t_in} *) pIm2Col4; 
-          ${int_t_in} ptrB4_2 = (${int_t_in} *) (pIm2Col4 + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+          ${int_t_in} ptrB4_2 = (${int_t_in} *) (pIm2Col4 + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
 
           ptrA = MacLoadInit(1, 0, 0, 0, ptrA);
           ptrA2 = MacLoadInit(1, 0, 1, 0, ptrA2);
@@ -690,39 +690,39 @@ void ${config.fn_name}(
     %if config.less_precision == 8:
               int8_t w = *(int8_t *) pWt++;
               ${pt_in} x = *(${pt_in} *) pIm2Col++;
-              ${pt_in} x2 = *(${pt_in} *) (pIm2Col - 1 + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+              ${pt_in} x2 = *(${pt_in} *) (pIm2Col - 1 + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
               sum += x * w;
               sum2 += x2 * w;
     %elif config.less_precision == 4:
               int8_t w = *(int8_t *) pWt++;
               ${pt_in} x = *(${pt_in} *) pIm2Col++;
-              ${pt_in} x_2 = *(${pt_in} *) (pIm2Col - 1 + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+              ${pt_in} x_2 = *(${pt_in} *) (pIm2Col - 1 + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
               sum += x * w;
               sum3 += x_2 * w;
               int8_t w2 = *(int8_t *) pWt2++;
               ${pt_in} x2 = *(${pt_in} *) pIm2Col2++;
-              ${pt_in} x2_2 = *(${pt_in} *) (pIm2Col2 - 1 + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+              ${pt_in} x2_2 = *(${pt_in} *) (pIm2Col2 - 1 + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
               sum2 += x2 * w2;
               sum4 += x2_2 * w2;
     %elif config.less_precision == 2:
               int8_t w = *(int8_t *) pWt++;
               ${pt_in} x = *(${pt_in} *) pIm2Col++;
-              ${pt_in} x_2 = *(${pt_in} *) (pIm2Col - 1 + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+              ${pt_in} x_2 = *(${pt_in} *) (pIm2Col - 1 + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
               sum += x * w;
               sum5 += x_2 * w;
               int8_t w2 = *(int8_t *) pWt2++;
               ${pt_in} x2 = *(${pt_in} *) pIm2Col2++;
-              ${pt_in} x2_2 = *(${pt_in} *) (pIm2Col2 - 1 + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+              ${pt_in} x2_2 = *(${pt_in} *) (pIm2Col2 - 1 + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
               sum2 += x2 * w2;
               sum6 += x2_2 * w2;
               int8_t w3 = *(int8_t *) pWt3++;
               ${pt_in} x3 = *(${pt_in} *) pIm2Col3++;
-              ${pt_in} x3_2 = *(${pt_in} *) (pIm2Col3 - 1 + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+              ${pt_in} x3_2 = *(${pt_in} *) (pIm2Col3 - 1 + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
               sum3 += x3 * w3;
               sum7 += x3_2 * w3;
               int8_t w4 = *(int8_t *) pWt4++;
               ${pt_in} x4 = *(${pt_in} *) pIm2Col4++;
-              ${pt_in} x4_2 = *(${pt_in} *) (pIm2Col4 - 1 + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+              ${pt_in} x4_2 = *(${pt_in} *) (pIm2Col4 - 1 + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
               sum4 += x4 * w4;
               sum8 += x4_2 * w4;
     %endif
@@ -808,6 +808,7 @@ void ${config.fn_name}(
               *pOutBuffer = bitins(sum, n_mask, sum2, mask, off);
               sum3 = ${config.relu_fn}(sum3, out_mult, out_shift);
               sum4 = ${config.relu_fn}(sum4, out_mult, out_shift);
+              *pOutBuffer2 = bitins(sum3, n_mask, sum4, mask, off);
     %endif
   %elif config.less_precision == 2:
     %if config.kernel.out_data_t == 8:
@@ -915,6 +916,285 @@ void ${config.fn_name}(
           pOutBuffer2+=(dim_out_x * ch_out_r);
           l++;
         }while(l<(dim_out_y>>1));
+        if(dim_out_y&0x1){
+  %if config.less_precision == 8:
+    %if config.kernel.wt_data_t == 8:
+          pWt = pWeight + i_wt_ch;
+    %else:
+          pWt = pWtBase;
+    %endif
+          int sum = 0;
+          if (pBias != NULL)
+          {
+            sum = ((int) (pBias[i_ch]));
+          }
+          pIm2Col = (pIm2ColBase + (((dim_out_y-1) * stride_y) * dim_kernel_x));
+  %elif config.less_precision == 4:
+    %if config.kernel.wt_data_t == 8:
+          pWt = pWeight + i_wt_ch;
+    %else:
+          pWt = pWtBase;
+    %endif
+          pWt2 = pWt + kernel_size;
+          int sum = 0;
+          int sum2 = 0;
+          if (pBias != NULL)
+          {
+            sum = ((int) (pBias[i_ch]));
+            sum2 = ((int) (pBias[i_ch + 1]));
+          }
+          pIm2Col = (pIm2ColBase + (((dim_out_y-1) * stride_y) * dim_kernel_x));
+          pIm2Col2 = pIm2Col + im2col_size;
+  %elif config.less_precision == 2:
+    %if config.kernel.wt_data_t == 8:
+          pWt = pWeight + i_wt_ch;
+    %else:
+          pWt = pWtBase;
+    %endif
+          pWt2 = pWt + kernel_size;
+          pWt3 = pWt2 + kernel_size;
+          pWt4 = pWt3 + kernel_size;
+          int sum = 0;
+          int sum2 = 0;
+          int sum3 = 0;
+          int sum4 = 0;
+          if (pBias != NULL)
+          {
+            sum = ((int) (pBias[i_ch]));
+            sum2 = ((int) (pBias[i_ch + 1]));
+            sum3 = ((int) (pBias[i_ch + 2]));
+            sum4 = ((int) (pBias[i_ch + 3]));
+          }
+          pIm2Col = (pIm2ColBase + (((dim_out_y-1) * stride_y) * dim_kernel_x));
+          pIm2Col2 = pIm2Col + im2col_size;
+          pIm2Col3 = pIm2Col2 + im2col_size;
+          pIm2Col4 = pIm2Col3 + im2col_size;
+  %endif
+
+%if config.less_precision == 8:
+          int32_t ptrA = (int32_t *) pWt;
+          ${int_t_in} ptrB = (${int_t_in} *) pIm2Col;
+
+          ptrA = MacLoadInit(1, 0, 0, 0, ptrA);
+          ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
+%elif config.less_precision == 4:
+          int32_t ptrA  = (int32_t *) pWt;
+          int32_t ptrA2 = (int32_t *) pWt2;
+          ${int_t_in} ptrB  = (${int_t_in} *) pIm2Col;
+          ${int_t_in} ptrB2 = (${int_t_in} *) pIm2Col2;
+
+          ptrA  = MacLoadInit(1, 0, 0, 0, ptrA);
+          ptrA2 = MacLoadInit(1, 0, 1, 0, ptrA2);
+          ptrB  = MacLoadInit(0, 1, 0, 0, ptrB);
+%elif config.less_precision == 2:
+          int32_t ptrA  = (int32_t *) pWt;
+          int32_t ptrA2 = (int32_t *) pWt2;
+          int32_t ptrA3 = (int32_t *) pWt3;
+          int32_t ptrA4 = (int32_t *) pWt4;
+          ${int_t_in} ptrB  = (${int_t_in} *) pIm2Col;
+          ${int_t_in} ptrB2 = (${int_t_in} *) pIm2Col2;
+          ${int_t_in} ptrB3 = (${int_t_in} *) pIm2Col3;
+          ${int_t_in} ptrB4 = (${int_t_in} *) pIm2Col4;
+
+          ptrA  = MacLoadInit(1, 0, 0, 0, ptrA);
+          ptrA2 = MacLoadInit(1, 0, 1, 0, ptrA2);
+          ptrA3 = MacLoadInit(1, 0, 2, 0, ptrA3);
+          ptrA4 = MacLoadInit(1, 0, 3, 0, ptrA4);
+          ptrB  = MacLoadInit(0, 1, 0, 0, ptrB);
+%endif
+          int j = 0;
+          do{
+%if config.less_precision == 8:
+            sum = ${macload_fn}(1, 0, 0, 0, ptrA, sum);
+            ptrA = MacLoadUpdate(ptrA);
+            ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
+%elif config.less_precision == 4:
+            ptrB2 = MacLoadInit(0, 1, 0, 1, ptrB2);
+            sum = ${macload_fn}(1, 0, 0, 0, ptrA, sum);
+            ptrA = MacLoadUpdate(ptrA);
+            sum2 = ${macload_fn}(1, 0, 1, 1, ptrA2, sum2);
+            ptrA2 = MacLoadUpdate(ptrA2);
+            ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
+%elif config.less_precision == 2:
+            ptrB2 = MacLoadInit(0, 1, 0, 1, ptrB2);
+            sum = ${macload_fn}(0, 1, 0, 0, ptrB3, sum);
+            ptrB3 = MacLoadUpdate(ptrB3);
+            sum2 = ${macload_fn}(0, 1, 1, 1, ptrB4, sum2);
+            ptrB4 = MacLoadUpdate(ptrB4);
+            sum3 = ${macload_fn}(1, 0, 2, 0, ptrA3, sum3);
+            ptrA3 = MacLoadUpdate(ptrA3);
+            sum4 = ${macload_fn}(1, 0, 3, 1, ptrA4, sum4);
+            ptrA4 = MacLoadUpdate(ptrA4);
+            ptrA  = MacLoadInit(1, 0, 0, 0, ptrA);
+            ptrA2 = MacLoadInit(1, 0, 1, 0, ptrA2);
+            ptrB  = MacLoadInit(0, 1, 0, 0, ptrB);
+%endif
+            j++;
+          }while(j<colCnt);
+          if(leftCnt){
+%if config.less_precision == 8:
+            pWt+=(j<<2);
+            pIm2Col+=(j<<2);
+%elif config.less_precision == 4:
+            pWt+=(j<<2);
+            pWt2+=(j<<2);
+            pIm2Col+=(j<<2);
+            pIm2Col2+=(j<<2);
+%elif config.less_precision == 2:
+            pWt+=(j<<2);
+            pWt2+=(j<<2);
+            pWt3+=(j<<2);
+            pWt4+=(j<<2);
+            pIm2Col+=(j<<2);
+            pIm2Col2+=(j<<2);
+            pIm2Col3+=(j<<2);
+            pIm2Col4+=(j<<2);
+%endif
+            do{
+%if config.less_precision == 8:
+              int8_t w = *(int8_t *) pWt++;
+              ${pt_in} x = *(${pt_in} *) pIm2Col++;
+%elif config.less_precision == 4:
+              int8_t w  = *(int8_t *) pWt++;
+              int8_t w2 = *(int8_t *) pWt2++;
+              ${pt_in} x  = *(${pt_in} *) pIm2Col++;
+              ${pt_in} x2 = *(${pt_in} *) pIm2Col2++;
+%elif config.less_precision == 2:
+              int8_t w  = *(int8_t *) pWt++;
+              int8_t w2 = *(int8_t *) pWt2++;
+              int8_t w3 = *(int8_t *) pWt3++;
+              int8_t w4 = *(int8_t *) pWt4++;
+              ${pt_in} x  = *(${pt_in} *) pIm2Col++;
+              ${pt_in} x2 = *(${pt_in} *) pIm2Col2++;
+              ${pt_in} x3 = *(${pt_in} *) pIm2Col3++;
+              ${pt_in} x4 = *(${pt_in} *) pIm2Col4++;
+%endif
+              sum += x * w;
+%if config.less_precision <= 4:
+              sum2 += x2 * w2;
+%if config.less_precision == 2:
+              sum3 += x3 * w3;
+              sum4 += x4 * w4;
+%endif
+%endif
+              j++;
+            }while(j<leftCnt);
+          }
+          if (flag_batch_norm && flag_relu)
+          {
+  %if config.less_precision == 8:
+            *pOutBuffer2 = ${config.bn_fn}(sum, *k1, *lambda1, out_shift);
+  %elif config.less_precision == 4:
+    %if config.kernel.out_data_t == 8:
+            *pOutBuffer2 = ${config.bn_fn}(sum, *k1, *lambda1, out_shift);
+            *(pOutBuffer2 + 1) = ${config.bn_fn}(sum2, *(k1 + 1), *(lambda1 + 1), out_shift);
+    %elif config.kernel.out_data_t == 4:
+            sum = ${config.bn_fn}(sum, *k1, *lambda1, out_shift);
+            sum2 = ${config.bn_fn}(sum2, *(k1 + 1), *(lambda1 + 1), out_shift);
+            *pOutBuffer2 = bitins(sum, n_mask, sum2, mask, off);
+    %endif
+  %elif config.less_precision == 2:
+    %if config.kernel.out_data_t == 8:
+            *pOutBuffer2 = ${config.bn_fn}(sum, *k1, *lambda1, out_shift);
+            *(pOutBuffer2 + 1) = ${config.bn_fn}(sum2, *(k1 + 1), *(lambda1 + 1), out_shift);
+            *(pOutBuffer2 + 2) = ${config.bn_fn}(sum3, *(k1 + 2), *(lambda1 + 2), out_shift);
+            *(pOutBuffer2 + 3) = ${config.bn_fn}(sum4, *(k1 + 3), *(lambda1 + 3), out_shift);
+    %elif config.kernel.out_data_t == 4:
+            sum = ${config.bn_fn}(sum, *k1, *lambda1, out_shift);
+            sum2 = ${config.bn_fn}(sum2, *(k1 + 1), *(lambda1 + 1), out_shift);
+            sum3 = ${config.bn_fn}(sum3, *(k1 + 2), *(lambda1 + 2), out_shift);
+            sum4 = ${config.bn_fn}(sum4, *(k1 + 3), *(lambda1 + 3), out_shift);
+            *pOutBuffer2 = bitins(sum, n_mask, sum2, mask, off);
+            *(pOutBuffer2 + 1) = bitins(sum3, n_mask, sum4, mask, off);
+    %elif config.kernel.out_data_t == 2:
+            sum = ${config.bn_fn}(sum, *k1, *lambda1, out_shift);
+            sum2 = ${config.bn_fn}(sum2, *(k1 + 1), *(lambda1 + 1), out_shift);
+            sum3 = ${config.bn_fn}(sum3, *(k1 + 2), *(lambda1 + 2), out_shift);
+            sum4 = ${config.bn_fn}(sum4, *(k1 + 3), *(lambda1 + 3), out_shift);
+            sum = bitins(sum, n_mask2, sum2, mask2, off2);
+            sum = bitins(sum, n_mask4, sum3, mask4, off4);
+            *pOutBuffer2 = bitins(sum, n_mask6, sum4, mask6, off6);
+    %endif
+  %endif
+          }
+          else
+          {
+            if(flag_relu == 1)
+            {
+  %if config.less_precision == 8:
+              *pOutBuffer2 = ${config.relu_fn}(sum, out_mult, out_shift);
+  %elif config.less_precision == 4:
+    %if config.kernel.out_data_t == 8:
+              *pOutBuffer2 = ${config.relu_fn}(sum, out_mult, out_shift);
+              *(pOutBuffer2 + 1) = ${config.relu_fn}(sum2, out_mult, out_shift);
+    %elif config.kernel.out_data_t == 4:
+              sum = ${config.relu_fn}(sum, out_mult, out_shift);
+              sum2 = ${config.relu_fn}(sum2, out_mult, out_shift);
+              *pOutBuffer2 = bitins(sum, n_mask, sum2, mask, off);
+    %endif
+  %elif config.less_precision == 2:
+    %if config.kernel.out_data_t == 8:
+              *pOutBuffer2 = ${config.relu_fn}(sum, out_mult, out_shift);
+              *(pOutBuffer2 + 1) = ${config.relu_fn}(sum2, out_mult, out_shift);
+              *(pOutBuffer2 + 2) = ${config.relu_fn}(sum3, out_mult, out_shift);
+              *(pOutBuffer2 + 3) = ${config.relu_fn}(sum4, out_mult, out_shift);
+    %elif config.kernel.out_data_t == 4:
+              sum = ${config.relu_fn}(sum, out_mult, out_shift);
+              sum2 = ${config.relu_fn}(sum2, out_mult, out_shift);
+              *pOutBuffer2 = bitins(sum, n_mask, sum2, mask, off);
+              sum3 = ${config.relu_fn}(sum3, out_mult, out_shift);
+              sum4 = ${config.relu_fn}(sum4, out_mult, out_shift);
+              *(pOutBuffer2 + 1) = bitins(sum3, n_mask, sum4, mask, off);
+    %elif config.kernel.out_data_t == 2:
+              sum = ${config.relu_fn}(sum, out_mult, out_shift);
+              sum2 = ${config.relu_fn}(sum2, out_mult, out_shift);
+              sum3 = ${config.relu_fn}(sum3, out_mult, out_shift);
+              sum4 = ${config.relu_fn}(sum4, out_mult, out_shift);
+              sum = bitins(sum, n_mask2, sum2, mask2, off2);
+              sum = bitins(sum, n_mask4, sum3, mask4, off4);
+              *pOutBuffer2 = bitins(sum, n_mask6, sum4, mask6, off6);
+    %endif
+  %endif
+            }
+            else
+            {
+  %if config.less_precision == 8:
+              *pOutBuffer2 = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+  %elif config.less_precision == 4:
+    %if config.kernel.out_data_t == 8:
+              *pOutBuffer2 = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+              *(pOutBuffer2 + 1) = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
+    %elif config.kernel.out_data_t == 4:
+              sum = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+              sum2 = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
+              *pOutBuffer2 = bitins(sum, n_mask, sum2, mask, off);
+    %endif
+  %elif config.less_precision == 2:
+    %if config.kernel.out_data_t == 8:
+              *pOutBuffer2 = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+              *(pOutBuffer2 + 1) = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
+              *(pOutBuffer2 + 2) = (${pt_out}) ${out_clip_fn}(sum3 >> out_shift);
+              *(pOutBuffer2 + 3) = (${pt_out}) ${out_clip_fn}(sum4 >> out_shift);
+    %elif config.kernel.out_data_t == 4:
+              sum = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+              sum2 = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
+              *pOutBuffer2 = bitins(sum, n_mask, sum2, mask, off);
+              sum3 = (${pt_out}) ${out_clip_fn}(sum3 >> out_shift);
+              sum4 = (${pt_out}) ${out_clip_fn}(sum4 >> out_shift);
+              *(pOutBuffer2 + 1) = bitins(sum3, n_mask, sum4, mask, off);
+    %elif config.kernel.out_data_t == 2:
+              sum = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+              sum2 = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
+              sum3 = (${pt_out}) ${out_clip_fn}(sum3 >> out_shift);
+              sum4 = (${pt_out}) ${out_clip_fn}(sum4 >> out_shift);
+              sum = bitins(sum, n_mask2, sum2, mask2, off2);
+              sum = bitins(sum, n_mask4, sum3, mask4, off4);
+              *pOutBuffer2 = bitins(sum, n_mask6, sum4, mask6, off6);
+    %endif
+  %endif
+            }
+          }
+        }
         i_out_x++;
       }while((i_out_x * stride_x) < padding_x_left);
     }
@@ -1217,7 +1497,7 @@ void ${config.fn_name}(
 %if config.less_precision == 8:
         int32_t ptrA  = (int32_t *) pWt;
         ${int_t_in} ptrB = (${int_t_in} *) pIm2Col;
-        ${int_t_in} ptrB_2 = (${int_t_in} *) (pIm2Col + ((dim_in_y>>1) * stride_y * dim_kernel_x));
+        ${int_t_in} ptrB_2 = (${int_t_in} *) (pIm2Col + ((dim_out_y>>1) * stride_y * dim_kernel_x));
 
         ptrA = MacLoadInit(1, 0, 0, 0, ptrA);
         ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
@@ -1225,9 +1505,9 @@ void ${config.fn_name}(
         int32_t  ptrA  = (int32_t *) pWt;
         int32_t  ptrA2 = (int32_t *) pWt2;
         ${int_t_in} ptrB  = (${int_t_in} *) pIm2Col;
-        ${int_t_in} ptrB_2 = (${int_t_in} *) (pIm2Col + ((dim_in_y>>1) * stride_y * dim_kernel_x));
+        ${int_t_in} ptrB_2 = (${int_t_in} *) (pIm2Col + ((dim_out_y>>1) * stride_y * dim_kernel_x));
         ${int_t_in} ptrB2 = (${int_t_in} *) pIm2Col2;
-        ${int_t_in} ptrB2_2 = (${int_t_in} *) (pIm2Col2 + ((dim_in_y>>1) * stride_y * dim_kernel_x));
+        ${int_t_in} ptrB2_2 = (${int_t_in} *) (pIm2Col2 + ((dim_out_y>>1) * stride_y * dim_kernel_x));
 
         ptrA  = MacLoadInit(1, 0, 0, 0, ptrA);
         ptrA2 = MacLoadInit(1, 0, 1, 0, ptrA2);
@@ -1238,13 +1518,13 @@ void ${config.fn_name}(
         int32_t ptrA3 = (int32_t *) pWt3;
         int32_t ptrA4 = (int32_t *) pWt4;
         ${int_t_in} ptrB = (${int_t_in} *) pIm2Col;
-        ${int_t_in} ptrB_2 = (${int_t_in} *) (pIm2Col + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+        ${int_t_in} ptrB_2 = (${int_t_in} *) (pIm2Col + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
         ${int_t_in} ptrB2 = (${int_t_in} *) pIm2Col2;
-        ${int_t_in} ptrB2_2 = (${int_t_in} *) (pIm2Col2 + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+        ${int_t_in} ptrB2_2 = (${int_t_in} *) (pIm2Col2 + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
         ${int_t_in} ptrB3 = (${int_t_in} *) pIm2Col3;
-        ${int_t_in} ptrB3_2 = (${int_t_in} *) (pIm2Col3 + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+        ${int_t_in} ptrB3_2 = (${int_t_in} *) (pIm2Col3 + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
         ${int_t_in} ptrB4 = (${int_t_in} *) pIm2Col4; 
-        ${int_t_in} ptrB4_2 = (${int_t_in} *) (pIm2Col4 + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+        ${int_t_in} ptrB4_2 = (${int_t_in} *) (pIm2Col4 + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
 
         ptrA = MacLoadInit(1, 0, 0, 0, ptrA);
         ptrA2 = MacLoadInit(1, 0, 1, 0, ptrA2);
@@ -1321,39 +1601,39 @@ void ${config.fn_name}(
   %if config.less_precision == 8:
             int8_t w = *(int8_t *) pWt++;
             ${pt_in} x = *(${pt_in} *) pIm2Col++;
-            ${pt_in} x_2 = *(${pt_in} *) (pIm2Col - 1 + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+            ${pt_in} x_2 = *(${pt_in} *) (pIm2Col - 1 + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
             sum += x * w;
             sum2 += x_2 * w;
   %elif config.less_precision == 4:
             int8_t w = *(int8_t *) pWt++;
             ${pt_in} x = *(${pt_in} *) pIm2Col++;
-            ${pt_in} x_2 = *(${pt_in} *) (pIm2Col - 1 + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+            ${pt_in} x_2 = *(${pt_in} *) (pIm2Col - 1 + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
             sum += x * w;
             sum3 += x_2 * w;
             int8_t w2 = *(int8_t *) pWt2++;
             ${pt_in} x2 = *(${pt_in} *) pIm2Col2++;
-            ${pt_in} x2_2 = *(${pt_in} *) (pIm2Col2 - 1 + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+            ${pt_in} x2_2 = *(${pt_in} *) (pIm2Col2 - 1 + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
             sum2 += x2 * w2;
             sum4 += x2_2 * w2;
   %elif config.less_precision == 2:
             int8_t w = *(int8_t *) pWt++;
             ${pt_in} x = *(${pt_in} *) pIm2Col++;
-            ${pt_in} x_2 = *(${pt_in} *) (pIm2Col - 1 + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+            ${pt_in} x_2 = *(${pt_in} *) (pIm2Col - 1 + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
             sum += x * w;
             sum5 += x_2 * w;
             int8_t w2 = *(int8_t *) pWt2++;
             ${pt_in} x2 = *(${pt_in} *) pIm2Col2++;
-            ${pt_in} x2_2 = *(${pt_in}*) (pIm2Col2 - 1 + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+            ${pt_in} x2_2 = *(${pt_in}*) (pIm2Col2 - 1 + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
             sum2 += x2 * w2;
             sum6 += x2_2 * w2;
             int8_t w3 = *(int8_t *) pWt3++;
             ${pt_in} x3 = *(${pt_in} *) pIm2Col3++;
-            ${pt_in} x3_2 = *(${pt_in} *) (pIm2Col3 - 1 + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+            ${pt_in} x3_2 = *(${pt_in} *) (pIm2Col3 - 1 + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
             sum3 += x3 * w3;
             sum7 += x3_2 * w3;
             int8_t w4 = *(int8_t *) pWt4++;
             ${pt_in} x4 = *(${pt_in} *) pIm2Col4++;
-            ${pt_in} x4_2 = *(${pt_in} *) (pIm2Col4 - 1 + ((dim_in_y >> 1) * stride_y * dim_kernel_x));
+            ${pt_in} x4_2 = *(${pt_in} *) (pIm2Col4 - 1 + ((dim_out_y >> 1) * stride_y * dim_kernel_x));
             sum4 += x4 * w4;
             sum8 += x4_2 * w4;
   %endif
@@ -1547,6 +1827,285 @@ void ${config.fn_name}(
         pOutBuffer2+=(dim_out_x * ch_out_r);
         l++;
       }while(l<(dim_out_y>>1));
+      if(dim_out_y&0x1){
+  %if config.less_precision == 8:
+    %if config.kernel.wt_data_t == 8:
+          pWt = pWeight + i_wt_ch;
+    %else:
+          pWt = pWtBase;
+    %endif
+          int sum = 0;
+          if (pBias != NULL)
+          {
+            sum = ((int) (pBias[i_ch]));
+          }
+          pIm2Col = (pIm2ColBase + (((dim_out_y-1) * stride_y) * dim_kernel_x));
+  %elif config.less_precision == 4:
+    %if config.kernel.wt_data_t == 8:
+          pWt = pWeight + i_wt_ch;
+    %else:
+          pWt = pWtBase;
+    %endif
+          pWt2 = pWt + kernel_size;
+          int sum = 0;
+          int sum2 = 0;
+          if (pBias != NULL)
+          {
+            sum = ((int) (pBias[i_ch]));
+            sum2 = ((int) (pBias[i_ch + 1]));
+          }
+          pIm2Col = (pIm2ColBase + (((dim_out_y-1) * stride_y) * dim_kernel_x));
+          pIm2Col2 = pIm2Col + im2col_size;
+  %elif config.less_precision == 2:
+    %if config.kernel.wt_data_t == 8:
+          pWt = pWeight + i_wt_ch;
+    %else:
+          pWt = pWtBase;
+    %endif
+          pWt2 = pWt + kernel_size;
+          pWt3 = pWt2 + kernel_size;
+          pWt4 = pWt3 + kernel_size;
+          int sum = 0;
+          int sum2 = 0;
+          int sum3 = 0;
+          int sum4 = 0;
+          if (pBias != NULL)
+          {
+            sum = ((int) (pBias[i_ch]));
+            sum2 = ((int) (pBias[i_ch + 1]));
+            sum3 = ((int) (pBias[i_ch + 2]));
+            sum4 = ((int) (pBias[i_ch + 3]));
+          }
+          pIm2Col = (pIm2ColBase + (((dim_out_y-1) * stride_y) * dim_kernel_x));
+          pIm2Col2 = pIm2Col + im2col_size;
+          pIm2Col3 = pIm2Col2 + im2col_size;
+          pIm2Col4 = pIm2Col3 + im2col_size;
+  %endif
+
+%if config.less_precision == 8:
+          int32_t ptrA = (int32_t *) pWt;
+          ${int_t_in} ptrB = (${int_t_in} *) pIm2Col;
+
+          ptrA = MacLoadInit(1, 0, 0, 0, ptrA);
+          ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
+%elif config.less_precision == 4:
+          int32_t ptrA  = (int32_t *) pWt;
+          int32_t ptrA2 = (int32_t *) pWt2;
+          ${int_t_in} ptrB  = (${int_t_in} *) pIm2Col;
+          ${int_t_in} ptrB2 = (${int_t_in} *) pIm2Col2;
+
+          ptrA  = MacLoadInit(1, 0, 0, 0, ptrA);
+          ptrA2 = MacLoadInit(1, 0, 1, 0, ptrA2);
+          ptrB  = MacLoadInit(0, 1, 0, 0, ptrB);
+%elif config.less_precision == 2:
+          int32_t ptrA  = (int32_t *) pWt;
+          int32_t ptrA2 = (int32_t *) pWt2;
+          int32_t ptrA3 = (int32_t *) pWt3;
+          int32_t ptrA4 = (int32_t *) pWt4;
+          ${int_t_in} ptrB  = (${int_t_in} *) pIm2Col;
+          ${int_t_in} ptrB2 = (${int_t_in} *) pIm2Col2;
+          ${int_t_in} ptrB3 = (${int_t_in} *) pIm2Col3;
+          ${int_t_in} ptrB4 = (${int_t_in} *) pIm2Col4;
+
+          ptrA  = MacLoadInit(1, 0, 0, 0, ptrA);
+          ptrA2 = MacLoadInit(1, 0, 1, 0, ptrA2);
+          ptrA3 = MacLoadInit(1, 0, 2, 0, ptrA3);
+          ptrA4 = MacLoadInit(1, 0, 3, 0, ptrA4);
+          ptrB  = MacLoadInit(0, 1, 0, 0, ptrB);
+%endif
+          int j = 0;
+          do{
+%if config.less_precision == 8:
+            sum = ${macload_fn}(1, 0, 0, 0, ptrA, sum);
+            ptrA = MacLoadUpdate(ptrA);
+            ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
+%elif config.less_precision == 4:
+            ptrB2 = MacLoadInit(0, 1, 0, 1, ptrB2);
+            sum = ${macload_fn}(1, 0, 0, 0, ptrA, sum);
+            ptrA = MacLoadUpdate(ptrA);
+            sum2 = ${macload_fn}(1, 0, 1, 1, ptrA2, sum2);
+            ptrA2 = MacLoadUpdate(ptrA2);
+            ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
+%elif config.less_precision == 2:
+            ptrB2 = MacLoadInit(0, 1, 0, 1, ptrB2);
+            sum = ${macload_fn}(0, 1, 0, 0, ptrB3, sum);
+            ptrB3 = MacLoadUpdate(ptrB3);
+            sum2 = ${macload_fn}(0, 1, 1, 1, ptrB4, sum2);
+            ptrB4 = MacLoadUpdate(ptrB4);
+            sum3 = ${macload_fn}(1, 0, 2, 0, ptrA3, sum3);
+            ptrA3 = MacLoadUpdate(ptrA3);
+            sum4 = ${macload_fn}(1, 0, 3, 1, ptrA4, sum4);
+            ptrA4 = MacLoadUpdate(ptrA4);
+            ptrA  = MacLoadInit(1, 0, 0, 0, ptrA);
+            ptrA2 = MacLoadInit(1, 0, 1, 0, ptrA2);
+            ptrB  = MacLoadInit(0, 1, 0, 0, ptrB);
+%endif
+            j++;
+          }while(j<colCnt);
+          if(leftCnt){
+%if config.less_precision == 8:
+            pWt+=(j<<2);
+            pIm2Col+=(j<<2);
+%elif config.less_precision == 4:
+            pWt+=(j<<2);
+            pWt2+=(j<<2);
+            pIm2Col+=(j<<2);
+            pIm2Col2+=(j<<2);
+%elif config.less_precision == 2:
+            pWt+=(j<<2);
+            pWt2+=(j<<2);
+            pWt3+=(j<<2);
+            pWt4+=(j<<2);
+            pIm2Col+=(j<<2);
+            pIm2Col2+=(j<<2);
+            pIm2Col3+=(j<<2);
+            pIm2Col4+=(j<<2);
+%endif
+            do{
+%if config.less_precision == 8:
+              int8_t w = *(int8_t *) pWt++;
+              ${pt_in} x = *(${pt_in} *) pIm2Col++;
+%elif config.less_precision == 4:
+              int8_t w  = *(int8_t *) pWt++;
+              int8_t w2 = *(int8_t *) pWt2++;
+              ${pt_in} x  = *(${pt_in} *) pIm2Col++;
+              ${pt_in} x2 = *(${pt_in} *) pIm2Col2++;
+%elif config.less_precision == 2:
+              int8_t w  = *(int8_t *) pWt++;
+              int8_t w2 = *(int8_t *) pWt2++;
+              int8_t w3 = *(int8_t *) pWt3++;
+              int8_t w4 = *(int8_t *) pWt4++;
+              ${pt_in} x  = *(${pt_in} *) pIm2Col++;
+              ${pt_in} x2 = *(${pt_in} *) pIm2Col2++;
+              ${pt_in} x3 = *(${pt_in} *) pIm2Col3++;
+              ${pt_in} x4 = *(${pt_in} *) pIm2Col4++;
+%endif
+              sum += x * w;
+%if config.less_precision <= 4:
+              sum2 += x2 * w2;
+%if config.less_precision == 2:
+              sum3 += x3 * w3;
+              sum4 += x4 * w4;
+%endif
+%endif
+              j++;
+            }while(j<leftCnt);
+          }
+          if (flag_batch_norm && flag_relu)
+          {
+  %if config.less_precision == 8:
+            *pOutBuffer2 = ${config.bn_fn}(sum, *k1, *lambda1, out_shift);
+  %elif config.less_precision == 4:
+    %if config.kernel.out_data_t == 8:
+            *pOutBuffer2 = ${config.bn_fn}(sum, *k1, *lambda1, out_shift);
+            *(pOutBuffer2 + 1) = ${config.bn_fn}(sum2, *(k1 + 1), *(lambda1 + 1), out_shift);
+    %elif config.kernel.out_data_t == 4:
+            sum = ${config.bn_fn}(sum, *k1, *lambda1, out_shift);
+            sum2 = ${config.bn_fn}(sum2, *(k1 + 1), *(lambda1 + 1), out_shift);
+            *pOutBuffer2 = bitins(sum, n_mask, sum2, mask, off);
+    %endif
+  %elif config.less_precision == 2:
+    %if config.kernel.out_data_t == 8:
+            *pOutBuffer2 = ${config.bn_fn}(sum, *k1, *lambda1, out_shift);
+            *(pOutBuffer2 + 1) = ${config.bn_fn}(sum2, *(k1 + 1), *(lambda1 + 1), out_shift);
+            *(pOutBuffer2 + 2) = ${config.bn_fn}(sum3, *(k1 + 2), *(lambda1 + 2), out_shift);
+            *(pOutBuffer2 + 3) = ${config.bn_fn}(sum4, *(k1 + 3), *(lambda1 + 3), out_shift);
+    %elif config.kernel.out_data_t == 4:
+            sum = ${config.bn_fn}(sum, *k1, *lambda1, out_shift);
+            sum2 = ${config.bn_fn}(sum2, *(k1 + 1), *(lambda1 + 1), out_shift);
+            sum3 = ${config.bn_fn}(sum3, *(k1 + 2), *(lambda1 + 2), out_shift);
+            sum4 = ${config.bn_fn}(sum4, *(k1 + 3), *(lambda1 + 3), out_shift);
+            *pOutBuffer2 = bitins(sum, n_mask, sum2, mask, off);
+            *(pOutBuffer2 + 1) = bitins(sum3, n_mask, sum4, mask, off);
+    %elif config.kernel.out_data_t == 2:
+            sum = ${config.bn_fn}(sum, *k1, *lambda1, out_shift);
+            sum2 = ${config.bn_fn}(sum2, *(k1 + 1), *(lambda1 + 1), out_shift);
+            sum3 = ${config.bn_fn}(sum3, *(k1 + 2), *(lambda1 + 2), out_shift);
+            sum4 = ${config.bn_fn}(sum4, *(k1 + 3), *(lambda1 + 3), out_shift);
+            sum = bitins(sum, n_mask2, sum2, mask2, off2);
+            sum = bitins(sum, n_mask4, sum3, mask4, off4);
+            *pOutBuffer2 = bitins(sum, n_mask6, sum4, mask6, off6);
+    %endif
+  %endif
+          }
+          else
+          {
+            if(flag_relu == 1)
+            {
+  %if config.less_precision == 8:
+              *pOutBuffer2 = ${config.relu_fn}(sum, out_mult, out_shift);
+  %elif config.less_precision == 4:
+    %if config.kernel.out_data_t == 8:
+              *pOutBuffer2 = ${config.relu_fn}(sum, out_mult, out_shift);
+              *(pOutBuffer2 + 1) = ${config.relu_fn}(sum2, out_mult, out_shift);
+    %elif config.kernel.out_data_t == 4:
+              sum = ${config.relu_fn}(sum, out_mult, out_shift);
+              sum2 = ${config.relu_fn}(sum2, out_mult, out_shift);
+              *pOutBuffer2 = bitins(sum, n_mask, sum2, mask, off);
+    %endif
+  %elif config.less_precision == 2:
+    %if config.kernel.out_data_t == 8:
+              *pOutBuffer2 = ${config.relu_fn}(sum, out_mult, out_shift);
+              *(pOutBuffer2 + 1) = ${config.relu_fn}(sum2, out_mult, out_shift);
+              *(pOutBuffer2 + 2) = ${config.relu_fn}(sum3, out_mult, out_shift);
+              *(pOutBuffer2 + 3) = ${config.relu_fn}(sum4, out_mult, out_shift);
+    %elif config.kernel.out_data_t == 4:
+              sum = ${config.relu_fn}(sum, out_mult, out_shift);
+              sum2 = ${config.relu_fn}(sum2, out_mult, out_shift);
+              *pOutBuffer2 = bitins(sum, n_mask, sum2, mask, off);
+              sum3 = ${config.relu_fn}(sum3, out_mult, out_shift);
+              sum4 = ${config.relu_fn}(sum4, out_mult, out_shift);
+              *(pOutBuffer2 + 1) = bitins(sum3, n_mask, sum4, mask, off);
+    %elif config.kernel.out_data_t == 2:
+              sum = ${config.relu_fn}(sum, out_mult, out_shift);
+              sum2 = ${config.relu_fn}(sum2, out_mult, out_shift);
+              sum3 = ${config.relu_fn}(sum3, out_mult, out_shift);
+              sum4 = ${config.relu_fn}(sum4, out_mult, out_shift);
+              sum = bitins(sum, n_mask2, sum2, mask2, off2);
+              sum = bitins(sum, n_mask4, sum3, mask4, off4);
+              *pOutBuffer2 = bitins(sum, n_mask6, sum4, mask6, off6);
+    %endif
+  %endif
+            }
+            else
+            {
+  %if config.less_precision == 8:
+              *pOutBuffer2 = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+  %elif config.less_precision == 4:
+    %if config.kernel.out_data_t == 8:
+              *pOutBuffer2 = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+              *(pOutBuffer2 + 1) = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
+    %elif config.kernel.out_data_t == 4:
+              sum = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+              sum2 = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
+              *pOutBuffer2 = bitins(sum, n_mask, sum2, mask, off);
+    %endif
+  %elif config.less_precision == 2:
+    %if config.kernel.out_data_t == 8:
+              *pOutBuffer2 = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+              *(pOutBuffer2 + 1) = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
+              *(pOutBuffer2 + 2) = (${pt_out}) ${out_clip_fn}(sum3 >> out_shift);
+              *(pOutBuffer2 + 3) = (${pt_out}) ${out_clip_fn}(sum4 >> out_shift);
+    %elif config.kernel.out_data_t == 4:
+              sum = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+              sum2 = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
+              *pOutBuffer2 = bitins(sum, n_mask, sum2, mask, off);
+              sum3 = (${pt_out}) ${out_clip_fn}(sum3 >> out_shift);
+              sum4 = (${pt_out}) ${out_clip_fn}(sum4 >> out_shift);
+              *(pOutBuffer2 + 1) = bitins(sum3, n_mask, sum4, mask, off);
+    %elif config.kernel.out_data_t == 2:
+              sum = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+              sum2 = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
+              sum3 = (${pt_out}) ${out_clip_fn}(sum3 >> out_shift);
+              sum4 = (${pt_out}) ${out_clip_fn}(sum4 >> out_shift);
+              sum = bitins(sum, n_mask2, sum2, mask2, off2);
+              sum = bitins(sum, n_mask4, sum3, mask4, off4);
+              *pOutBuffer2 = bitins(sum, n_mask6, sum4, mask6, off6);
+    %endif
+  %endif
+            }
+          }
+        }
       i_out_x++;
     }while((i_out_x * stride_x) < ((dim_out_x * stride_x) - padding_x_right));
     for (i_out_x; i_out_x < dim_out_x; i_out_x++)
@@ -1849,7 +2408,7 @@ void ${config.fn_name}(
 %if config.less_precision == 8:
         int32_t ptrA  = (int32_t *) pWt;
         ${int_t_in} ptrB = (${int_t_in} *) pIm2Col;
-        ${int_t_in} ptrB_2 = (${int_t_in} *) (pIm2Col + ((dim_in_y>>1) * stride_y * dim_kernel_x));
+        ${int_t_in} ptrB_2 = (${int_t_in} *) (pIm2Col + ((dim_out_y>>1) * stride_y * dim_kernel_x));
 
         ptrA = MacLoadInit(1, 0, 0, 0, ptrA);
         ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
@@ -1857,9 +2416,9 @@ void ${config.fn_name}(
         int32_t  ptrA  = (int32_t *) pWt;
         int32_t  ptrA2 = (int32_t *) pWt2;
         ${int_t_in} ptrB  = (${int_t_in} *) pIm2Col;
-        ${int_t_in} ptrB_2 = (${int_t_in} *) (pIm2Col + ((dim_in_y>>1) * stride_y * dim_kernel_x));
+        ${int_t_in} ptrB_2 = (${int_t_in} *) (pIm2Col + ((dim_out_y>>1) * stride_y * dim_kernel_x));
         ${int_t_in} ptrB2 = (${int_t_in} *) pIm2Col2;
-        ${int_t_in} ptrB2_2 = (${int_t_in} *) (pIm2Col2 + ((dim_in_y>>1) * stride_y * dim_kernel_x));
+        ${int_t_in} ptrB2_2 = (${int_t_in} *) (pIm2Col2 + ((dim_out_y>>1) * stride_y * dim_kernel_x));
 
         ptrA  = MacLoadInit(1, 0, 0, 0, ptrA);
         ptrA2 = MacLoadInit(1, 0, 1, 0, ptrA2);
@@ -1870,13 +2429,13 @@ void ${config.fn_name}(
         int32_t ptrA3 = (int32_t *) pWt3;
         int32_t ptrA4 = (int32_t *) pWt4;
         ${int_t_in} ptrB  = (${int_t_in} *) pIm2Col;
-        ${int_t_in} ptrB_2 = (${int_t_in} *) (pIm2Col + ((dim_in_y>>1) * stride_y * dim_kernel_x));
+        ${int_t_in} ptrB_2 = (${int_t_in} *) (pIm2Col + ((dim_out_y>>1) * stride_y * dim_kernel_x));
         ${int_t_in} ptrB2 = (${int_t_in} *) pIm2Col2;
-        ${int_t_in} ptrB2_2 = (${int_t_in} *) (pIm2Col2 + ((dim_in_y>>1) * stride_y * dim_kernel_x));
+        ${int_t_in} ptrB2_2 = (${int_t_in} *) (pIm2Col2 + ((dim_out_y>>1) * stride_y * dim_kernel_x));
         ${int_t_in} ptrB3 = (${int_t_in} *) pIm2Col3;
-        ${int_t_in} ptrB3_2 = (${int_t_in} *) (pIm2Col3 + ((dim_in_y>>1) * stride_y * dim_kernel_x));
+        ${int_t_in} ptrB3_2 = (${int_t_in} *) (pIm2Col3 + ((dim_out_y>>1) * stride_y * dim_kernel_x));
         ${int_t_in} ptrB4 = (${int_t_in} *) pIm2Col4;
-        ${int_t_in} ptrB4_2 = (${int_t_in} *) (pIm2Col4 + ((dim_in_y>>1) * stride_y * dim_kernel_x));
+        ${int_t_in} ptrB4_2 = (${int_t_in} *) (pIm2Col4 + ((dim_out_y>>1) * stride_y * dim_kernel_x));
 
         ptrA  = MacLoadInit(1, 0, 0, 0, ptrA);
         ptrA2 = MacLoadInit(1, 0, 1, 0, ptrA2);
@@ -1953,39 +2512,39 @@ void ${config.fn_name}(
   %if config.less_precision == 8:
             int8_t w = *(int8_t *) pWt++;
             ${pt_in} x = *(${pt_in} *) pIm2Col++;
-            ${pt_in} x_2 = *(${pt_in} *) (pIm2Col - 1 + ((dim_in_y>>1) * stride_y * dim_kernel_x));
+            ${pt_in} x_2 = *(${pt_in} *) (pIm2Col - 1 + ((dim_out_y>>1) * stride_y * dim_kernel_x));
             sum += x * w;
             sum2 += x_2 * w;
   %elif config.less_precision == 4:
             int8_t w = *(int8_t *) pWt++;
             ${pt_in} x = *(${pt_in} *) pIm2Col++;
-            ${pt_in} x_2 = *(${pt_in} *) (pIm2Col - 1 + ((dim_in_y>>1) * stride_y * dim_kernel_x));
+            ${pt_in} x_2 = *(${pt_in} *) (pIm2Col - 1 + ((dim_out_y>>1) * stride_y * dim_kernel_x));
             sum += x * w;
             sum3 += x_2 * w;
             int8_t w2 = *(int8_t *) pWt2++;
             ${pt_in} x2 = *(${pt_in} *) pIm2Col2++;
-            ${pt_in} x2_2 = *(${pt_in} *) (pIm2Col2 - 1 + ((dim_in_y>>1) * stride_y * dim_kernel_x));
+            ${pt_in} x2_2 = *(${pt_in} *) (pIm2Col2 - 1 + ((dim_out_y>>1) * stride_y * dim_kernel_x));
             sum2 += x2 * w2;
             sum4 += x2_2 * w2;
   %elif config.less_precision == 2:
             int8_t w = *(int8_t *) pWt++;
             ${pt_in} x = *(${pt_in} *) pIm2Col++;
-            ${pt_in} x_2 = *(${pt_in} *) (pIm2Col - 1 + ((dim_in_y>>1) * stride_y * dim_kernel_x));
+            ${pt_in} x_2 = *(${pt_in} *) (pIm2Col - 1 + ((dim_out_y>>1) * stride_y * dim_kernel_x));
             sum += x * w;
             sum5 += x_2 * w;
             int8_t w2 = *(int8_t *) pWt2++;
             ${pt_in} x2 = *(${pt_in} *) pIm2Col2++;
-            ${pt_in} x2_2 = *(${pt_in} *) (pIm2Col2 - 1 + ((dim_in_y>>1) * stride_y * dim_kernel_x));
+            ${pt_in} x2_2 = *(${pt_in} *) (pIm2Col2 - 1 + ((dim_out_y>>1) * stride_y * dim_kernel_x));
             sum2 += x2 * w2;
             sum6 += x2_2 * w2;
             int8_t w3 = *(int8_t *) pWt3++;
             ${pt_in} x3 = *(${pt_in} *) pIm2Col3++;
-            ${pt_in} x3_2 = *(${pt_in} *) (pIm2Col3 - 1 + ((dim_in_y>>1) * stride_y * dim_kernel_x));
+            ${pt_in} x3_2 = *(${pt_in} *) (pIm2Col3 - 1 + ((dim_out_y>>1) * stride_y * dim_kernel_x));
             sum3 += x3 * w3;
             sum7 += x3_2 * w3;
             int8_t w4 = *(int8_t *) pWt4++;
             ${pt_in} x4 = *(${pt_in} *) pIm2Col4++;
-            ${pt_in} x4_2 = *(${pt_in} *) (pIm2Col4 - 1 + ((dim_in_y>>1) * stride_y * dim_kernel_x));
+            ${pt_in} x4_2 = *(${pt_in} *) (pIm2Col4 - 1 + ((dim_out_y>>1) * stride_y * dim_kernel_x));
             sum4 += x4 * w4;
             sum8 += x4_2 * w4;
   %endif
@@ -2179,6 +2738,285 @@ void ${config.fn_name}(
         pOutBuffer2+=(dim_out_x * ch_out_r);
         l++;
       }while(l<(dim_out_y>>1));
+      if(dim_out_y&0x1){
+  %if config.less_precision == 8:
+    %if config.kernel.wt_data_t == 8:
+          pWt = pWeight + i_wt_ch;
+    %else:
+          pWt = pWtBase;
+    %endif
+          int sum = 0;
+          if (pBias != NULL)
+          {
+            sum = ((int) (pBias[i_ch]));
+          }
+          pIm2Col = (pIm2ColBase + (((dim_out_y-1) * stride_y) * dim_kernel_x));
+  %elif config.less_precision == 4:
+    %if config.kernel.wt_data_t == 8:
+          pWt = pWeight + i_wt_ch;
+    %else:
+          pWt = pWtBase;
+    %endif
+          pWt2 = pWt + kernel_size;
+          int sum = 0;
+          int sum2 = 0;
+          if (pBias != NULL)
+          {
+            sum = ((int) (pBias[i_ch]));
+            sum2 = ((int) (pBias[i_ch + 1]));
+          }
+          pIm2Col = (pIm2ColBase + (((dim_out_y-1) * stride_y) * dim_kernel_x));
+          pIm2Col2 = pIm2Col + im2col_size;
+  %elif config.less_precision == 2:
+    %if config.kernel.wt_data_t == 8:
+          pWt = pWeight + i_wt_ch;
+    %else:
+          pWt = pWtBase;
+    %endif
+          pWt2 = pWt + kernel_size;
+          pWt3 = pWt2 + kernel_size;
+          pWt4 = pWt3 + kernel_size;
+          int sum = 0;
+          int sum2 = 0;
+          int sum3 = 0;
+          int sum4 = 0;
+          if (pBias != NULL)
+          {
+            sum = ((int) (pBias[i_ch]));
+            sum2 = ((int) (pBias[i_ch + 1]));
+            sum3 = ((int) (pBias[i_ch + 2]));
+            sum4 = ((int) (pBias[i_ch + 3]));
+          }
+          pIm2Col = (pIm2ColBase + (((dim_out_y-1) * stride_y) * dim_kernel_x));
+          pIm2Col2 = pIm2Col + im2col_size;
+          pIm2Col3 = pIm2Col2 + im2col_size;
+          pIm2Col4 = pIm2Col3 + im2col_size;
+  %endif
+
+%if config.less_precision == 8:
+          int32_t ptrA = (int32_t *) pWt;
+          ${int_t_in} ptrB = (${int_t_in} *) pIm2Col;
+
+          ptrA = MacLoadInit(1, 0, 0, 0, ptrA);
+          ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
+%elif config.less_precision == 4:
+          int32_t ptrA  = (int32_t *) pWt;
+          int32_t ptrA2 = (int32_t *) pWt2;
+          ${int_t_in} ptrB  = (${int_t_in} *) pIm2Col;
+          ${int_t_in} ptrB2 = (${int_t_in} *) pIm2Col2;
+
+          ptrA  = MacLoadInit(1, 0, 0, 0, ptrA);
+          ptrA2 = MacLoadInit(1, 0, 1, 0, ptrA2);
+          ptrB  = MacLoadInit(0, 1, 0, 0, ptrB);
+%elif config.less_precision == 2:
+          int32_t ptrA  = (int32_t *) pWt;
+          int32_t ptrA2 = (int32_t *) pWt2;
+          int32_t ptrA3 = (int32_t *) pWt3;
+          int32_t ptrA4 = (int32_t *) pWt4;
+          ${int_t_in} ptrB  = (${int_t_in} *) pIm2Col;
+          ${int_t_in} ptrB2 = (${int_t_in} *) pIm2Col2;
+          ${int_t_in} ptrB3 = (${int_t_in} *) pIm2Col3;
+          ${int_t_in} ptrB4 = (${int_t_in} *) pIm2Col4;
+
+          ptrA  = MacLoadInit(1, 0, 0, 0, ptrA);
+          ptrA2 = MacLoadInit(1, 0, 1, 0, ptrA2);
+          ptrA3 = MacLoadInit(1, 0, 2, 0, ptrA3);
+          ptrA4 = MacLoadInit(1, 0, 3, 0, ptrA4);
+          ptrB  = MacLoadInit(0, 1, 0, 0, ptrB);
+%endif
+          int j = 0;
+          do{
+%if config.less_precision == 8:
+            sum = ${macload_fn}(1, 0, 0, 0, ptrA, sum);
+            ptrA = MacLoadUpdate(ptrA);
+            ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
+%elif config.less_precision == 4:
+            ptrB2 = MacLoadInit(0, 1, 0, 1, ptrB2);
+            sum = ${macload_fn}(1, 0, 0, 0, ptrA, sum);
+            ptrA = MacLoadUpdate(ptrA);
+            sum2 = ${macload_fn}(1, 0, 1, 1, ptrA2, sum2);
+            ptrA2 = MacLoadUpdate(ptrA2);
+            ptrB = MacLoadInit(0, 1, 0, 0, ptrB);
+%elif config.less_precision == 2:
+            ptrB2 = MacLoadInit(0, 1, 0, 1, ptrB2);
+            sum = ${macload_fn}(0, 1, 0, 0, ptrB3, sum);
+            ptrB3 = MacLoadUpdate(ptrB3);
+            sum2 = ${macload_fn}(0, 1, 1, 1, ptrB4, sum2);
+            ptrB4 = MacLoadUpdate(ptrB4);
+            sum3 = ${macload_fn}(1, 0, 2, 0, ptrA3, sum3);
+            ptrA3 = MacLoadUpdate(ptrA3);
+            sum4 = ${macload_fn}(1, 0, 3, 1, ptrA4, sum4);
+            ptrA4 = MacLoadUpdate(ptrA4);
+            ptrA  = MacLoadInit(1, 0, 0, 0, ptrA);
+            ptrA2 = MacLoadInit(1, 0, 1, 0, ptrA2);
+            ptrB  = MacLoadInit(0, 1, 0, 0, ptrB);
+%endif
+            j++;
+          }while(j<colCnt);
+          if(leftCnt){
+%if config.less_precision == 8:
+            pWt+=(j<<2);
+            pIm2Col+=(j<<2);
+%elif config.less_precision == 4:
+            pWt+=(j<<2);
+            pWt2+=(j<<2);
+            pIm2Col+=(j<<2);
+            pIm2Col2+=(j<<2);
+%elif config.less_precision == 2:
+            pWt+=(j<<2);
+            pWt2+=(j<<2);
+            pWt3+=(j<<2);
+            pWt4+=(j<<2);
+            pIm2Col+=(j<<2);
+            pIm2Col2+=(j<<2);
+            pIm2Col3+=(j<<2);
+            pIm2Col4+=(j<<2);
+%endif
+            do{
+%if config.less_precision == 8:
+              int8_t w = *(int8_t *) pWt++;
+              ${pt_in} x = *(${pt_in} *) pIm2Col++;
+%elif config.less_precision == 4:
+              int8_t w  = *(int8_t *) pWt++;
+              int8_t w2 = *(int8_t *) pWt2++;
+              ${pt_in} x  = *(${pt_in} *) pIm2Col++;
+              ${pt_in} x2 = *(${pt_in} *) pIm2Col2++;
+%elif config.less_precision == 2:
+              int8_t w  = *(int8_t *) pWt++;
+              int8_t w2 = *(int8_t *) pWt2++;
+              int8_t w3 = *(int8_t *) pWt3++;
+              int8_t w4 = *(int8_t *) pWt4++;
+              ${pt_in} x  = *(${pt_in} *) pIm2Col++;
+              ${pt_in} x2 = *(${pt_in} *) pIm2Col2++;
+              ${pt_in} x3 = *(${pt_in} *) pIm2Col3++;
+              ${pt_in} x4 = *(${pt_in} *) pIm2Col4++;
+%endif
+              sum += x * w;
+%if config.less_precision <= 4:
+              sum2 += x2 * w2;
+%if config.less_precision == 2:
+              sum3 += x3 * w3;
+              sum4 += x4 * w4;
+%endif
+%endif
+              j++;
+            }while(j<leftCnt);
+          }
+          if (flag_batch_norm && flag_relu)
+          {
+  %if config.less_precision == 8:
+            *pOutBuffer2 = ${config.bn_fn}(sum, *k1, *lambda1, out_shift);
+  %elif config.less_precision == 4:
+    %if config.kernel.out_data_t == 8:
+            *pOutBuffer2 = ${config.bn_fn}(sum, *k1, *lambda1, out_shift);
+            *(pOutBuffer2 + 1) = ${config.bn_fn}(sum2, *(k1 + 1), *(lambda1 + 1), out_shift);
+    %elif config.kernel.out_data_t == 4:
+            sum = ${config.bn_fn}(sum, *k1, *lambda1, out_shift);
+            sum2 = ${config.bn_fn}(sum2, *(k1 + 1), *(lambda1 + 1), out_shift);
+            *pOutBuffer2 = bitins(sum, n_mask, sum2, mask, off);
+    %endif
+  %elif config.less_precision == 2:
+    %if config.kernel.out_data_t == 8:
+            *pOutBuffer2 = ${config.bn_fn}(sum, *k1, *lambda1, out_shift);
+            *(pOutBuffer2 + 1) = ${config.bn_fn}(sum2, *(k1 + 1), *(lambda1 + 1), out_shift);
+            *(pOutBuffer2 + 2) = ${config.bn_fn}(sum3, *(k1 + 2), *(lambda1 + 2), out_shift);
+            *(pOutBuffer2 + 3) = ${config.bn_fn}(sum4, *(k1 + 3), *(lambda1 + 3), out_shift);
+    %elif config.kernel.out_data_t == 4:
+            sum = ${config.bn_fn}(sum, *k1, *lambda1, out_shift);
+            sum2 = ${config.bn_fn}(sum2, *(k1 + 1), *(lambda1 + 1), out_shift);
+            sum3 = ${config.bn_fn}(sum3, *(k1 + 2), *(lambda1 + 2), out_shift);
+            sum4 = ${config.bn_fn}(sum4, *(k1 + 3), *(lambda1 + 3), out_shift);
+            *pOutBuffer2 = bitins(sum, n_mask, sum2, mask, off);
+            *(pOutBuffer2 + 1) = bitins(sum3, n_mask, sum4, mask, off);
+    %elif config.kernel.out_data_t == 2:
+            sum = ${config.bn_fn}(sum, *k1, *lambda1, out_shift);
+            sum2 = ${config.bn_fn}(sum2, *(k1 + 1), *(lambda1 + 1), out_shift);
+            sum3 = ${config.bn_fn}(sum3, *(k1 + 2), *(lambda1 + 2), out_shift);
+            sum4 = ${config.bn_fn}(sum4, *(k1 + 3), *(lambda1 + 3), out_shift);
+            sum = bitins(sum, n_mask2, sum2, mask2, off2);
+            sum = bitins(sum, n_mask4, sum3, mask4, off4);
+            *pOutBuffer2 = bitins(sum, n_mask6, sum4, mask6, off6);
+    %endif
+  %endif
+          }
+          else
+          {
+            if(flag_relu == 1)
+            {
+  %if config.less_precision == 8:
+              *pOutBuffer2 = ${config.relu_fn}(sum, out_mult, out_shift);
+  %elif config.less_precision == 4:
+    %if config.kernel.out_data_t == 8:
+              *pOutBuffer2 = ${config.relu_fn}(sum, out_mult, out_shift);
+              *(pOutBuffer2 + 1) = ${config.relu_fn}(sum2, out_mult, out_shift);
+    %elif config.kernel.out_data_t == 4:
+              sum = ${config.relu_fn}(sum, out_mult, out_shift);
+              sum2 = ${config.relu_fn}(sum2, out_mult, out_shift);
+              *pOutBuffer2 = bitins(sum, n_mask, sum2, mask, off);
+    %endif
+  %elif config.less_precision == 2:
+    %if config.kernel.out_data_t == 8:
+              *pOutBuffer2 = ${config.relu_fn}(sum, out_mult, out_shift);
+              *(pOutBuffer2 + 1) = ${config.relu_fn}(sum2, out_mult, out_shift);
+              *(pOutBuffer2 + 2) = ${config.relu_fn}(sum3, out_mult, out_shift);
+              *(pOutBuffer2 + 3) = ${config.relu_fn}(sum4, out_mult, out_shift);
+    %elif config.kernel.out_data_t == 4:
+              sum = ${config.relu_fn}(sum, out_mult, out_shift);
+              sum2 = ${config.relu_fn}(sum2, out_mult, out_shift);
+              *pOutBuffer2 = bitins(sum, n_mask, sum2, mask, off);
+              sum3 = ${config.relu_fn}(sum3, out_mult, out_shift);
+              sum4 = ${config.relu_fn}(sum4, out_mult, out_shift);
+              *(pOutBuffer2 + 1) = bitins(sum3, n_mask, sum4, mask, off);
+    %elif config.kernel.out_data_t == 2:
+              sum = ${config.relu_fn}(sum, out_mult, out_shift);
+              sum2 = ${config.relu_fn}(sum2, out_mult, out_shift);
+              sum3 = ${config.relu_fn}(sum3, out_mult, out_shift);
+              sum4 = ${config.relu_fn}(sum4, out_mult, out_shift);
+              sum = bitins(sum, n_mask2, sum2, mask2, off2);
+              sum = bitins(sum, n_mask4, sum3, mask4, off4);
+              *pOutBuffer2 = bitins(sum, n_mask6, sum4, mask6, off6);
+    %endif
+  %endif
+            }
+            else
+            {
+  %if config.less_precision == 8:
+              *pOutBuffer2 = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+  %elif config.less_precision == 4:
+    %if config.kernel.out_data_t == 8:
+              *pOutBuffer2 = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+              *(pOutBuffer2 + 1) = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
+    %elif config.kernel.out_data_t == 4:
+              sum = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+              sum2 = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
+              *pOutBuffer2 = bitins(sum, n_mask, sum2, mask, off);
+    %endif
+  %elif config.less_precision == 2:
+    %if config.kernel.out_data_t == 8:
+              *pOutBuffer2 = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+              *(pOutBuffer2 + 1) = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
+              *(pOutBuffer2 + 2) = (${pt_out}) ${out_clip_fn}(sum3 >> out_shift);
+              *(pOutBuffer2 + 3) = (${pt_out}) ${out_clip_fn}(sum4 >> out_shift);
+    %elif config.kernel.out_data_t == 4:
+              sum = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+              sum2 = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
+              *pOutBuffer2 = bitins(sum, n_mask, sum2, mask, off);
+              sum3 = (${pt_out}) ${out_clip_fn}(sum3 >> out_shift);
+              sum4 = (${pt_out}) ${out_clip_fn}(sum4 >> out_shift);
+              *(pOutBuffer2 + 1) = bitins(sum3, n_mask, sum4, mask, off);
+    %elif config.kernel.out_data_t == 2:
+              sum = (${pt_out}) ${out_clip_fn}(sum >> out_shift);
+              sum2 = (${pt_out}) ${out_clip_fn}(sum2 >> out_shift);
+              sum3 = (${pt_out}) ${out_clip_fn}(sum3 >> out_shift);
+              sum4 = (${pt_out}) ${out_clip_fn}(sum4 >> out_shift);
+              sum = bitins(sum, n_mask2, sum2, mask2, off2);
+              sum = bitins(sum, n_mask4, sum3, mask4, off4);
+              *pOutBuffer2 = bitins(sum, n_mask6, sum4, mask6, off6);
+    %endif
+  %endif
+            }
+          }
+        }
     }
 %if config.less_precision == 8:
     i_in_ch+=in_image_size;
