@@ -69,7 +69,7 @@ MIXED_SKIP("16");
 %endif
 #if (KERNEL == 888) || (KERNEL == 848) || (KERNEL == 828) || (KERNEL == 488) || (KERNEL == 448) || (KERNEL == 428) || (KERNEL == 288) || (KERNEL == 248) || (KERNEL == 228)
 IVEC_FMT("2");
-#elif (KERNEL == 484) || (KERNEL == 444) || (KERNEL == 424) || (KERNEL == 284) || (KERMEL == 244) || (KERNEL == 224)
+#elif (KERNEL == 484) || (KERNEL == 444) || (KERNEL == 424) || (KERNEL == 284) || (KERNEL == 244) || (KERNEL == 224)
 IVEC_FMT("3");
 #elif (KERNEL == 282) || (KERNEL == 242) || (KERNEL == 222)
 IVEC_FMT("4");
