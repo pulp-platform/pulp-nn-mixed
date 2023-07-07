@@ -124,8 +124,8 @@ uint8_t *pulp_nn_matmul_i8_u4_i8(
       int8_t inA2 = *pA2++;
       int8_t inA3 = *pA3++;
       int8_t inA4 = *pA4++;
-      uint8_t inB = *pB++;
-      uint8_t inB2 = *pB2++;
+      int8_t inB = *pB++;
+      int8_t inB2 = *pB2++;
       asm volatile("": : :"memory");
       sum += inA * inB;
       sum2 += inA2 * inB;
@@ -241,8 +241,8 @@ uint8_t *pulp_nn_matmul_i8_u4_i8(
     while(col_cnt_im2col > 0)
     {
       int8_t inA = *pA++;
-      uint8_t inB = *pB++;
-      uint8_t inB2 = *pB2++;
+      int8_t inB = *pB++;
+      int8_t inB2 = *pB2++;
       asm volatile("": : :"memory");
       sum += inA * inB;
       sum2 += inA * inB2;

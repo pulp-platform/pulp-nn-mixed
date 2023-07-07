@@ -120,6 +120,8 @@ void __attribute__((noinline)) xpulp_nn_linear_i2_u2_i2(
 
       ptrB  = MacLoadInit(0, 1, 0, 0, ptrB);
 
+      //ensure enough instructions in the HW loop - otherwise it will work on GVSOC but not in real hardware!
+      asm volatile("nop;");
     }
     uint16_t col_cnt = dim_vec & 0xf;
     if(col_cnt)

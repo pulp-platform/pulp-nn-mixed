@@ -253,75 +253,78 @@ void __attribute__((noinline)) ${config.fn_name}(
       ptrB  = MacLoadInit(0, 1, 0, 0, ptrB);
 
 %if config.kernel.in_data_t != config.kernel.wt_data_t:
-%if (int(config.kernel.in_data_t/config.kernel.wt_data_t) == 4) or (int(config.kernel.wt_data_t/config.kernel.in_data_t) == 4):
+  %if (int(config.kernel.in_data_t/config.kernel.wt_data_t) == 4) or (int(config.kernel.wt_data_t/config.kernel.in_data_t) == 4):
       sum = ${macload_fn}(1, 0, 0, 0, ptrA, sum);
       ptrA = MacLoadUpdate(ptrA);
-%if config.kernel.out_data_t < 8:
+    %if config.kernel.out_data_t < 8:
       sum2 = ${macload_fn}(1, 0, 1, 0, ptrA2, sum2);
       ptrA2 = MacLoadUpdate(ptrA2);
-%if config.kernel.out_data_t == 2:
+      %if config.kernel.out_data_t == 2:
       sum3 = ${macload_fn}(1, 0, 2, 0, ptrA3, sum3);
       ptrA3 = MacLoadUpdate(ptrA3);
       sum4 = ${macload_fn}(1, 0, 3, 0, ptrA4, sum4);
       ptrA4 = MacLoadUpdate(ptrA4);
-%endif
-%endif
+      %endif
+    %endif
 
       ptrB  = MacLoadInit(0, 1, 0, 0, ptrB);
 
       sum = ${macload_fn}(1, 0, 0, 0, ptrA, sum);
       ptrA = MacLoadUpdate(ptrA);
-%if config.kernel.out_data_t < 8:
+    %if config.kernel.out_data_t < 8:
       sum2 = ${macload_fn}(1, 0, 1, 0, ptrA2, sum2);
       ptrA2 = MacLoadUpdate(ptrA2);
-%if config.kernel.out_data_t == 2:
+      %if config.kernel.out_data_t == 2:
       sum3 = ${macload_fn}(1, 0, 2, 0, ptrA3, sum3);
       ptrA3 = MacLoadUpdate(ptrA3);
       sum4 = ${macload_fn}(1, 0, 3, 0, ptrA4, sum4);
       ptrA4 = MacLoadUpdate(ptrA4);
-%endif
-%endif
+      %endif
+    %endif
 
       ptrB  = MacLoadInit(0, 1, 0, 0, ptrB);
-%endif
-%if config.kernel.wt_data_t < config.kernel.in_data_t:
+  %endif
+  %if config.kernel.wt_data_t < config.kernel.in_data_t:
       pA  = ${config.unpack_wt_fn}(pA , vecA);
-%if config.kernel.out_data_t < 8:
+    %if config.kernel.out_data_t < 8:
       pA2  = ${config.unpack_wt_fn}(pA2 , vecA2);
-%if config.kernel.out_data_t == 2:
+      %if config.kernel.out_data_t == 2:
       pA3  = ${config.unpack_wt_fn}(pA3 , vecA3);
       pA4  = ${config.unpack_wt_fn}(pA4 , vecA4);
-%endif
-%endif
+      %endif
+    %endif
 
       ptrA   = MacLoadAssign(startA);
-%if config.kernel.out_data_t < 8:
+    %if config.kernel.out_data_t < 8:
       ptrA2   = MacLoadAssign(startA2);
-%if config.kernel.out_data_t == 2:
+      %if config.kernel.out_data_t == 2:
       ptrA3   = MacLoadAssign(startA3);
       ptrA4   = MacLoadAssign(startA4);
-%endif
-%endif
-%endif
-%if config.kernel.in_data_t < config.kernel.wt_data_t:
+      %endif
+    %endif
+  %endif
+  %if config.kernel.in_data_t < config.kernel.wt_data_t:
       pB  = ${config.unpack_in_fn}(pB , vecB);
 
       ptrB   = MacLoadAssign(startB);
-%endif
+  %endif
       sum = ${macload_fn}(1, 0, 0, 0, ptrA, sum);
       ptrA = MacLoadUpdate(ptrA);
-%if config.kernel.out_data_t < 8:
+  %if config.kernel.out_data_t < 8:
       sum2 = ${macload_fn}(1, 0, 1, 0, ptrA2, sum2);
       ptrA2 = MacLoadUpdate(ptrA2);
-%if config.kernel.out_data_t == 2:
+    %if config.kernel.out_data_t == 2:
       sum3 = ${macload_fn}(1, 0, 2, 0, ptrA3, sum3);
       ptrA3 = MacLoadUpdate(ptrA3);
       sum4 = ${macload_fn}(1, 0, 3, 0, ptrA4, sum4);
       ptrA4 = MacLoadUpdate(ptrA4);
-%endif
-%endif
+    %endif
+  %endif
 
       ptrB  = MacLoadInit(0, 1, 0, 0, ptrB);
+%else:
+      //ensure enough instructions in the HW loop - otherwise it will work on GVSOC but not in real hardware!
+      asm volatile("nop;");
 %endif
     }
 %if config.kernel.wt_data_t < config.kernel.in_data_t:

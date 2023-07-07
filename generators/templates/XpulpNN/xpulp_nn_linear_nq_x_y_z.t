@@ -146,6 +146,9 @@ void __attribute__((noinline)) ${config.fn_name}(
       ptrA = MacLoadUpdate(ptrA);
 
       ptrB  = MacLoadInit(0, 1, 0, 0, ptrB);
+%else:
+      //ensure enough instructions in the HW loop - otherwise it will work on GVSOC but not in real hardware!
+      asm volatile("nop;");
 %endif
     }
 %if config.kernel.wt_data_t < config.kernel.in_data_t:

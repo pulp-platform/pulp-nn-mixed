@@ -157,8 +157,8 @@ int8_t *pulp_nn_matmul_i8_i8_i2(
       int8_t inA2 = (int8_t) bitext((int) *pA2, 2, 0);
       int8_t inA3 = (int8_t) bitext((int) *pA3, 2, 0);
       int8_t inA4 = (int8_t) bitext((int) *pA4, 2, 0);
-      uint8_t inB = *pB++;
-      uint8_t inB2 = *pB2++;
+      int8_t inB = *pB++;
+      int8_t inB2 = *pB2++;
       sum += inA * inB;
       sum2 += inA2 * inB;
       sum3 += inA3 * inB;
@@ -331,8 +331,8 @@ int8_t *pulp_nn_matmul_i8_i8_i2(
     while(col_cnt_im2col > 0)
     {
       int8_t inA = (int8_t) bitext((int) *pA, 2, 0);
-      uint8_t inB = *pB++;
-      uint8_t inB2 = *pB2++;
+      int8_t inB = *pB++;
+      int8_t inB2 = *pB2++;
       sum += inA * inB;
       sum2 += inA * inB2;
       inA = (int8_t) bitext((int) *pA, 2, 2);

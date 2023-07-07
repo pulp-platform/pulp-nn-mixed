@@ -7,7 +7,7 @@ ifndef signed
 signed=1
 endif
 ifndef kernel
-kernel=8
+kernel=${config.kernel.in_data_t}
 %elif config.kernel.type == 'linear_no_quant':
 ifndef signed
 signed=1

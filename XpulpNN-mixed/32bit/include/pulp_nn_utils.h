@@ -1243,8 +1243,8 @@ static void __attribute__((noinline)) pulp_nn_compare_and_replace_if_larger_u4(u
 
   while(cnt > 0u)
   {
-    pulp_nn_u4_to_u8(pIn, inp);
-    pulp_nn_u4_to_u8(pCom, com);
+    pulp_nn_u4_to_u8(pIn, (uint8_t *)inp);
+    pulp_nn_u4_to_u8(pCom, (uint8_t *)com);
 
     *((v4u *)out) = max4(inp[0], com[0]);
 
@@ -1303,8 +1303,8 @@ static void __attribute__((noinline)) pulp_nn_compare_and_replace_if_larger_i4(i
 
   while(cnt > 0u)
   {
-    pulp_nn_i4_to_i8(pIn, inp);
-    pulp_nn_i4_to_i8(pCom, com);
+    pulp_nn_i4_to_i8(pIn, (int8_t *)inp);
+    pulp_nn_i4_to_i8(pCom, (int8_t *)com);
 
     *((v4s *)out) = maxs4(inp[0], com[0]);
 
