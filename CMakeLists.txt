@@ -13,13 +13,18 @@ target_compile_options(pulp-nn-mixed PRIVATE
   -Wno-incompatible-pointer-types
   -Wno-implicit-function-declaration
   -Wno-attributes
-  -Wno-discarded-qualifiers
   -Wno-pointer-sign
   -Wno-unused-value
   -Wno-int-conversion
   -Wno-typedef-redefinition
   -Wno-uninitialized
 )
+
+if(TOOLCHAIN STREQUAL LLVM)
+  target_compile_options(pulp-nn-mixed PRIVATE -Wno-ignored-qualifiers)
+else()
+  target_compile_options(pulp-nn-mixed PRIVATE -Wno-discarded-qualifiers)
+endif()
 
 target_include_directories(pulp-nn-mixed PRIVATE ${PULP_SDK_INCLUDES})
 target_compile_options(pulp-nn-mixed PRIVATE ${PULP_SDK_COMPILE_FLAGS})
