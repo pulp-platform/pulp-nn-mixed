@@ -23,9 +23,6 @@
 #define __PULPNN_UTILS__
 
 #include "pmsis.h"
-#ifdef GAP_SDK
-#include "pulp.h"
-#endif
 
 #define bitext(x,size,off)                                      __builtin_pulp_bextract(x,size,off)
 #define bitextu(x,size,off)                                     __builtin_pulp_bextractu(x,size,off)
