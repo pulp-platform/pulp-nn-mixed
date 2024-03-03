@@ -37,7 +37,11 @@ else:
 
 #define bitext(x,size,off)                                      __builtin_pulp_bextract(x,size,off)
 #define bitextu(x,size,off)                                     __builtin_pulp_bextractu(x,size,off)
+#ifdef __clang__
+#define bitins(dst,not_mask_imm,src,mask_imm,off)               __builtin_binsert(dst,not_mask_imm,src,mask_imm,off)
+#else
 #define bitins(dst,not_mask_imm,src,mask_imm,off)               __builtin_pulp_binsert(dst,not_mask_imm,src,mask_imm,off)
+#endif
 #define pack(x,y,z,t)                                           __builtin_pulp_pack4(x,y,z,t)
 #define max4(a,b)                                               __builtin_pulp_maxu4(a,b)
 #define maxs4(a, b)                                             __builtin_pulp_max4(a, b)

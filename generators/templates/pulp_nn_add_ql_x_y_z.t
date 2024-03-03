@@ -192,5 +192,29 @@ byte_chan_shift_out = int(np.log2(els_per_byte_out))
         pOutBuffer++;
 %endif
     }
+%if dw_out == 8 and dw_in2 == 8 and dw_in1 == 8:
+    // SCHEREMO: Cleanup leftovers, not doing it with this codebase for sub-byte formats
+    for (int i=0; i<(((stop-start) * ch_im_out_r * dim_im_in_x) % ${int(4/els_per_byte_out)}); i++){
+        in1_rq1 = ((*(target1)) * in1_mul + in1_add) >> in1_shift;
+        in2_rq1 = ((*(target2)) * in2_mul + in2_add) >> in2_shift;
+
+        // SCHEREMO: Maybe it's just LLVM, but unless I hack 3 non-unrolled nops in here, stuff fails
+        #pragma nounroll
+        for (int j = 0; j < 3; j++) {
+    	    asm volatile("nop" ::);
+        }
+
+        target1++;
+        target2++;
+        sum1 = ${clip_in1_fn}(in1_rq1) + ${clip_in2_fn}(in2_rq1);
+        if (out_requant_flag) {
+	        sum1 = (sum1 * out_mul + out_add) >> out_shift;
+        }
+
+        out1 = ${clip_out_fn}(sum1);
+        *pOutBuffer = (${pt_out})out1;
+        pOutBuffer++;
+    }
+%endif
    pi_cl_team_barrier(0);
 }
