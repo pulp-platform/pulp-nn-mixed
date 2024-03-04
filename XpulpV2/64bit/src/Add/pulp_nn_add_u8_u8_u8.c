@@ -178,5 +178,27 @@ void __attribute__ ((noinline)) pulp_nn_add_u8_u8_u8(
         *pOutBuffer = (uint8_t) out4;
         pOutBuffer++;
     }
+    // SCHEREMO: Cleanup leftovers, not doing it with this codebase for sub-byte formats
+    for (int i=0; i<(((stop-start) * ch_im_out_r * dim_im_in_x) % 4); i++){
+        in1_rq1 = ((*(target1)) * in1_mul + in1_add) >> in1_shift;
+        in2_rq1 = ((*(target2)) * in2_mul + in2_add) >> in2_shift;
+
+        // SCHEREMO: Maybe it's just LLVM, but unless I hack 3 non-unrolled nops in here, stuff fails
+        #pragma nounroll
+        for (int j = 0; j < 3; j++) {
+    	    asm volatile("nop" ::);
+        }
+
+        target1++;
+        target2++;
+        sum1 = clip8(in1_rq1) + clip8(in2_rq1);
+        if (out_requant_flag) {
+	        sum1 = (sum1 * out_mul + out_add) >> out_shift;
+        }
+
+        out1 = clip8(sum1);
+        *pOutBuffer = (uint8_t)out1;
+        pOutBuffer++;
+    }
    pi_cl_team_barrier(0);
 }
