@@ -193,5 +193,5 @@ void __attribute__((noinline)) xpulp_nn_linear_u8_u2_i8(
       }
     }
   }
-  pi_cl_team_barrier(0);
+  pi_cl_team_barrier();
 }

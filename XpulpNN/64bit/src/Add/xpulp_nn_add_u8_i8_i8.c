@@ -200,5 +200,5 @@ void __attribute__ ((noinline)) xpulp_nn_add_u8_i8_i8(
         *pOutBuffer = (int8_t)out1;
         pOutBuffer++;
     }
-   pi_cl_team_barrier(0);
+   pi_cl_team_barrier();
 }

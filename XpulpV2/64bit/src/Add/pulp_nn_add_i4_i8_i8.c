@@ -178,5 +178,5 @@ void __attribute__ ((noinline)) pulp_nn_add_i4_i8_i8(
         *pOutBuffer = (int8_t) out4;
         pOutBuffer++;
     }
-   pi_cl_team_barrier(0);
+   pi_cl_team_barrier();
 }

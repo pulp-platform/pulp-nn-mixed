@@ -183,5 +183,5 @@ void pulp_nn_linear_u4_i2_i4(
           }
         }
     }
-    pi_cl_team_barrier(0);
+    pi_cl_team_barrier();
 }
