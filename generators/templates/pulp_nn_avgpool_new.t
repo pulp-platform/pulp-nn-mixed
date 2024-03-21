@@ -205,5 +205,5 @@ cur_mask_shift = c * dw_in
             }
         }
     }
- pi_cl_team_barrier(0);
+ pi_cl_team_barrier();
 }
