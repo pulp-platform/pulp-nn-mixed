@@ -114,7 +114,7 @@ void __attribute__ ((noinline)) ${config.fn_name}(
     }
   }
 
-  pi_cl_team_barrier(0);
+  pi_cl_team_barrier();
   if (dim_im_out_y < NUM_CORES)
   {
     n_cores = dim_im_out_y;
@@ -163,5 +163,5 @@ void __attribute__ ((noinline)) ${config.fn_name}(
       ${config.comp_and_replace_fn}(target, row_start, dim_im_out_x * ch_im_in_r);
     }
   }
-  pi_cl_team_barrier(0);
+  pi_cl_team_barrier();
 }

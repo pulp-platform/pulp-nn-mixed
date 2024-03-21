@@ -95,7 +95,7 @@ void __attribute__ ((noinline)) ${config.fn_name}(
   }
 
   /* synch barrier + parallelization for the second pooling phase */
-  pi_cl_team_barrier(0);
+  pi_cl_team_barrier();
   if (dim_im_out_y < NUM_CORES)
   {
     n_cores = dim_im_out_y;
@@ -145,5 +145,5 @@ void __attribute__ ((noinline)) ${config.fn_name}(
     }
   }
 
-  pi_cl_team_barrier(0);
+  pi_cl_team_barrier();
 }

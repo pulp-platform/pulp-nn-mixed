@@ -498,5 +498,5 @@ void ${config.fn_name}(
         *pOutBuffer = sum;
         pOutBuffer++;
     }
-    pi_cl_team_barrier(0);
+    pi_cl_team_barrier();
 }

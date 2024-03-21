@@ -134,5 +134,5 @@ void pulp_nn_linear_i4_i32_i4(
         *pOutBuffer = sum;
         pOutBuffer++;
     }
-    pi_cl_team_barrier(0);
+    pi_cl_team_barrier();
 }

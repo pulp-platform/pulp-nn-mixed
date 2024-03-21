@@ -93,7 +93,7 @@ void __attribute__ ((noinline)) xpulp_nn_maxpool_i8(
     }
   }
 
-  pi_cl_team_barrier(0);
+  pi_cl_team_barrier();
   if (dim_im_out_y < NUM_CORES)
   {
     n_cores = dim_im_out_y;
@@ -142,5 +142,5 @@ void __attribute__ ((noinline)) xpulp_nn_maxpool_i8(
       pulp_nn_compare_and_replace_if_larger_i8(target, row_start, dim_im_out_x * ch_im_in_r);
     }
   }
-  pi_cl_team_barrier(0);
+  pi_cl_team_barrier();
 }

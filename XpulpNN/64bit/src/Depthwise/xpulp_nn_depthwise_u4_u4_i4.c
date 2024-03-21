@@ -571,5 +571,5 @@ void xpulp_nn_depthwise_u4_u4_i4(
     lambda1+=2;
     i_out_ch++;
   }
-  pi_cl_team_barrier(0);
+  pi_cl_team_barrier();
 }

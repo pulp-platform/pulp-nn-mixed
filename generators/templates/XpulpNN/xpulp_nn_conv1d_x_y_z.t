@@ -505,5 +505,5 @@ void __attribute__((noinline)) ${config.fn_name}(
     pOutBuffer+=(extra_chunk * (1 - section) * ch_out_r);
     pIm2Col = pIm2ColBase;
   }
-  pi_cl_team_barrier(0);
+  pi_cl_team_barrier();
 }

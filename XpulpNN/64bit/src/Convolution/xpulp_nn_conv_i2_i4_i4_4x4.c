@@ -305,5 +305,5 @@ void __attribute__((noinline)) xpulp_nn_conv_i2_i4_i4_4x4(
     pOutBuffer+=(extra_chunk * ((dim_out_x_r + ((1 - section) * flag_dim_out_x_odd)) * ch_out_r));
     pIm2Col = pIm2ColBase;
   }
-  pi_cl_team_barrier(0);
+  pi_cl_team_barrier();
 }

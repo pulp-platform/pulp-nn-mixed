@@ -174,5 +174,5 @@ void __attribute__((noinline)) xpulp_nn_linear_i4_i4_i2(
       }
     }
   }
-  pi_cl_team_barrier(0);
+  pi_cl_team_barrier();
 }

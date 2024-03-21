@@ -175,5 +175,5 @@ void __attribute__ ((noinline)) xpulp_nn_add_i2_i2_u4(
         *pOutBuffer = (uint8_t) bitins(out3, (int8_t) 0x0f, out4, (int8_t) 0xf0, 4);
         pOutBuffer++;
     }
-   pi_cl_team_barrier(0);
+   pi_cl_team_barrier();
 }

@@ -216,5 +216,5 @@ byte_chan_shift_out = int(np.log2(els_per_byte_out))
         pOutBuffer++;
     }
 %endif
-   pi_cl_team_barrier(0);
+   pi_cl_team_barrier();
 }

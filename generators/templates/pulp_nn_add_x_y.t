@@ -160,5 +160,5 @@ void __attribute__ ((noinline)) ${config.fn_name}(
         pOutBuffer++;
 %endif
     }
-   pi_cl_team_barrier(0);
+   pi_cl_team_barrier();
 }

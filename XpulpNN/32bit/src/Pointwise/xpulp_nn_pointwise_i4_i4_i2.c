@@ -215,5 +215,5 @@ void xpulp_nn_pointwise_i4_i4_i2(
     }
     pOutBuffer+=(extra_chunk * ((dim_out_x_r + ((1 - section) * flag_dim_out_x_odd)) * ch_out));
   }
-  pi_cl_team_barrier(0);
+  pi_cl_team_barrier();
 }

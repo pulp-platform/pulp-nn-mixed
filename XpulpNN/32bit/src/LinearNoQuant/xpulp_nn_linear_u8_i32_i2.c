@@ -123,5 +123,5 @@ void __attribute__((noinline)) xpulp_nn_linear_u8_i32_i2(
     *pOutBuffer = sum;
     pOutBuffer++;
   }
-  pi_cl_team_barrier(0);
+  pi_cl_team_barrier();
 }

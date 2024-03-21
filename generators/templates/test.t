@@ -280,7 +280,7 @@ void test()
 %endif
 %endif
   }
-  pi_cl_team_barrier(0);
+  pi_cl_team_barrier();
 
 #ifdef PERFORMANCE
 #ifdef VERBOSE_PERF
@@ -359,7 +359,7 @@ ${config.call}
   }
 %endif
 #endif /* VERBOSE */
-  pi_cl_team_barrier(0);
+  pi_cl_team_barrier();
 #endif /* PERFORMANCE */
 #ifdef CHECK
   if(pi_core_id()==0)
@@ -463,7 +463,7 @@ ${config.call}
 %endif
 %endif
   }
-  pi_cl_team_barrier(0);
+  pi_cl_team_barrier();
 #endif /* CHECK */
 }
 

@@ -280,5 +280,5 @@ void __attribute__((noinline)) xpulp_nn_mix_conv_u8_u8_i8(
     pOutBuffer+=(extra_chunk * ((dim_out_x_r + ((1 - section) * flag_dim_out_x_odd)) * ch_out_r));
     pIm2Col = pIm2ColBase;
   }
-  pi_cl_team_barrier(0);
+  pi_cl_team_barrier();
 }

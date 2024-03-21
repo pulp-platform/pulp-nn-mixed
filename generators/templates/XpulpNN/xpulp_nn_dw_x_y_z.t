@@ -1833,5 +1833,5 @@ void ${config.fn_name}(
   %endif
 %endif
   }
-  pi_cl_team_barrier(0);
+  pi_cl_team_barrier();
 }
