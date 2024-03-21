@@ -31,13 +31,9 @@ pt_out = f"{'' if config.kernel.out_signed else 'u'}int8_t"
 bext = f"bitext{'' if config.kernel.in_signed else '_u'}"
 int_t = f"{('' if config.kernel.in_signed else 'unsigned ') + 'int'}"
 els_per_out_byte = 8//config.kernel.out_data_t
-out_base_mask = 255 >> (8-config.kernel.out_data_t) 
+out_base_mask = 255 >> (8-config.kernel.out_data_t)
 %>
 
-
-#define bitins(dst,not_mask_imm,src,mask_imm,off) __builtin_pulp_binsert(dst,not_mask_imm,src,mask_imm,off)
-#define bitext_u(x,size,off) __builtin_pulp_bextractu(x,size,off)
-#define bitext(x,size,off) __builtin_pulp_bextract(x,size,off)
 
 void __attribute__ ((noinline))  ${config.fn_name}(
   ${pt_in} * pIn,
