@@ -88,5 +88,5 @@ void __attribute__ ((noinline)) xpulp_nn_add_u8_u2(
         pOutBuffer++;
 
     }
-   pi_cl_team_barrier(0);
+   pi_cl_team_barrier();
 }

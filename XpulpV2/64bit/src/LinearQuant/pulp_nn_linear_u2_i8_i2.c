@@ -206,5 +206,5 @@ void pulp_nn_linear_u2_i8_i2(
           }
         }
     }
-    pi_cl_team_barrier(0);
+    pi_cl_team_barrier();
 }

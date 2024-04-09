@@ -87,5 +87,5 @@ void __attribute__ ((noinline)) pulp_nn_add_u4_u2(
         *pOutBuffer = bitins(out3, n_mask, out4, mask, off);
         pOutBuffer++;
     }
-   pi_cl_team_barrier(0);
+   pi_cl_team_barrier();
 }

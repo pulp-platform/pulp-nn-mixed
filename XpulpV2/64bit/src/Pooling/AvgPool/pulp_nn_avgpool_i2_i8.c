@@ -23,10 +23,6 @@
 
 
 
-#define bitins(dst,not_mask_imm,src,mask_imm,off) __builtin_pulp_binsert(dst,not_mask_imm,src,mask_imm,off)
-#define bitext_u(x,size,off) __builtin_pulp_bextractu(x,size,off)
-#define bitext(x,size,off) __builtin_pulp_bextract(x,size,off)
-
 void __attribute__ ((noinline))  pulp_nn_avgpool_i2_i8(
   int8_t * pIn,
   int8_t * pOut,
@@ -144,5 +140,5 @@ void __attribute__ ((noinline))  pulp_nn_avgpool_i2_i8(
             }
         }
     }
- pi_cl_team_barrier(0);
+ pi_cl_team_barrier();
 }

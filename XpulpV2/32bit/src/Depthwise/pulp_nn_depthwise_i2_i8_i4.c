@@ -726,5 +726,5 @@ void pulp_nn_depthwise_i2_i8_i4(
     lambda1+=4;
     i_out_ch+=4;
   }
-  pi_cl_team_barrier(0);
+  pi_cl_team_barrier();
 }
