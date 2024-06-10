@@ -154,7 +154,7 @@ uint8_t * __attribute__((noinline)) xpulp_nn_mix_matmul_u2_u2_i2(
 
       pB+=loop_cnt_im2col_a;
       
-      uint8_t *pB2 = (pB + loop_cnt_im2col_a);
+      uint8_t *pB2 = (pB + num_col_im2col_a);
 
       do
       {

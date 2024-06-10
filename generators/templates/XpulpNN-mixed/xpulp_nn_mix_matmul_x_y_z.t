@@ -446,7 +446,7 @@ uint8_t * __attribute__((noinline)) ${config.fn_name}(
 
       pB+=loop_cnt_im2col_a;
       
-      uint8_t *pB2 = (pB + loop_cnt_im2col_a);
+      uint8_t *pB2 = (pB + num_col_im2col_a);
 
       do
       {
