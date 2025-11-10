@@ -19,7 +19,7 @@
 
 import errno
 import os
-import imp, sys
+import sys
 import shutil
 import torch
 import torch.nn as nn
@@ -625,7 +625,7 @@ class PULPNNBatchNorm(nn.Module):
 
     def forward(self, input):
         output = input * self.k + self.l
-        x = torch.floor(output >> self.d)
+        x = torch.floor(output / (2**self.d))
         out = clip8(x, self.BitO, self.SgnO)
         return out
 
@@ -646,7 +646,7 @@ class PULPNN1DBatchNorm(nn.Module):
 
     def forward(self, input):
         output = input * self.k + self.l
-        x = torch.floor(output >> self.d)
+        x = torch.floor(output / (2**self.d))
         out = clip8(x, self.BitO, self.SgnO)
         return out
 
@@ -659,7 +659,7 @@ class PULPNNReLu(nn.Module):
         self.SgnO = SgnO
 
     def forward(self, input):
-        output = torch.floor((input * self.out_mult) >> self.out_shift)
+        output = torch.floor((input * self.out_mult) / (2**self.out_shift))
         out = clip8(output, self.BitO, self.SgnO)
         return out
 
@@ -674,7 +674,7 @@ class PULPNNShiftClip(nn.Module):
         self.SgnO = SgnO
 
     def forward(self, input):
-        output = torch.floor(input >> self.out_shift)
+        output = torch.floor(input / (2**self.out_shift))
         out = clip8(output, self.BitO, self.SgnO)
         return out
 
@@ -1310,7 +1310,7 @@ def add_mixed_tests_generator(layer, kernel):
     out_shift = 3
 
     # Running the network
-    y = clip8(((x1 * m1)+(x2 * m2)) >> out_shift, kernel.in_data_t if kernel.in_data_t > kernel.out_data_t else kernel.out_data_t)
+    y = clip8(((x1 * m1)+(x2 * m2)) / (2**out_shift), kernel.in_data_t if kernel.in_data_t > kernel.out_data_t else kernel.out_data_t)
 
     str_out = '#define OUT_MULT1 ' + str(m1) +'\n'
     str_out += '#define OUT_MULT2 ' + str(m2) +'\n'
@@ -1341,7 +1341,7 @@ def quant_add_mixed_tests_generator(layer, kernel):
     out_shift = 3
 
     # Running the network
-    y = clip8(((x1 * m1)+(x2 * m2)) >> out_shift, kernel.in_data_t if kernel.in_data_t > kernel.out_data_t else kernel.out_data_t)
+    y = clip8(((x1 * m1)+(x2 * m2)) / (2**out_shift), kernel.in_data_t if kernel.in_data_t > kernel.out_data_t else kernel.out_data_t)
 
     str_out = '#define OUT_MULT1 ' + str(m1) +'\n'
     str_out += '#define OUT_MULT2 ' + str(m2) +'\n'
