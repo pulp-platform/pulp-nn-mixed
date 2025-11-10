@@ -101,7 +101,7 @@ PI_L1 int8_t WEIGHT_INT8_L1[(DIM_KERNEL_X * DIM_KERNEL_Y * CH_IM_IN * CH_IM_OUT)
 %if config.layer.bias == True:
 PI_L1 int8_t BIAS_L1[CH_IM_OUT] = BIAS;
 %else:
-PI_L1 int8_t BIAS_L1[CH_IM_OUT] = {0};
+PI_L1 int8_t BIAS_L1 = NULL;
 %endif
 %elif config.kernel.type in ['convolution', 'pointwise', 'avgpool']:
 %if config.kernel.in_data_t == 2:
@@ -186,7 +186,7 @@ PI_L1 ${pt_in} IM2COL_L1[(((CH_IM_IN >> 2) * DIM_KERNEL_X * DIM_KERNEL_Y) << 2) 
 %if config.layer.bias == True:
 PI_L1 int8_t BIAS_L1[CH_IM_OUT] = BIAS;
 %else:
-PI_L1 int8_t BIAS_L1[CH_IM_OUT] = {0};
+PI_L1 int8_t BIAS_L1 = NULL;
 %endif
 %endif
 %elif config.kernel.type == 'depthwise':
@@ -244,7 +244,7 @@ PI_L1 int8_t WTBUFF_L1[DIM_KERNEL_Y * DIM_KERNEL_X * NUM_CORES];
 %if config.layer.bias == True:
 PI_L1 int8_t BIAS_L1[CH_IM_OUT] = BIAS;
 %else:
-PI_L1 int8_t BIAS_L1[CH_IM_OUT] = {0};
+PI_L1 int8_t BIAS_L1 = NULL;
 %endif
 %elif config.kernel.type == 'linear_no_quant':
 %if config.kernel.in_data_t == 8:
@@ -276,7 +276,7 @@ PI_L1 int32_t OUT_L1[CH_IM_OUT];
 %if config.layer.bias == True:
 PI_L1 int8_t BIAS_L1[CH_IM_OUT] = BIAS;
 %else:
-PI_L1 int8_t BIAS_L1[CH_IM_OUT] = {0};
+PI_L1 int8_t BIAS_L1 = NULL;
 %endif
 %elif config.kernel.type == 'linear_quant':
 %if config.kernel.in_data_t == 8:
@@ -321,7 +321,7 @@ PI_L1 ${pt_out} OUT_L1[CH_IM_OUT >> 2];
 %if config.layer.bias == True:
 PI_L1 int8_t BIAS_L1[CH_IM_OUT] = BIAS;
 %else:
-PI_L1 int8_t BIAS_L1[CH_IM_OUT] = {0};
+PI_L1 int8_t BIAS_L1 = NULL;
 %endif
 %elif config.kernel.type == 'maxpool':
 %if config.kernel.in_data_t == 8:
