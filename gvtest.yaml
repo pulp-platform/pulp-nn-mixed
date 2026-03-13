@@ -1,0 +1,5 @@
+targets:
+  pulp-open-nn:
+    sourceme: ${PULP_SDK_HOME}/configs/pulp-open-nn.sh
+    envvars:
+      PULP_RISCV_GCC_TOOLCHAIN: ${PULP_NN_GCC_TOOLCHAIN}
