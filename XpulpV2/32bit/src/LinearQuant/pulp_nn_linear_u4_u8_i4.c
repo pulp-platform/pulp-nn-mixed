@@ -165,10 +165,10 @@ void pulp_nn_linear_u4_u8_i4(
         }
         if (flag_batch_norm && flag_relu)
         {
-          *pOutBuffer = pulp_nn_bn_quant_u8(sum, *pKappa, *pLambda, out_shift);
+          *pOutBuffer = pulp_nn_bn_quant_u8(sum, *k1, *lambda1, out_shift);
           pOutBuffer++;
-          pKappa++;
-          pLambda++;
+          k1++;
+          lambda1++;
         }
         else
         {
