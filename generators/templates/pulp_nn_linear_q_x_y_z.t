@@ -824,10 +824,10 @@ void ${config.fn_name}(
         }
         if (flag_batch_norm && flag_relu)
         {
-          *pOutBuffer = ${config.bn_fn}(sum, *pKappa, *pLambda, out_shift);
+          *pOutBuffer = ${config.bn_fn}(sum, *k1, *lambda1, out_shift);
           pOutBuffer++;
-          pKappa++;
-          pLambda++;
+          k1++;
+          lambda1++;
         }
         else
         {
